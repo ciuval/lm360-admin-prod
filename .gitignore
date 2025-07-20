@@ -1,0 +1,22 @@
+# Build e dipendenze
+node_modules/
+dist/
+.vercel/
+
+# File di ambiente
+.env
+.env.local
+.env.*.local
+
+# Log di errore
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# File di sistema e editor
+.DS_Store
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
