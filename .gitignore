@@ -20,3 +20,4 @@ yarn-error.log*
 *.sublime-project
 *.sublime-workspace
 
+vercel.json
