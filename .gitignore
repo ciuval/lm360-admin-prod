@@ -1,23 +1,27 @@
-# Build e dipendenze
+# node modules e output di build
 node_modules/
 dist/
-.vercel/
+.vite/
 
-# File di ambiente
+# Config locali e ambienti
 .env
 .env.local
 .env.*.local
 
-# Log di errore
+# Cache e log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# File di sistema e editor
+# File di sistema
 .DS_Store
-.vscode/
+.vercel/
 .idea/
+.vscode/
 *.sublime-project
 *.sublime-workspace
 
-vercel.json
+# File sensibili da NON escludere più:
+# (vercel.json deve essere incluso!)
+# vercel.json   ← 🔥 RIMOSSO
+

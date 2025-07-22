@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "lovematch360.com"
+        }
+      ],
+      "destination": "https://www.lovematch360.com/$1",
+      "permanent": true
+    }
+  ]
+}
