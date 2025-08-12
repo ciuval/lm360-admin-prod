@@ -1,75 +1,133 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
-import { Eye, EyeOff, Crown } from "lucide-react";
 
 export default function ProfilePublicCard() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [profilo, setProfilo] = useState(null);
-  const [visite, setVisite] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [isMatch, setIsMatch] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    const fetchProfilo = async () => {
-      const { data, error } = await supabase.from("profili").select("*").eq("id", id).single();
+    const fetchData = async () => {
+      const { data: session } = await supabase.auth.getSession();
+      const myId = session?.session?.user?.id;
+      setUserId(myId);
+
+      const { data, error } = await supabase
+        .from("profili")
+        .select("*")
+        .eq("id", id)
+        .single();
+
       if (!error) setProfilo(data);
+
+      if (myId && id) {
+        const { data: m1 } = await supabase
+          .from("match_scores")
+          .select("*")
+          .eq("user_id", myId)
+          .eq("matched_user_id", id)
+          .eq("score", 100)
+          .maybeSingle();
+
+        const { data: m2 } = await supabase
+          .from("match_scores")
+          .select("*")
+          .eq("user_id", id)
+          .eq("matched_user_id", myId)
+          .eq("score", 100)
+          .maybeSingle();
+
+        if (m1 && m2) setIsMatch(true);
+      }
+
+      setLoading(false);
     };
 
-    const fetchVisite = async () => {
-      const { count } = await supabase
-        .from("visite_profili")
-        .select("id", { count: "exact", head: true })
-        .eq("visitato_id", id);
-      setVisite(count || 0);
-    };
-
-    if (id) {
-      fetchProfilo();
-      fetchVisite();
-    }
+    if (id) fetchData();
   }, [id]);
 
-  if (!profilo) return <p className="text-white">Caricamento profilo...</p>;
+  const vaiAllaChat = () => {
+    navigate(`/chat/${id}`);
+  };
+
+  if (loading) return <p style={textStyle}>⏳ Caricamento...</p>;
+  if (!profilo) return <p style={textStyle}>❌ Profilo non trovato.</p>;
 
   return (
-    <div className="bg-gray-900 text-white p-6 rounded-xl max-w-md mx-auto shadow-lg">
-      <div className="flex items-center gap-4 mb-4">
+    <div style={containerStyle}>
+      <h2 style={titleStyle}>
+        👤 Profilo Pubblico
+        {isMatch && <span style={badgeStyle}>💘 Match!</span>}
+      </h2>
+
+      {profilo.foto_url && (
         <img
-          src={profilo.avatar_url || "/default-avatar.png"}
-          alt="avatar"
-          className="w-20 h-20 rounded-full object-cover border border-pink-500"
+          src={profilo.foto_url}
+          alt="Avatar"
+          style={{ width: "150px", borderRadius: "8px", marginBottom: "1rem" }}
         />
-        <div>
-          <h2 className="text-2xl font-bold">{profilo.username}</h2>
-          <div className="flex gap-2 mt-1">
-            {profilo.stato_premium === "approvato" && (
-              <span className="inline-flex items-center text-yellow-400 text-sm bg-yellow-800 px-2 py-1 rounded">
-                <Crown size={14} className="mr-1" /> Premium
-              </span>
-            )}
-            {profilo.modalita_incognito && (
-              <span className="inline-flex items-center text-gray-300 text-sm bg-gray-700 px-2 py-1 rounded">
-                <EyeOff size={14} className="mr-1" /> Incognito
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+      )}
 
-      <div className="mb-2">
-        <p className="text-sm text-gray-400 mb-1">Bio:</p>
-        <p className="text-base">{profilo.bio || "(nessuna descrizione)"}</p>
-      </div>
+      <p><strong>Nome:</strong> {profilo.nome || "N/D"}</p>
+      <p><strong>Bio:</strong> {profilo.bio || "Nessuna bio"}</p>
+      <p><strong>Interessi:</strong> {profilo.interessi || "Nessuno"}</p>
+      <p><strong>Ruolo:</strong> {profilo.ruolo || "utente"}</p>
 
-      <div className="mb-2">
-        <p className="text-sm text-gray-400 mb-1">Interessi:</p>
-        <p className="text-base">{profilo.interessi || "(non specificati)"}</p>
-      </div>
-
-      <div className="flex items-center text-sm text-gray-400 mt-4 gap-2">
-        <Eye size={16} />
-        <span>{visite} visite ricevute</span>
-      </div>
+      {isMatch && (
+        <button onClick={vaiAllaChat} style={chatBtnStyle}>
+          💬 Chatta ora
+        </button>
+      )}
     </div>
   );
 }
+
+// STILI
+
+const containerStyle = {
+  padding: "2rem",
+  backgroundColor: "#121212",
+  color: "white",
+  minHeight: "100vh",
+  fontFamily: "'Segoe UI', sans-serif",
+};
+
+const titleStyle = {
+  color: "#f08fc0",
+  textShadow: "0 0 10px #f08fc0",
+  marginBottom: "1.5rem",
+};
+
+const textStyle = {
+  padding: "2rem",
+  fontFamily: "'Segoe UI', sans-serif",
+  color: "#ccc",
+};
+
+const badgeStyle = {
+  marginLeft: "0.5rem",
+  backgroundColor: "#f08fc0",
+  color: "white",
+  padding: "0.3rem 0.6rem",
+  borderRadius: "6px",
+  fontSize: "0.9rem",
+  boxShadow: "0 0 10px #f08fc0",
+  animation: "pulse 1s infinite alternate",
+};
+
+const chatBtnStyle = {
+  marginTop: "1.5rem",
+  backgroundColor: "#f08fc0",
+  color: "#fff",
+  border: "none",
+  borderRadius: "8px",
+  padding: "0.6rem 1.2rem",
+  fontSize: "1rem",
+  cursor: "pointer",
+  boxShadow: "0 0 10px #f08fc0",
+};
 

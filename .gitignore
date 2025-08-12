@@ -25,3 +25,4 @@ yarn-error.log*
 # (vercel.json deve essere incluso!)
 # vercel.json   ← 🔥 RIMOSSO
 
+.vercel
