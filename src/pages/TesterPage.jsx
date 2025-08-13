@@ -1,22 +1,21 @@
+// src/pages/TesterPage.jsx
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function TesterPage() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState({
+    user: {
+      id: "vale-test-id",
+      email: "vale-test@example.com",
+    },
+  });
   const [profilo, setProfilo] = useState(null);
   const [log, setLog] = useState([]);
   const [messaggi, setMessaggi] = useState([]);
   const [output, setOutput] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data?.session) setSession(data.session);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!session?.user?.id) return;
-
     const userId = session.user.id;
 
     supabase
@@ -31,6 +30,7 @@ export default function TesterPage() {
     supabase
       .from("log_attivita")
       .select("*")
+      .order("timestamp", { ascending: false })
       .limit(5)
       .then(({ data, error }) => {
         if (!error) setLog(data || []);
@@ -46,29 +46,26 @@ export default function TesterPage() {
   }, [session]);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) return setOutput(`❌ Logout fallito: ${error.message}`);
-    setOutput("✅ Logout effettuato");
+    toast("✅ Finto logout completato");
     setSession(null);
     setTimeout(() => window.location.reload(), 1000);
   };
 
   const generaMatch = async () => {
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth?.user) return setOutput("⚠️ Devi essere loggato per generare match.");
+    const fakeUserId = session.user.id;
 
     const { data: me } = await supabase
       .from("profili")
       .select("*")
-      .eq("id", auth.user.id)
+      .eq("id", fakeUserId)
       .single();
 
-    if (!me) return setOutput("⚠️ Profilo utente non trovato");
+    if (!me) return toast("⚠️ Profilo utente non trovato");
 
     const { data: altri } = await supabase
       .from("profili")
       .select("*")
-      .neq("id", auth.user.id);
+      .neq("id", fakeUserId);
 
     const risultati = (altri || []).map((altro) => {
       const interessiA = (me.interessi || "").toLowerCase().split(",");
@@ -86,35 +83,44 @@ export default function TesterPage() {
       onConflict: ["user_id", "matched_user_id"],
     });
 
-    if (error) return setOutput(`❌ Errore inserimento match: ${error.message}`);
-    setOutput("✅ Match generati correttamente!");
+    if (error) {
+      toast.error(`❌ Errore: ${error.message}`);
+      return;
+    }
+
+    toast.success("✅ Match generati!");
+    setOutput(JSON.stringify(risultati, null, 2));
   };
 
   return (
     <div style={containerStyle}>
-      <h2 style={titleStyle}>🧬 Tester Supabase + RLS</h2>
+      <Toaster position="top-right" />
+      <h2 style={titleStyle}>🧬 Tester Supabase + RLS (Fake Login)</h2>
 
       {!session && (
-        <p style={warningText}>⚠️ Nessuna sessione trovata. Effettua il login su /debug.</p>
+        <p style={warningText}>⚠️ Nessuna sessione trovata. Fai login finto attivo.</p>
       )}
 
       {session && (
         <>
-          <h3>👤 Sessione attiva</h3>
+          <h3>👤 Sessione finta attiva</h3>
           <p><b>ID:</b> {session.user.id}</p>
           <p><b>Email:</b> {session.user.email}</p>
 
-          <button onClick={generaMatch} style={buttonStyle}>🧠 Genera Match</button>
-          <button onClick={handleLogout} style={logoutBtn}>🔓 Logout</button>
+          <div style={{ marginBottom: "1rem" }}>
+            <button onClick={generaMatch} style={buttonStyle}>🧠 Genera Match</button>
+            <button onClick={handleLogout} style={logoutBtn}>🔓 Logout</button>
+          </div>
+
           <pre style={outputBox}>{output}</pre>
 
           <h3>📘 Profilo</h3>
           <pre style={outputBox}>{JSON.stringify(profilo, null, 2)}</pre>
 
-          <h3>📝 Log attività visibili</h3>
+          <h3>📝 Log attività</h3>
           <pre style={outputBox}>{JSON.stringify(log, null, 2)}</pre>
 
-          <h3>💬 Messaggi tuoi</h3>
+          <h3>💬 Messaggi</h3>
           <pre style={outputBox}>{JSON.stringify(messaggi, null, 2)}</pre>
         </>
       )}

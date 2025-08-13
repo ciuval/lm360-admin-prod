@@ -1,18 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-
-// ⚠️ Componenti disattivati temporaneamente per evitare errori
-// import AdminPremiumRequests from "../components/AdminPremiumRequests";
-// import ActivityLogViewer from "../components/ActivityLogViewer";
-// import ActivityLogCSVAndGraph from "../components/ActivityLogCSVAndGraph";
-// import BadgeRichiestePremium from "../components/BadgeRichiestePremium";
-// import useRealtimeLogListener from "../hooks/useRealtimeLogListener";
+import ReportEconomicoMensile from "../components/ReportEconomicoMensile";
 
 export default function AdminDashboard() {
   const [utenti, setUtenti] = useState([]);
   const [filtro, setFiltro] = useState("");
-
-  // useRealtimeLogListener(); // disattivato temporaneamente
 
   useEffect(() => {
     fetchUtenti();
@@ -25,6 +17,11 @@ export default function AdminDashboard() {
 
   const cambiaRuolo = async (id, nuovoRuolo) => {
     await supabase.from("profili").update({ ruolo: nuovoRuolo }).eq("id", id);
+    fetchUtenti();
+  };
+
+  const cambiaPremium = async (id, nuovoValore) => {
+    await supabase.from("profili").update({ premium: nuovoValore }).eq("id", id);
     fetchUtenti();
   };
 
@@ -53,27 +50,18 @@ export default function AdminDashboard() {
         {utentiFiltrati.map((u) => (
           <li key={u.id} style={itemStyle}>
             <strong>{u.username || "Anonimo"}</strong> – <code>{u.ruolo}</code>
+            {u.premium && <span style={premiumBadge}> 🌟 Premium</span>}
             <br />
-            <button onClick={() => cambiaRuolo(u.id, "admin")} style={btn}>
-              🔑 Admin
+            <button onClick={() => cambiaRuolo(u.id, "admin")} style={btn}>🔑 Admin</button>
+            <button onClick={() => cambiaRuolo(u.id, "utente")} style={btn}>🙋‍♂️ Utente</button>
+            <button onClick={() => cambiaPremium(u.id, !u.premium)} style={{ ...btn, backgroundColor: u.premium ? "#888" : "#ffd700", color: u.premium ? "#fff" : "#000" }}>
+            <ReportEconomicoMensile />
+              {u.premium ? "💼 Rimuovi Premium" : "🌟 Rendi Premium"}
             </button>
-            <button onClick={() => cambiaRuolo(u.id, "utente")} style={btn}>
-              🙋‍♂️ Utente
-            </button>
-            <button
-              onClick={() => eliminaUtente(u.id)}
-              style={{ ...btn, backgroundColor: "#ff4d4d" }}
-            >
-              🗑️ Elimina
-            </button>
+            <button onClick={() => eliminaUtente(u.id)} style={{ ...btn, backgroundColor: "#ff4d4d" }}>🗑️ Elimina</button>
           </li>
         ))}
       </ul>
-
-      {/* Sezioni extra da riattivare dopo */}
-      {/* <div id="richieste-premium"><AdminPremiumRequests /></div>
-          <ActivityLogViewer />
-          <ActivityLogCSVAndGraph /> */}
     </div>
   );
 }
@@ -122,5 +110,15 @@ const btn = {
   cursor: "pointer",
   backgroundColor: "#333",
   color: "#fff",
+};
+
+const premiumBadge = {
+  backgroundColor: "#ffd700",
+  color: "#000",
+  padding: "0.2rem 0.5rem",
+  borderRadius: "4px",
+  fontSize: "0.75rem",
+  marginLeft: "0.5rem",
+  fontWeight: "bold",
 };
 

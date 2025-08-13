@@ -1,16 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function DebugPage() {
   const [email, setEmail] = useState("vale-test@example.com");
   const [password, setPassword] = useState("ValeTest123!");
   const [output, setOutput] = useState("");
+  const [user, setUser] = useState(null);
+  const [profilo, setProfilo] = useState(null);
+  const [match, setMatch] = useState([]);
+  const [messaggi, setMessaggi] = useState([]);
 
   const testLogin = async () => {
     setOutput("⏳ Login in corso...");
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return setOutput(`❌ Errore login: ${error.message}`);
+    setUser(data.user);
     setOutput(`✅ Login OK: ${data.user.email}`);
+    fetchDati(data.user);
   };
 
   const testProfilo = async () => {
@@ -18,28 +24,52 @@ export default function DebugPage() {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return setOutput("❌ Nessun utente loggato");
+    setUser(user);
+    fetchDati(user);
+  };
 
-    const { data, error } = await supabase
+  const fetchDati = async (utente) => {
+    setOutput("⏳ Caricamento dati...");
+
+    const { data: prof, error: err1 } = await supabase
       .from("profili")
       .select("*")
-      .eq("id", user.id);
+      .eq("id", utente.id)
+      .single();
+    setProfilo(prof);
 
-    if (error) return setOutput(`❌ Errore profilo: ${error.message}`);
-    setOutput(`📘 Profilo trovato: ${JSON.stringify(data, null, 2)}`);
+    const { data: matchData } = await supabase
+      .from("match_scores")
+      .select("*")
+      .or(`user1_id.eq.${utente.id},user2_id.eq.${utente.id}`)
+      .gte("match_score", 90);
+    setMatch(matchData || []);
+
+    const { data: messaggiData } = await supabase
+      .from("messaggi")
+      .select("*")
+      .or(`mittente.eq.${utente.id},destinatario.eq.${utente.id}`)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    setMessaggi(messaggiData || []);
+
+    setOutput("✅ Dati caricati.");
   };
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) return setOutput(`❌ Logout fallito: ${error.message}`);
+    setUser(null);
+    setProfilo(null);
+    setMatch([]);
+    setMessaggi([]);
     setOutput("✅ Logout effettuato");
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+    setTimeout(() => window.location.reload(), 1000);
   };
 
   return (
     <div style={container}>
-      <h2 style={title}>🧪 Debug Login + RLS</h2>
+      <h2 style={title}>🧪 Debug Page LoveMatch360</h2>
 
       <input
         type="email"
@@ -63,6 +93,22 @@ export default function DebugPage() {
       </div>
 
       <pre style={outputStyle}>{output}</pre>
+
+      {user && (
+        <div style={dataBox}>
+          <h3>🔐 Utente Loggato</h3>
+          <pre>{JSON.stringify(user, null, 2)}</pre>
+
+          <h3>🙋 Profilo</h3>
+          <pre>{JSON.stringify(profilo, null, 2)}</pre>
+
+          <h3>💘 Match Attivi</h3>
+          <pre>{JSON.stringify(match, null, 2)}</pre>
+
+          <h3>💬 Ultimi Messaggi</h3>
+          <pre>{JSON.stringify(messaggi, null, 2)}</pre>
+        </div>
+      )}
     </div>
   );
 }
@@ -70,14 +116,14 @@ export default function DebugPage() {
 // STILI
 const container = {
   padding: "2rem",
-  maxWidth: "600px",
+  maxWidth: "800px",
   margin: "0 auto",
   color: "white",
   fontFamily: "'Segoe UI', sans-serif",
 };
 
 const title = {
-  fontSize: "1.5rem",
+  fontSize: "1.7rem",
   marginBottom: "1rem",
   color: "#f08fc0",
 };
@@ -128,4 +174,12 @@ const outputStyle = {
   borderRadius: "6px",
   border: "1px solid #333",
   fontSize: "0.9rem",
+};
+
+const dataBox = {
+  marginTop: "2rem",
+  backgroundColor: "#111",
+  padding: "1rem",
+  borderRadius: "8px",
+  border: "1px solid #444",
 };

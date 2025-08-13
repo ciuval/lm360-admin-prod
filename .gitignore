@@ -25,3 +25,7 @@ yarn-error.log*
 # (vercel.json deve essere incluso!)
 # vercel.json   ← 🔥 RIMOSSO
 
+.vercel
+
+# Extension package
+lm360-helper-ext.zip
