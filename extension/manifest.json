@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "LoveMatch360 Helper",
+  "version": "0.1.0",
+  "description": "Estensione di prova: popup minimale.",
+  "action": { "default_popup": "popup.html" },
+  "permissions": []
+}
