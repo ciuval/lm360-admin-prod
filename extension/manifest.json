@@ -1,8 +1,30 @@
 {
   "manifest_version": 3,
   "name": "LoveMatch360 Helper",
-  "version": "0.1.0",
-  "description": "Estensione di prova: popup minimale.",
-  "action": { "default_popup": "popup.html" },
-  "permissions": []
+  "version": "0.2.0",
+  "description": "Strumenti rapidi per lovematch360.com (dev).",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LoveMatch360 Helper"
+  },
+  "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "https://www.lovematch360.com/*",
+    "https://lovematch360.com/*",
+    "http://localhost:5173/*",
+    "http://localhost:5174/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.lovematch360.com/*",
+        "https://lovematch360.com/*",
+        "http://localhost:5173/*",
+        "http://localhost:5174/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
 }
