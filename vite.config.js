@@ -1,13 +1,10 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+cat > vite.config.js <<'JS'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // ✅ NECESSARIO per HashRouter e deploy statici
-  build: {
-    outDir: 'dist',
-  },
-  server: {
-    port: 5173,
-  },
-});
+  build: { chunkSizeWarningLimit: 1500 }
+})
+JS
+
