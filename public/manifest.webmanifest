@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 cat > public/manifest.webmanifest <<'JSON'
->>>>>>> origin/main
 {
   "name": "LoveMatch360",
   "short_name": "LM360",
@@ -14,8 +11,5 @@ cat > public/manifest.webmanifest <<'JSON'
     { "src": "/logo.png", "sizes": "192x192", "type": "image/png" }
   ]
 }
-<<<<<<< HEAD
-=======
 JSON
 
->>>>>>> origin/main
