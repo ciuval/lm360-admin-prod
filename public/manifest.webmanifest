@@ -12,4 +12,3 @@ cat > public/manifest.webmanifest <<'JSON'
   ]
 }
 JSON
-
