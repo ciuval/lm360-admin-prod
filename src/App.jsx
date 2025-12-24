@@ -1,5 +1,5 @@
-﻿import { Routes, Route } from "react-router-dom";
-import AppShell from "./components/layout/AppShell.jsx";
+import { Routes, Route } from "react-router-dom";
+import AppShell from "./AppShell.jsx";
 
 import Home from "./pages/Home.jsx";
 import Premium from "./pages/Premium.jsx";
