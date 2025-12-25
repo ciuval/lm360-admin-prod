@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/vercel-precheck.cjs && vite build",
     "preview": "vite preview",
     "check-premium": "node cron/checkPremiumExpiry.js"
   },
