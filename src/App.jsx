@@ -27,7 +27,7 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/billing" element={<Billing />} />
 
-        {/* Nuova pagina “Quantum” */}
+        {/* Nuova pagina â€œQuantumâ€ */}
         <Route path="/quantum" element={<QuantumPage />} />
 
         <Route path="/privacy" element={<Privacy />} />
