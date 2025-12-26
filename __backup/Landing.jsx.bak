@@ -1,0 +1,22 @@
+﻿import React from "react";
+
+export default function Landing(){
+  const wrap = {minHeight:"100vh",display:"grid",placeItems:"center",background:"#0b0b0b",color:"#e5e7eb",padding:"56px 16px"};
+  const box = {maxWidth:860,textAlign:"center"};
+  const h1 = {fontSize:"2.2rem",lineHeight:1.2,marginBottom:12};
+  const p  = {fontSize:"1.125rem",color:"#9CA3AF",marginBottom:24};
+  const row= {display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"};
+  const btn= (pri)=>({padding:"12px 18px",borderRadius:10,border:"1px solid #1f2937",background: pri?"#6CA2FF":"transparent",color: pri?"#0b0b0b":"#e5e7eb"});
+  return (
+    <main style={wrap}>
+      <div style={box}>
+        <h1 style={h1}>Consigli che fanno strada.</h1>
+        <p style={p}>Strumenti e guide pratiche per scegliere bene: persone, lavoro, soldi. Zero fuffa, risultati misurabili.</p>
+        <div style={row} role="group" aria-label="Azioni principali">
+          <a href="#/onboarding" style={btn(true)} aria-label="Prova gratuita">Prova gratuita</a>
+          <a href="#/premium" style={btn(false)} aria-label="Vedi Premium">Vedi Premium</a>
+        </div>
+      </div>
+    </main>
+  );
+}

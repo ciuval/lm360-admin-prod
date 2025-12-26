@@ -1,63 +1,76 @@
-// src/components/NavBar.jsx
-import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import "../styles/nav.css";
+import React from 'react';
+import { useAuth } from '../lib/authContext';
+import { supabase } from '../lib/supabaseClient';
 
-function Item({ to, children, badgeCount = 0, badgeColor, onClick }) {
-  return (
-    <NavLink
-      to={to}
-      onClick={onClick}
-      className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
-    >
-      {children}
-      {badgeCount > 0 && (
-        <span className={`badge ${badgeColor || ""}`}>{badgeCount}</span>
-      )}
-      <span className="glow-underline" />
-    </NavLink>
-  );
-}
+export default function Navbar() {
+  const { user } = useAuth();
 
-export default function NavBar({
-  matchTrovati,
-  visiteRecenti,
-  messaggiNonLetti,
-  onClickChat,
-  onClickVisitatori,
-}) {
-  const location = useLocation();
-  const inChat = location.pathname.startsWith("/chat/");
+  const bar = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px 16px',
+    borderBottom: '1px solid #1e252d',
+    position: 'sticky',
+    top: 0,
+    background: '#0b0d10',
+    zIndex: 10,
+  };
+  const link = { color: '#e8edf2', textDecoration: 'none', padding: '8px 10px', borderRadius: 8 };
+  const btnP = { ...link, background: '#3A7AFE', color: '#fff', fontWeight: 600 };
+  const btnG = { ...link, border: '1px solid #2b323b' };
+
+  const isActive = (hash) =>
+    typeof location !== 'undefined' && location.hash.startsWith(hash) ? 'page' : undefined;
+  const logout = async () => {
+    await supabase.auth.signOut();
+    location.hash = '#/home';
+  };
+
   return (
-    <nav className="nav">
-      <Item to="/">🏠 Home</Item>
-      <Item to="/profilo">👤 Profilo</Item>
-      <Item to="/match" badgeCount={matchTrovati} badgeColor="pink">💘 Match</Item>
-      <Item to="/profili-pubblici">🌐 Profili Pubblici</Item>
-      <Item
-        to="/visitatori"
-        badgeCount={visiteRecenti}
-        badgeColor="orange"
-        onClick={onClickVisitatori}
-      >
-        👀 Visitatori
-      </Item>
-      <Item
-        to="/chat/placeholder"
-        badgeCount={!inChat ? messaggiNonLetti : 0}
-        badgeColor=""
-        onClick={onClickChat}
-      >
-        💬 Chat
-      </Item>
-      <Item to="/premium">💎 Premium</Item>
-      <Item to="/attiva-premium">💎 Attiva Premium</Item>
-      <Item to="/funzioni">📊 Funzioni</Item>
-      <Item to="/log-stats">📈 Statistiche</Item>
-      <Item to="/admin">🛠️ Admin</Item>
-      <Item to="/log-admin">📜 Log</Item>
-      <Item to="/debug">🧪 Debug</Item>
-      <Item to="/tester">🧬 Tester</Item>
+    <nav style={bar} role="navigation" aria-label="Principale">
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <a href="#/home" style={{ ...link, fontWeight: 700 }} aria-current={isActive('#/home')}>
+          LoveMatch360
+        </a>
+        <a href="#/premium" style={link} aria-current={isActive('#/premium')}>
+          Premium
+        </a>
+        <a href="#/discover" style={link} aria-current={isActive('#/discover')}>
+          Scopri
+        </a>
+        {user && (
+          <a href="#/profile" style={link} aria-current={isActive('#/profile')}>
+            Profilo
+          </a>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        {user ? (
+          <>
+            <a href="#/account" style={btnG} aria-current={isActive('#/account')}>
+              Account
+            </a>
+            <button onClick={logout} style={btnG} aria-label="Esci">
+              Esci
+            </button>
+          </>
+        ) : (
+          <>
+            <a href="#/login" style={btnG} aria-current={isActive('#/login')}>
+              Accedi
+            </a>
+            <a
+              href="#/signup"
+              style={btnP}
+              aria-label="Registrati"
+              aria-current={isActive('#/signup')}
+            >
+              Registrati
+            </a>
+          </>
+        )}
+      </div>
     </nav>
   );
 }

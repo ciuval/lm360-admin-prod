@@ -1,0 +1,118 @@
+/* src/styles/navbar.css */
+/* Palette a variabili: adatta automaticamente in dark mode */
+:root {
+  --lm-bg: #0f1115;
+  --lm-surface: #151922;
+  --lm-text: #e6ebf2;
+  --lm-muted: #9aa3b2;
+  --lm-accent: #8b5cf6; /* viola elegante */
+  --lm-ring: #a78bfa;
+  --lm-border: #202636;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --lm-bg: #ffffff;
+    --lm-surface: #f7f8fb;
+    --lm-text: #111827;
+    --lm-muted: #6b7280;
+    --lm-accent: #6d28d9;
+    --lm-ring: #7c3aed;
+    --lm-border: #e5e7eb;
+  }
+}
+
+/* Contenitore sticky */
+.lm-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--lm-surface);
+  border-bottom: 1px solid var(--lm-border);
+  backdrop-filter: saturate(140%) blur(6px);
+}
+
+/* Skip link per tastiera */
+.lm-skip {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+}
+.lm-skip:focus {
+  left: 12px;
+  top: 8px;
+  background: var(--lm-accent);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  outline: none;
+}
+
+/* Barra */
+.lm-navbar {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Brand */
+.lm-brand {
+  color: var(--lm-text);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.lm-heart {
+  color: var(--lm-accent);
+}
+
+/* Links */
+.lm-links {
+  display: inline-flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+.lm-link {
+  color: var(--lm-muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 1;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+  outline: none;
+}
+.lm-link:hover {
+  color: var(--lm-text);
+  background: var(--lm-bg);
+}
+.lm-link:focus-visible {
+  outline: 2px solid var(--lm-ring);
+  outline-offset: 2px;
+}
+
+/* Stato attivo (route corrente) */
+.lm-link.is-active {
+  color: var(--lm-text);
+  background: var(--lm-bg);
+  box-shadow: inset 0 -2px 0 var(--lm-accent);
+}
+
+/* Mobile scrollabile, niente hamburger per semplicità/robustezza */
+@media (max-width: 680px) {
+  .lm-links {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .lm-link {
+    padding: 8px 10px;
+  }
+}

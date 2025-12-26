@@ -1,15 +1,42 @@
-import React, { useEffect, useState } from "react";
-export default function CmpBanner(){
-  const KEY="cmp.analytics";
-  const [show,setShow]=useState(false);
-  useEffect(()=>{ const v=localStorage.getItem(KEY); if(v===null) setShow(true); },[]);
-  if(!show) return null;
+﻿import { getJson, setJson } from '../lib/storage';
+/* src/components/CmpBanner.jsx */
+import React, { useEffect, useState } from 'react';
+
+export default function CmpBanner() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const v = getJson('cmp:consent');
+    if (!v) setShow(true);
+  }, []);
+
+  const accept = () => {
+    setJson('cmp:consent', 'yes');
+    setShow(false);
+  };
+  const decline = () => {
+    setJson('cmp:consent', 'no');
+    setShow(false);
+  };
+
+  if (!show) return null;
   return (
-    <div role="dialog" aria-live="polite"
-      style={{position:"fixed",inset:"auto 0 0 0",background:"var(--elev)",borderTop:"var(--border)",padding:"12px",display:"flex",gap:8,alignItems:"center",zIndex:100}}>
-      <div style={{flex:1}}>Usiamo analytics anonimi per migliorare l’esperienza. Accetti?</div>
-      <button onClick={()=>{localStorage.setItem(KEY,"false");setShow(false);}} style={{background:"transparent",color:"var(--txt)",border:"var(--border)",borderRadius:"var(--radius)",padding:"8px 10px"}}>Rifiuta</button>
-      <button onClick={()=>{localStorage.setItem(KEY,"true");setShow(false);}} style={{background:"var(--ok)",color:"#121212",border:"none",borderRadius:"var(--radius)",padding:"8px 10px"}}>Accetta</button>
+    <div className="fixed bottom-0 inset-x-0 z-50 bg-zinc-900/95 border-t border-zinc-800">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="text-sm opacity-90">
+          Usiamo analytics anonimi per migliorare l’esperienza. Accetti?
+        </div>
+        <div className="flex gap-2">
+          <button onClick={decline} className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700">
+            Rifiuta
+          </button>
+          <button
+            onClick={accept}
+            className="px-4 py-2 rounded-xl bg-rose-400 text-black font-semibold hover:opacity-90"
+          >
+            Accetta
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

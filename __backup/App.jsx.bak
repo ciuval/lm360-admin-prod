@@ -1,0 +1,44 @@
+﻿import React from "react";
+import { HashRouter, Routes, Route } from "react-router-dom";
+import { PremiumProvider } from "./context/PremiumContext.jsx";
+import Header from "./components/Header.jsx";
+
+import PremiumCheckoutTest from "./pages/PremiumCheckoutTest.jsx";   // se esiste
+import Onboarding from "./pages/Onboarding.jsx";                     // se esiste
+
+function Home() {
+  return (
+    <div style={{padding:"24px", color:"#eee"}}>
+      <h1>Home</h1>
+      <p>Benvenuto/a su LoveMatch360.</p>
+    </div>
+  );
+}
+
+function Premium() {
+  // legge lo status via Header (Badge) — pagina contenuti premium
+  return (
+    <div style={{padding:"24px", color:"#eee"}}>
+      <h1>Premium</h1>
+      <p>Area Premium — Demo</p>
+      <p><a href="#/premium-checkout-test" style={{color:"#9cc3ff"}}>Vai al checkout test</a></p>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <HashRouter>
+      <PremiumProvider>
+        <Header/>
+        <Routes>
+          <Route path="/" element={<Home/>} />
+          <Route path="/premium" element={<Premium/>} />
+          <Route path="/premium-checkout-test" element={<PremiumCheckoutTest/>} />
+          <Route path="/onboarding" element={<Onboarding/>} />
+          <Route path="*" element={<Home/>} />
+        </Routes>
+      </PremiumProvider>
+    </HashRouter>
+  );
+}

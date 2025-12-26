@@ -1,0 +1,37 @@
+{
+    "prod_url":  "https://lm360-admin-prod-fnb4lol5d-valerius-projects-967888ac.vercel.app",
+    "whoami_tail":  "kf9QR",
+    "stripe_live":  {
+                        "price":  "price_1S2AJbGiegyuEkiYwrgp2JXs",
+                        "customer":  "cus_Sy7Bxd91dz28pa",
+                        "portal_config":  "bpc_1S2IOaGiegyuEkiYmDVOXnsy",
+                        "subscription":  "sub_1S2AxVGiegyuEkiYA6fdHtys"
+                    },
+    "abbonamenti":  {
+                        "value":  [
+                                      {
+                                          "user_id":  "6895d2d1-8476-49fa-b569-6be8b8f119a4",
+                                          "status":  "active",
+                                          "attivo":  true,
+                                          "tipo":  "mensile",
+                                          "inizio":  "2025-08-31T13:05:35+00:00",
+                                          "fine":  null,
+                                          "stripe_subscription_id":  "sub_1S2AxVGiegyuEkiYA6fdHtys",
+                                          "stripe_customer_id":  "cus_Sy7Bxd91dz28pa",
+                                          "stripe_price_id":  "price_1S2AJbGiegyuEkiYwrgp2JXs",
+                                          "updated_at":  "2025-08-30T17:21:12.007116+00:00"
+                                      }
+                                  ],
+                        "Count":  1
+                    },
+    "profili":  {
+                    "value":  [
+                                  {
+                                      "id":  "6895d2d1-8476-49fa-b569-6be8b8f119a4",
+                                      "email":  "test@lovematch360.com",
+                                      "ruolo":  "premium"
+                                  }
+                              ],
+                    "Count":  1
+                }
+}

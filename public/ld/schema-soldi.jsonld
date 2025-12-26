@@ -1,0 +1,28 @@
+﻿<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Guadagnare online sicuro e veloce",
+      "description": "Entrate extra realistiche e a basso rischio: idee verificate, filtri anti-truffa e primi passi.",
+      "inLanguage": "it",
+      "mainEntityOfPage": {"@type":"WebPage","@id":"https://www.lovematch360.com/soldi/guadagnare-online-sicuro-veloce"},
+      "author": {"@type":"Person","name":"LoveMatch360 Editorial Team"},
+      "publisher": {"@type":"Organization","name":"LoveMatch360","logo":{"@type":"ImageObject","url":"https://www.lovematch360.com/logo.png"}},
+      "image": "https://www.lovematch360.com/og/soldi-guadagnare-sicuro.jpg",
+      "datePublished": "2025-08-31",
+      "dateModified": "2025-08-31"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type":"Question","name":"È davvero possibile guadagnare online in modo sicuro e rapido?","acceptedAnswer":{"@type":"Answer","text":"Sì, con micro-servizi e task concreti (editing, copy, AI micro-task, setup no-code). Focus su esecuzione, non su promesse."}},
+        {"@type":"Question","name":"Con quale side-hustle inizio?","acceptedAnswer":{"@type":"Answer","text":"Scegli in base a tempo/skill disponibili. Inizia con un servizio piccolo (consegna in 48h) e una sola offerta chiara."}},
+        {"@type":"Question","name":"Come evito le truffe?","acceptedAnswer":{"@type":"Answer","text":"Controlla P.IVA/CF, recensioni esterne, canali di pagamento sicuri, niente fee in anticipo, diritto di recesso chiaro."}},
+        {"@type":"Question","name":"Quanto posso fare il primo mese?","acceptedAnswer":{"@type":"Answer","text":"Obiettivo realistico 50–300€. Cresce con portfolio, referenze e processi. Premium include playbook e checklist."}}
+      ]
+    }
+  ]
+}
+</script>

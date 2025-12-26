@@ -1,23 +1,15 @@
-import React from "react";
+﻿import { NavLink } from "react-router-dom";
 
-const mods = import.meta.glob(
-  ["./NotFoundPage.jsx","./PageNotFound.jsx","./FourOhFour.jsx"],
-  { eager: true }
-);
-
-const mod =
-  mods["./NotFoundPage.jsx"] ||
-  mods["./PageNotFound.jsx"] ||
-  mods["./FourOhFour.jsx"] ||
-  Object.values(mods)[0];
-
-const NotFound = (mod && mod.default) || function NotFoundFallback() {
+export default function NotFound() {
   return (
-    <section style={{ padding: 24 }}>
-      <h1>Pagina non trovata</h1>
-      <p>Qui non c’è niente. Ma puoi tornare a casa.</p>
-    </section>
+    <main id="main" className="section">
+      <div className="card card-pad">
+        <h1 style={{ margin: 0 }}>Pagina non trovata</h1>
+        <p className="lead" style={{ marginTop: 10 }}>
+          Qui non c’è niente. Ma puoi tornare a casa.
+        </p>
+        <NavLink className="btn" to="/">Torna alla Home</NavLink>
+      </div>
+    </main>
   );
-};
-
-export default NotFound;
+}

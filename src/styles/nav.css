@@ -3,7 +3,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: .75rem;
+  gap: 0.75rem;
   padding: 1rem;
   background-color: #1e1e1e;
   box-shadow: 0 0 10px #f08fc0;
@@ -14,11 +14,15 @@
 
 .nav-link {
   position: relative;
-  padding: .5rem .75rem;
+  padding: 0.5rem 0.75rem;
   color: #fff;
   text-decoration: none;
   border-radius: 8px;
-  transition: transform .12s ease, box-shadow .2s ease, color .2s ease, background .2s ease;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
   outline: none;
 }
 
@@ -28,12 +32,12 @@
 }
 
 .nav-link:active {
-  transform: scale(.96);
+  transform: scale(0.96);
 }
 
 .nav-link.active {
   color: #ffd6e8;
-  background: rgba(240, 143, 192, .10);
+  background: rgba(240, 143, 192, 0.1);
   box-shadow: 0 0 0 2px #f08fc0 inset;
 }
 
@@ -46,8 +50,8 @@
   height: 2px;
   background: linear-gradient(90deg, transparent, #f08fc0, transparent);
   opacity: 0;
-  transition: opacity .25s ease;
-  filter: blur(.3px);
+  transition: opacity 0.25s ease;
+  filter: blur(0.3px);
 }
 
 .nav-link.active .glow-underline {
@@ -69,13 +73,22 @@
   text-align: center;
   box-shadow: 0 0 0 2px #1e1e1e;
   transform-origin: center;
-  animation: pop .18s ease;
+  animation: pop 0.18s ease;
 }
-.badge.pink { background: deeppink; }
-.badge.orange { background: orange; }
+.badge.pink {
+  background: deeppink;
+}
+.badge.orange {
+  background: orange;
+}
 
 @keyframes pop {
-  from { transform: scale(.8); opacity: .8; }
-  to   { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
-

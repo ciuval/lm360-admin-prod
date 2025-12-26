@@ -1,0 +1,122 @@
+﻿import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { API_BASE } from "../lib/apiBase";
+import { setSEO, injectJSONLD } from "../lib/seo";\r\nimport { shareLink } from "../lib/share";
+
+function fmtDate(iso) { try { return new Date(iso).toLocaleDateString("it-IT"); } catch { return ""; } }
+function clipText(t, n=480){ if(!t) return ""; return t.length>n ? t.slice(0,n)+"…" : t; }
+
+export default function PostDetail() {
+  const { id } = useParams();
+  const [post, setPost] = useState(null);
+  const [premium, setPremium] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+
+    async function fetchPremium() {
+      try { const r = await fetch(`${API_BASE}/api/my-premium`, { credentials: "include" });
+        if (!r.ok) return false; const j = await r.json().catch(()=>null); return j?.premium === true;
+      } catch { return false; }
+    }
+
+    async function fetchPost() {
+      try {
+        const r1 = await fetch(`${API_BASE}/api/posts-list?id=${encodeURIComponent(id)}`);
+        if (r1.ok) { const j1 = await r1.json(); if (j1?.items?.length) return j1.items[0]; }
+      } catch {}
+      try {
+        const r2 = await fetch(`${API_BASE}/api/posts-list?status=published&visibility=public&page=1&limit=100`);
+        if (r2.ok) { const j2 = await r2.json(); return (j2?.items||[]).find(x=>x.id===id) ?? null; }
+      } catch {}
+      return null;
+    }
+
+    (async () => {
+      setLoading(true); setErr("");
+      const [isPrem, p] = await Promise.all([fetchPremium(), fetchPost()]);
+      if (!alive) return;
+      setPremium(isPrem); setPost(p); if (!p) setErr("Post non trovato.");
+
+      if (p) {
+        const desc = clipText(p.content||"", 150);
+        setSEO(`${p.title ?? "Articolo"} — LoveMatch360`, desc);
+        injectJSONLD({
+          "@context":"https://schema.org",
+          "@type":"Article",
+          headline: p.title || "",
+          datePublished: p.created_at || "",
+          author: { "@type":"Organization", name:"LoveMatch360" }
+        });
+      } else {
+        setSEO("Articolo — LoveMatch360", "Dettaglio articolo.");
+      }
+      setLoading(false);
+    })();
+
+    return () => { alive = false; };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <main style={{padding:"24px"}}>
+        <nav style={{fontSize:12,opacity:.7,marginBottom:8}}>
+          <Link to="/">Home</Link> · <Link to="/consigli">Consigli</Link> · Caricamento…
+        </nav>
+        <div style={{height:6,background:"#1e293b",borderRadius:4,overflow:"hidden"}}>
+          <div style={{width:"60%",height:"100%",background:"#334155",animation:"pulse 1.2s infinite"}}/>
+        </div>
+      </main>
+    );
+  }
+
+  if (err) {
+    return (
+      <main style={{padding:"24px"}}>
+        <nav style={{fontSize:12,opacity:.7,marginBottom:8}}>
+          <Link to="/">Home</Link> · <Link to="/consigli">Consigli</Link>
+        </nav>
+        <p style={{color:"#ef4444"}}>{err}</p>
+      </main>
+    );
+  }
+
+  const full = post?.content ?? "";
+  const preview = clipText(full, 480);
+
+  return (
+    <main style={{padding:"24px",lineHeight:1.55,maxWidth:920,margin:"0 auto"}}>
+      <nav style={{fontSize:12,opacity:.7,marginBottom:8}}>
+        <Link to="/">Home</Link> · <Link to="/consigli">Consigli</Link> · Dettaglio
+      </nav>
+
+      <h1 style={{fontSize:"clamp(22px,3.5vw,34px)",margin:"4px 0 6px"}}>{post?.title ?? "Senza titolo"}</h1>
+      <div style={{opacity:.65,fontSize:13,marginBottom:18}}>Pubblicato il {fmtDate(post?.created_at)}</div>
+
+      {premium ? (
+        <article style={{whiteSpace:"pre-wrap"}}>{full}</article>
+      ) : (
+        <>
+          <article style={{whiteSpace:"pre-wrap"}}>{preview}</article>
+          <div style={{marginTop:18,padding:16,border:"1px dashed #334155",borderRadius:10,background:"#0b1220"}}>
+            <b>Contenuto Premium</b> — Sblocca l'articolo completo e tutti i percorsi guidati.
+            <div style={{marginTop:10,display:"flex",gap:8,flexWrap:"wrap"}}>
+              <Link to="/premium" style={{padding:"10px 14px",borderRadius:10,background:"#2563eb",color:"#fff",textDecoration:"none",fontWeight:600}}>
+                Sblocca Premium (9,99€)
+              </Link>
+              <Link to="/premium" style={{padding:"10px 14px",borderRadius:10,background:"#111827",color:"#e5e7eb",textDecoration:"none"}}>
+                Scopri i vantaggi
+              </Link>
+            </div>
+          </div>
+        </>
+      )}
+    </main>
+  );
+}
+
+
+
+

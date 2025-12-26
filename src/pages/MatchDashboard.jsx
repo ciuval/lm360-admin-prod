@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import { Link } from "react-router-dom";
+﻿import { getJson, setJson } from '../lib/storage';
+// src/pages/MatchDashboard.jsx
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { Link } from 'react-router-dom';
+import LazyImage from '../components/LazyImage';
 
 export default function MatchDashboard() {
   const [matchList, setMatchList] = useState([]);
@@ -9,30 +12,31 @@ export default function MatchDashboard() {
 
   useEffect(() => {
     const fetchMatches = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      const id = session?.user?.id || "vale-test-id"; // ✅ fallback utente finto
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const id = session?.user?.id || 'vale-test-id'; // fallback test
       setUserId(id);
 
       if (!id) {
-        console.warn("❌ Nessun utente loggato");
         setLoading(false);
         return;
       }
 
       const { data: matches, error: matchErr } = await supabase
-        .from("match_scores")
-        .select("matched_user_id, score")
-        .eq("user_id", id)
-        .eq("score", 100)
-        .order("score", { ascending: false });
+        .from('match_scores')
+        .select('matched_user_id, score')
+        .eq('user_id', id)
+        .eq('score', 100)
+        .order('score', { ascending: false });
 
       if (matchErr) {
-        console.error("Errore caricamento match:", matchErr);
+        console.error('Errore caricamento match:', matchErr);
         setLoading(false);
         return;
       }
 
-      if (!matches || matches.length === 0) {
+      if (!matches?.length) {
         setMatchList([]);
         setLoading(false);
         return;
@@ -41,19 +45,19 @@ export default function MatchDashboard() {
       const ids = matches.map((m) => m.matched_user_id);
 
       const { data: profili, error: profiliErr } = await supabase
-        .from("profili")
-        .select("id, nome, eta, bio, interessi, foto_url")
-        .in("id", ids);
+        .from('profili')
+        .select('id, nome, eta, bio, interessi, foto_url')
+        .in('id', ids);
 
       if (profiliErr) {
-        console.error("Errore caricamento profili:", profiliErr);
+        console.error('Errore caricamento profili:', profiliErr);
         setLoading(false);
         return;
       }
 
       const uniti = matches.map((m) => ({
         ...m,
-        profilo: profili.find((p) => p.id === m.matched_user_id)
+        profilo: profili.find((p) => p.id === m.matched_user_id),
       }));
 
       setMatchList(uniti);
@@ -64,34 +68,56 @@ export default function MatchDashboard() {
   }, []);
 
   return (
-    <div style={containerStyle}>
-      <h2 style={titleStyle}>💘 Match Trovati</h2>
+    <div className="p-6 bg-dark min-h-screen text-light font-sans">
+      <h2 className="text-2xl font-bold text-primary mb-6">ðŸ’˜ Match Trovati</h2>
 
       {loading ? (
-        <p>⏳ Caricamento...</p>
+        <p>â³ Caricamento...</p>
       ) : matchList.length === 0 ? (
-        <p>Nessun match trovato. Inizia a lasciare qualche 💗!</p>
+        <p>Nessun match trovato. Inizia a lasciare qualche ðŸ’—!</p>
       ) : (
-        <ul style={listStyle}>
+        <ul className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
           {matchList.map(({ score, profilo }) => (
-            <li key={profilo.id} style={itemStyle}>
-              <Link to={`/profilo/${profilo.id}`} style={linkStyle}>
-                <img
-                  src={profilo.foto_url || "/default-avatar.png"}
-                  alt={profilo.nome}
-                  style={avatarStyle}
-                />
-                <div>
-                  <strong>{profilo.nome}, {profilo.eta}</strong>
-                  <p>{profilo.bio?.slice(0, 80)}{profilo.bio?.length > 80 ? "..." : ""}</p>
-                  <p style={{ fontSize: "0.9rem", color: "#aaa" }}>🎯 {profilo.interessi}</p>
-                  <span style={{ color: "#f08fc0" }}>💘 Match Score: {score}%</span>
+            <li
+              key={profilo.id}
+              className="bg-[#1e1e1e] rounded-xl p-4 flex flex-col gap-2 shadow-lg border border-primary/40"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full overflow-hidden">
+                  <LazyImage
+                    src={profilo.foto_url || '/default-avatar.png'}
+                    alt={profilo.nome}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </Link>
+                <div className="flex flex-col">
+                  <strong>
+                    {profilo.nome}, {profilo.eta}
+                  </strong>
+                  <p className="text-gray-400 text-sm">
+                    {profilo.bio?.slice(0, 60)}
+                    {profilo.bio?.length > 60 ? '...' : ''}
+                  </p>
+                  <p className="text-gray-500 text-xs">ðŸŽ¯ {profilo.interessi}</p>
+                </div>
+              </div>
 
-              <Link to={`/chat/${profilo.id}`} style={chatBtn}>
-                💬 Chatta
-              </Link>
+              <span className="text-primary font-semibold">ðŸ’˜ Match Score: {score}%</span>
+
+              <div className="flex gap-2 mt-2">
+                <Link
+                  to={`/profilo/${profilo.id}`}
+                  className="px-3 py-2 rounded-lg bg-dark border border-primary text-primary hover:bg-primary hover:text-white transition flex-1 text-center"
+                >
+                  Vedi Profilo
+                </Link>
+                <Link
+                  to={`/chat/${profilo.id}`}
+                  className="px-3 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-pink-600 transition flex-1 text-center"
+                >
+                  ðŸ’¬ Chatta
+                </Link>
+              </div>
             </li>
           ))}
         </ul>
@@ -99,66 +125,3 @@ export default function MatchDashboard() {
     </div>
   );
 }
-
-// STILI
-const containerStyle = {
-  padding: "2rem",
-  backgroundColor: "#121212",
-  color: "#fff",
-  minHeight: "100vh",
-  fontFamily: "'Segoe UI', sans-serif",
-};
-
-const titleStyle = {
-  color: "#f08fc0",
-  fontSize: "1.7rem",
-  marginBottom: "1rem",
-};
-
-const listStyle = {
-  listStyle: "none",
-  padding: 0,
-  margin: 0,
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-  gap: "1rem",
-};
-
-const itemStyle = {
-  backgroundColor: "#1e1e1e",
-  borderRadius: "8px",
-  padding: "1rem",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: "1rem",
-  boxShadow: "0 0 8px #f08fc0",
-};
-
-const avatarStyle = {
-  width: "64px",
-  height: "64px",
-  borderRadius: "50%",
-  objectFit: "cover",
-};
-
-const linkStyle = {
-  textDecoration: "none",
-  color: "#f08fc0",
-  display: "flex",
-  alignItems: "center",
-  gap: "1rem",
-  flexGrow: 1,
-};
-
-const chatBtn = {
-  padding: "0.5rem 1rem",
-  backgroundColor: "#f08fc0",
-  color: "#fff",
-  border: "none",
-  borderRadius: "6px",
-  fontWeight: "bold",
-  textDecoration: "none",
-};
-
-

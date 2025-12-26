@@ -1,0 +1,1 @@
+﻿-join ((48..57 + 65..90 + 97..122 + 35,36,64) | Get-Random -Count 64 | ForEach-Object {[char]$_})

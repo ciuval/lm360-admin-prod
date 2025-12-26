@@ -1,0 +1,22 @@
+{
+  "name": "lm360-webhook",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "listen": "stripe listen --events checkout.session.completed,customer.subscription.deleted,invoice.paid,invoice.payment_failed --forward-to http://localhost:3000/api/stripe-webhook",
+    "dev:all": "concurrently \"npm:dev\" \"npm:listen\"",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.8",
+    "stripe": "^16.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "nodemon": "^3.1.10"
+  }
+}

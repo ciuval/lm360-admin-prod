@@ -1,0 +1,42 @@
+﻿:root {
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  background: #0b0f19;
+  color: #e5e7eb;
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Inter,
+    Arial;
+}
+a {
+  color: #86b6ff;
+}
+.container {
+  max-width: 980px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+ul.reset {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.card {
+  background: #121826;
+  border: 1px solid #223049;
+  border-radius: 12px;
+  padding: 16px;
+}
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #31476b;
+  color: #b9cdf0;
+}

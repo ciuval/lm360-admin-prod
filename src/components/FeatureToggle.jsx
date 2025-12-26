@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import { toast } from "react-hot-toast";
+﻿import { getJson, setJson } from '../lib/storage';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { toast } from 'react-hot-toast';
 
 /**
  * Props:
@@ -37,23 +38,33 @@ export default function FeatureToggle({
   useEffect(() => {
     let ignore = false;
     (async () => {
-      if (!userId) { setEnabled(false); setLoading(false); return; }
+      if (!userId) {
+        setEnabled(false);
+        setLoading(false);
+        return;
+      }
       try {
         const { data, error } = await supabase
-          .from("user_features")
-          .select("enabled")
-          .eq("user_id", userId)
-          .eq("feature", featureKey)
+          .from('user_features')
+          .select('enabled')
+          .eq('user_id', userId)
+          .eq('feature', featureKey)
           .maybeSingle();
-        if (!ignore && !error && data) { setEnabled(!!data.enabled); setLoading(false); return; }
+        if (!ignore && !error && data) {
+          setEnabled(!!data.enabled);
+          setLoading(false);
+          return;
+        }
       } catch {}
       try {
-        const v = localStorage.getItem(`uf:${userId}:${featureKey}`);
-        if (!ignore) setEnabled(v === "1");
+        const v = getJson(`uf:${userId}:${featureKey}`);
+        if (!ignore) setEnabled(v === '1');
       } catch {}
       if (!ignore) setLoading(false);
     })();
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
   }, [userId, featureKey]);
 
   // Conteggio (opzionale)
@@ -69,7 +80,10 @@ export default function FeatureToggle({
     }
     doLoad();
     if (countPollMs > 0) timer = setInterval(doLoad, countPollMs);
-    return () => { alive = false; if (timer) clearInterval(timer); };
+    return () => {
+      alive = false;
+      if (timer) clearInterval(timer);
+    };
   }, [userId, featureKey, loadCount, countPollMs]);
 
   // Realtime (opzionale)
@@ -77,13 +91,15 @@ export default function FeatureToggle({
     if (!realtimeTable) return;
     const ch = supabase
       .channel(`ft-${featureKey}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: realtimeTable }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: realtimeTable }, (payload) => {
         const row = payload?.new ?? payload?.old ?? payload;
         if (!realtimeFilter || realtimeFilter(row)) {
           onRealtime?.(row);
           // se abbiamo un contatore, prova a ricaricarlo via loadCount
           if (loadCount && userId) {
-            loadCount(userId, featureKey).then((n) => setCount(Number.isFinite(n) ? n : null)).catch(()=>{});
+            loadCount(userId, featureKey)
+              .then((n) => setCount(Number.isFinite(n) ? n : null))
+              .catch(() => {});
           }
         }
       })
@@ -96,39 +112,47 @@ export default function FeatureToggle({
   const canActivate = !enabled && !loading;
 
   async function onActivate() {
-    if (!userId) { toast.error("Devi accedere"); return; }
+    if (!userId) {
+      toast.error('Devi accedere');
+      return;
+    }
     if (checkPrereq) {
       const res = await checkPrereq(userId);
-      if (!res.ok) { toast.error(res.reason || "Requisiti non soddisfatti"); return; }
+      if (!res.ok) {
+        toast.error(res.reason || 'Requisiti non soddisfatti');
+        return;
+      }
     }
     setLoading(true);
     try {
       const { error } = await supabase
-        .from("user_features")
+        .from('user_features')
         .upsert({ user_id: userId, feature: featureKey, enabled: true });
       if (error) throw error;
     } catch {
-      try { localStorage.setItem(`uf:${userId}:${featureKey}`, "1"); } catch {}
+      try {
+        setJson(`uf:${userId}:${featureKey}`, '1');
+      } catch {}
     }
     setEnabled(true);
     setLoading(false);
     onChange?.(true);
-    toast.success(`${label} attivata ✅`);
+    toast.success(`${label} attivata âœ…`);
   }
 
   const style = {
-    display: "inline-flex",
-    alignItems: "center",
+    display: 'inline-flex',
+    alignItems: 'center',
     gap: 6,
-    background: enabled ? "var(--ok)" : "var(--err)",
-    color: "#121212",
+    background: enabled ? 'var(--ok)' : 'var(--err)',
+    color: '#121212',
     borderRadius: 999,
-    padding: "4px 10px",
+    padding: '4px 10px',
     fontSize: 12,
-    cursor: canActivate ? "pointer" : "default",
+    cursor: canActivate ? 'pointer' : 'default',
     opacity: loading ? 0.6 : 1,
-    userSelect: "none",
-    border: "none",
+    userSelect: 'none',
+    border: 'none',
   };
 
   return (
@@ -138,18 +162,25 @@ export default function FeatureToggle({
       style={style}
       onClick={canActivate ? onActivate : undefined}
       onKeyDown={(e) => {
-        if (e.key === "Enter" && canActivate) onActivate();
+        if (e.key === 'Enter' && canActivate) onActivate();
       }}
-      onMouseDown={(e) => (e.currentTarget.style.transform = "scale(.96)")}
-      onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-      onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(.96)')}
+      onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
       aria-pressed={enabled}
       aria-label={`Attiva ${label}`}
     >
-      {enabled ? "Attiva ✓" : "Attiva funzione"}{" "}
-      <small style={{ opacity: 0.9 }}>({label})</small>
+      {enabled ? 'Attiva âœ“' : 'Attiva funzione'} <small style={{ opacity: 0.9 }}>({label})</small>
       {Number.isFinite(count) && (
-        <span style={{ marginLeft: 6, background: "var(--elev)", color: "var(--txt)", borderRadius: 999, padding: "0 6px" }}>
+        <span
+          style={{
+            marginLeft: 6,
+            background: 'var(--elev)',
+            color: 'var(--txt)',
+            borderRadius: 999,
+            padding: '0 6px',
+          }}
+        >
           {count}
         </span>
       )}

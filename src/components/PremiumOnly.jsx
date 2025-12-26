@@ -1,31 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import { useNavigate } from "react-router-dom";
+﻿import { getJson, setJson } from '../lib/storage';
+// src/components/PremiumOnly.jsx
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import usePremium from '../hooks/usePremium';
 
 export default function PremiumOnly({ children }) {
-  const [isPremium, setIsPremium] = useState(null);
+  const { premium, loading } = usePremium();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const check = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return navigate("/login");
+    if (!loading && !premium) {
+      toast('Contenuto Premium. Sbloccalo a 9,99€', { icon: '🔒' });
+      navigate('/premium'); // la tua pagina paywall
+    }
+  }, [loading, premium, navigate]);
 
-      const { data } = await supabase
-        .from("profili")
-        .select("ruolo")
-        .eq("id", user.id)
-        .single();
-
-      setIsPremium(data?.ruolo === "premium");
-    };
-    check();
-  }, []);
-
-  if (isPremium === null) return <p>🔄 Verifica accesso...</p>;
-  if (!isPremium) return <p>🚫 Sezione riservata ai Premium.</p>;
-
+  if (loading) return <div className="p-6">Carico…</div>;
+  if (!premium) return null;
   return <>{children}</>;
 }
-
-

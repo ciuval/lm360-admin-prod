@@ -1,0 +1,14 @@
+{
+  "type":"customer.subscription.updated",
+  "data":{
+    "object":{
+      "id":"sub_debug_002",
+      "status":"active",
+      "customer":"cus_debug_001",
+      "metadata":{"user_id":"55a1e810-3d6e-416d-b394-1bce72e4e6a6"},
+      "current_period_start":1758326400,
+      "current_period_end":1893456000,
+      "items":{"data":[{"price":{"id":"price_debug_002"}}]}
+    }
+  }
+}

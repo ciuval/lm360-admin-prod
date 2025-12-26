@@ -1,0 +1,28 @@
+﻿<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Trovare l'anima gemella: guida completa",
+      "description": "Metodo serio per riconoscere compatibilità reale, segnali, errori da evitare e piano d'azione.",
+      "inLanguage": "it",
+      "mainEntityOfPage": {"@type":"WebPage","@id":"https://www.lovematch360.com/amore/come-trovare-anima-gemella"},
+      "author": {"@type":"Person","name":"LoveMatch360 Editorial Team"},
+      "publisher": {"@type":"Organization","name":"LoveMatch360","logo":{"@type":"ImageObject","url":"https://www.lovematch360.com/logo.png"}},
+      "image": "https://www.lovematch360.com/og/amore-anima-gemella.jpg",
+      "datePublished": "2025-08-31",
+      "dateModified": "2025-08-31"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type":"Question","name":"Come capisco se siamo davvero compatibili?","acceptedAnswer":{"@type":"Answer","text":"Verifica allineamento su valori, stile di vita e gestione conflitti. Usa domande Partner-Fit (famiglia, tempo, soldi, obiettivi) e osserva ritmo di risposta/rispetto dei confini."}},
+        {"@type":"Question","name":"Quante chat prima di vederci?","acceptedAnswer":{"@type":"Answer","text":"3–5 scambi utili, poi call 10' e incontro breve (20–40'). Riduce illusioni e aumenta sicurezza."}},
+        {"@type":"Question","name":"Quali foto funzionano nel profilo?","acceptedAnswer":{"@type":"Answer","text":"Luce naturale, volto sorridente, uno scatto a figura 3/4, attività reale. Evita filtri pesanti e gruppi confusivi."}},
+        {"@type":"Question","name":"Come evito perdite di tempo sulle app?","acceptedAnswer":{"@type":"Answer","text":"Bio chiara con intenzione, filtri seri, 2–3 domande di screening, chiusura gentile se mismatch."}}
+      ]
+    }
+  ]
+}
+</script>

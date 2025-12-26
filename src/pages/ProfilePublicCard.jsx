@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabaseClient";
+﻿import { getJson, setJson } from '../lib/storage';
+// src/pages/ProfilePublicCard.jsx
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
+import LazyImage from '../components/LazyImage';
 
 export default function ProfilePublicCard() {
   const { id } = useParams();
@@ -16,29 +19,26 @@ export default function ProfilePublicCard() {
       const myId = session?.session?.user?.id;
       setUserId(myId);
 
-      const { data, error } = await supabase
-        .from("profili")
-        .select("*")
-        .eq("id", id)
-        .single();
-
+      // Carica profilo
+      const { data, error } = await supabase.from('profili').select('*').eq('id', id).single();
       if (!error) setProfilo(data);
 
+      // Verifica match reciproco
       if (myId && id) {
         const { data: m1 } = await supabase
-          .from("match_scores")
-          .select("*")
-          .eq("user_id", myId)
-          .eq("matched_user_id", id)
-          .eq("score", 100)
+          .from('match_scores')
+          .select('*')
+          .eq('user_id', myId)
+          .eq('matched_user_id', id)
+          .eq('score', 100)
           .maybeSingle();
 
         const { data: m2 } = await supabase
-          .from("match_scores")
-          .select("*")
-          .eq("user_id", id)
-          .eq("matched_user_id", myId)
-          .eq("score", 100)
+          .from('match_scores')
+          .select('*')
+          .eq('user_id', id)
+          .eq('matched_user_id', myId)
+          .eq('score', 100)
           .maybeSingle();
 
         if (m1 && m2) setIsMatch(true);
@@ -54,80 +54,56 @@ export default function ProfilePublicCard() {
     navigate(`/chat/${id}`);
   };
 
-  if (loading) return <p style={textStyle}>⏳ Caricamento...</p>;
-  if (!profilo) return <p style={textStyle}>❌ Profilo non trovato.</p>;
+  if (loading) return <p className="p-8 text-gray-400">â³ Caricamento...</p>;
+  if (!profilo) return <p className="p-8 text-gray-400">âŒ Profilo non trovato.</p>;
 
   return (
-    <div style={containerStyle}>
-      <h2 style={titleStyle}>
-        👤 Profilo Pubblico
-        {isMatch && <span style={badgeStyle}>💘 Match!</span>}
+    <div className="p-8 bg-dark text-light min-h-screen font-sans">
+      <h2 className="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+        ðŸ‘¤ Profilo Pubblico
+        {isMatch && (
+          <span className="bg-primary text-white px-3 py-1 rounded-lg text-sm shadow animate-pulse">
+            ðŸ’˜ Match!
+          </span>
+        )}
       </h2>
 
+      {/* Foto profilo */}
       {profilo.foto_url && (
-        <img
-          src={profilo.foto_url}
-          alt="Avatar"
-          style={{ width: "150px", borderRadius: "8px", marginBottom: "1rem" }}
-        />
+        <div className="w-40 h-40 rounded-xl overflow-hidden mb-6 shadow-lg">
+          <LazyImage
+            src={profilo.foto_url}
+            alt={`Foto profilo di ${profilo.nome}`}
+            className="w-full h-full object-cover"
+          />
+        </div>
       )}
 
-      <p><strong>Nome:</strong> {profilo.nome || "N/D"}</p>
-      <p><strong>Bio:</strong> {profilo.bio || "Nessuna bio"}</p>
-      <p><strong>Interessi:</strong> {profilo.interessi || "Nessuno"}</p>
-      <p><strong>Ruolo:</strong> {profilo.ruolo || "utente"}</p>
+      {/* Info profilo */}
+      <div className="space-y-2 text-gray-300">
+        <p>
+          <strong className="text-light">Nome:</strong> {profilo.nome || 'N/D'}
+        </p>
+        <p>
+          <strong className="text-light">Bio:</strong> {profilo.bio || 'Nessuna bio'}
+        </p>
+        <p>
+          <strong className="text-light">Interessi:</strong> {profilo.interessi || 'Nessuno'}
+        </p>
+        <p>
+          <strong className="text-light">Ruolo:</strong> {profilo.ruolo || 'utente'}
+        </p>
+      </div>
 
+      {/* CTA se match */}
       {isMatch && (
-        <button onClick={vaiAllaChat} style={chatBtnStyle}>
-          💬 Chatta ora
+        <button
+          onClick={vaiAllaChat}
+          className="mt-6 px-6 py-3 bg-primary text-white font-semibold rounded-xl shadow hover:bg-pink-600 transition"
+        >
+          ðŸ’¬ Chatta ora
         </button>
       )}
     </div>
   );
 }
-
-// STILI
-
-const containerStyle = {
-  padding: "2rem",
-  backgroundColor: "#121212",
-  color: "white",
-  minHeight: "100vh",
-  fontFamily: "'Segoe UI', sans-serif",
-};
-
-const titleStyle = {
-  color: "#f08fc0",
-  textShadow: "0 0 10px #f08fc0",
-  marginBottom: "1.5rem",
-};
-
-const textStyle = {
-  padding: "2rem",
-  fontFamily: "'Segoe UI', sans-serif",
-  color: "#ccc",
-};
-
-const badgeStyle = {
-  marginLeft: "0.5rem",
-  backgroundColor: "#f08fc0",
-  color: "white",
-  padding: "0.3rem 0.6rem",
-  borderRadius: "6px",
-  fontSize: "0.9rem",
-  boxShadow: "0 0 10px #f08fc0",
-  animation: "pulse 1s infinite alternate",
-};
-
-const chatBtnStyle = {
-  marginTop: "1.5rem",
-  backgroundColor: "#f08fc0",
-  color: "#fff",
-  border: "none",
-  borderRadius: "8px",
-  padding: "0.6rem 1.2rem",
-  fontSize: "1rem",
-  cursor: "pointer",
-  boxShadow: "0 0 10px #f08fc0",
-};
-

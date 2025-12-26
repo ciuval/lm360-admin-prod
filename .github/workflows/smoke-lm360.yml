@@ -1,0 +1,59 @@
+name: Smoke LM360 (prod)
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: "15 7 * * *" # ogni giorno 07:15 UTC
+  workflow_dispatch: {}
+
+concurrency:
+  group: smoke-lm360-prod
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Warmup endpoints
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $urls = @(
+            "https://lovematch360.com",
+            "https://www.lovematch360.com/robots.txt",
+            "https://www.lovematch360.com/sitemap.xml",
+            "https://app.lovematch360.com/"
+          )
+
+          $deadline = (Get-Date).AddMinutes(4)
+
+          foreach ($u in $urls) {
+            Write-Host "Warmup: $u"
+            while ((Get-Date) -lt $deadline) {
+              try {
+                $r = Invoke-WebRequest -Uri $u -Method Head -MaximumRedirection 5 -TimeoutSec 20
+                if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 400) {
+                  Write-Host "OK $($r.StatusCode) - $u"
+                  break
+                }
+              } catch {
+                Write-Host "Not ready yet: $u"
+              }
+              Start-Sleep -Seconds 10
+            }
+          }
+
+      - name: Run Smoke Test
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          if (-not (Test-Path -Path "./Test-LM360.ps1")) {
+            throw "Test-LM360.ps1 non trovato in root repo. Mettilo in / oppure aggiorna il path nel workflow."
+          }
+          pwsh -NoProfile -File "./Test-LM360.ps1"

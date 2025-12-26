@@ -1,0 +1,23 @@
+﻿<script type=\"application/ld+json\">
+{
+  \"@context\": \"https://schema.org\",
+  \"@type\": \"Organization\",
+  \"name\": \"LoveMatch360\",
+  \"url\": \"https://www.lovematch360.com/\",
+  \"logo\": \"https://www.lovematch360.com/logo.png\"
+}
+</script>
+
+<script type=\"application/ld+json\">
+{
+  \"@context\": \"https://schema.org\",
+  \"@type\": \"WebSite\",
+  \"name\": \"LoveMatch360\",
+  \"url\": \"https://www.lovematch360.com/\",
+  \"potentialAction\": {
+    \"@type\": \"SearchAction\",
+    \"target\": \"https://www.lovematch360.com/search?q={query}\",
+    \"query-input\": \"required name=query\"
+  }
+}
+</script>

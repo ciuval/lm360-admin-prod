@@ -1,13 +1,13 @@
 // ✅ File: src/utils/logEvento.js
-import { supabase } from "../lib/supabaseClient"
+import { supabase } from '../lib/supabaseClient';
 
-export async function logEvento(userId, tipo, descrizione = "", pagina = window.location.pathname) {
+export async function logEvento(userId, tipo, descrizione = '', pagina = window.location.pathname) {
   if (!userId) return;
-  await supabase.from("log_attività").insert({
+  await supabase.from('log_attività').insert({
     user_id: userId,
     tipo_azione: tipo,
     descrizione,
-    pagina
+    pagina,
   });
 }
 

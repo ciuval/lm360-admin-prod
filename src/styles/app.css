@@ -1,0 +1,182 @@
+:root{
+  --bg:#0b0d10;
+  --panel:#10151c;
+  --card:#121924;
+  --text:#e7edf6;
+  --muted:#9aa7b6;
+  --line:#1f2a38;
+  --brand:#ff4fd8;
+  --brand2:#7cf;
+  --ok:#4ade80;
+  --bad:#fb7185;
+  --shadow: 0 10px 30px rgba(0,0,0,.45);
+  --radius: 16px;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: radial-gradient(1000px 500px at 20% -10%, rgba(255,79,216,.18), transparent 55%),
+              radial-gradient(900px 600px at 80% 0%, rgba(124,255,255,.12), transparent 55%),
+              var(--bg);
+  color:var(--text);
+}
+
+a{ color:inherit; text-decoration:none; }
+a:hover{ text-decoration:underline; }
+small{ color:var(--muted); }
+
+.container{
+  width:min(1100px, calc(100% - 32px));
+  margin:0 auto;
+}
+
+.skip-link{
+  position:absolute; left:-9999px; top:0;
+  background:#000; color:#fff;
+  padding:.5rem 1rem; border-radius:12px;
+  z-index:10000;
+}
+.skip-link:focus{ left:12px; top:12px; }
+
+:focus-visible{
+  outline:2px solid var(--brand2);
+  outline-offset:3px;
+  border-radius:10px;
+}
+
+.nav{
+  position:sticky; top:0; z-index:1000;
+  backdrop-filter: blur(10px);
+  background: rgba(11,13,16,.75);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.nav-inner{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 0;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.logo-dot{
+  width:10px; height:10px; border-radius:50%;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  box-shadow: 0 0 18px rgba(255,79,216,.35);
+}
+
+.nav-links{
+  display:flex; gap:16px; align-items:center;
+}
+.nav-links a{
+  padding:8px 10px;
+  border-radius:12px;
+  color:var(--muted);
+}
+.nav-links a[aria-current="page"]{
+  color:var(--text);
+  background: rgba(255,255,255,.06);
+  text-decoration:none;
+}
+
+.btn{
+  appearance:none; border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
+}
+.btn:hover{ background: rgba(255,255,255,.09); }
+.btn:active{ transform: translateY(1px); }
+.btn.primary{
+  border: none;
+  background: linear-gradient(135deg, var(--brand), #b54bff);
+  box-shadow: 0 10px 30px rgba(255,79,216,.18);
+}
+.btn.primary:hover{ filter: brightness(1.04); }
+
+.hero{
+  padding: 36px 0 18px;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns: 1.25fr .75fr;
+  gap:18px;
+}
+@media (max-width: 900px){
+  .hero-grid{ grid-template-columns: 1fr; }
+}
+
+.card{
+  background: rgba(18,25,36,.78);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card-pad{ padding:18px; }
+
+.h1{
+  font-size: clamp(28px, 3.4vw, 44px);
+  margin:0 0 10px;
+  letter-spacing:-.6px;
+}
+.lead{
+  color: var(--muted);
+  line-height:1.55;
+  margin: 0 0 14px;
+}
+.kpi{
+  display:flex; flex-wrap:wrap; gap:10px;
+  margin-top:10px;
+}
+.pill{
+  display:inline-flex; gap:8px; align-items:center;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  color: var(--muted);
+  background: rgba(255,255,255,.04);
+  font-size: 13px;
+}
+.pill strong{ color: var(--text); font-weight:700; }
+
+.section{
+  padding: 16px 0 30px;
+}
+
+.footer{
+  margin-top: 26px;
+  padding: 22px 0 26px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  color: var(--muted);
+}
+.footer-grid{
+  display:grid; gap:12px;
+  grid-template-columns: 1fr auto;
+}
+@media (max-width: 900px){
+  .footer-grid{ grid-template-columns:1fr; }
+}
+.footer-links{
+  display:flex; flex-wrap:wrap; gap:12px;
+}
+.mini{
+  font-size:12px;
+  color: var(--muted);
+  line-height:1.55;
+}
+
+.notice{
+  padding:10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.05);
+  color: var(--muted);
+}
+.notice.ok{ border-color: rgba(74,222,128,.35); }
+.notice.bad{ border-color: rgba(251,113,133,.35); }

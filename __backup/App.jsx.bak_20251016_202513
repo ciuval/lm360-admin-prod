@@ -1,0 +1,221 @@
+﻿import React, { useEffect, useState } from "react";
+
+
+import { Routes, Route, Link, useLocation } from "react-router-dom";
+
+
+import Feed from './pages/Feed.jsx';
+
+
+import Landing from "./pages/Landing.jsx";
+
+
+import Premium from "./pages/Premium.jsx";
+
+
+import Profilo from "./pages/Profilo.jsx";
+
+
+import PremiumCheckoutTest from "./pages/PremiumCheckoutTest.jsx";
+
+
+import Feed from "./pages/Feed.jsx";
+
+
+import BadgePremium from "./components/BadgePremium.jsx";
+
+
+import { apiFetch } from "./lib/devApi.js";
+
+
+
+
+
+function Navbar({ scadenza }){
+
+
+  const loc = useLocation();
+
+
+  const item = (to,label)=>(
+
+
+    <Link to={to} style={{...s.navItem, ...(loc.pathname===to? s.navItemActive:{} )}}>{label}</Link>
+
+
+  );
+
+
+  return (
+
+
+    <header style={s.header}>
+
+
+      <div style={s.brand}>LoveMatch360</div>
+
+
+      <nav style={s.nav}>
+
+
+        {item("/", "Home")}
+
+
+        {item("/feed", "Feed")}
+
+
+        {item("/profilo", "Profilo")}
+
+
+        {item("/premium", "Premium")}
+
+
+      </nav>
+
+
+      <div><BadgePremium scadenza={scadenza}/></div>
+
+
+    </header>
+
+
+  );
+
+
+}
+
+
+
+
+
+export default function App(){
+
+
+  const [scadenza,setScadenza] = useState(null);
+
+
+  useEffect(()=>{
+
+
+    (async ()=>{
+
+
+      try{
+
+
+        const mp = await apiFetch("/api/my-premium");
+
+
+        setScadenza(mp?.row?.scadenza ?? null);
+
+
+      }catch{}
+
+
+    })();
+
+
+  },[]);
+
+
+  return (
+
+
+    <div style={s.app}>
+
+
+      <Navbar scadenza={scadenza}/>
+
+
+      <div style={s.content}>
+
+
+        <Routes>
+
+
+          <Route path="/" element={<Landing/>} />
+
+
+          <Route path="/feed" element={<Feed/>} />
+
+
+          <Route path="/profilo" element={<Profilo/>} />
+
+
+          <Route path="/premium" element={<Premium/>} />
+
+          <Route path='/post/:id' element={<PostDetail/>} />
+
+
+
+          <Route path="/premium-checkout-test" element={<PremiumCheckoutTest/>} />
+
+
+          <Route path="*" element={<Landing/>} />
+
+
+                  <Route path='/feed' element={<Feed/>} />
+
+
+          <Route path='/consigli' element={<Feed/>} />
+
+
+
+
+
+      </div>
+
+
+    </div>
+
+
+  );
+
+
+}
+
+
+
+
+
+const s = {
+
+
+  app:{ minHeight:"100vh", background:"#0b0f19", color:"#e5e7eb", fontFamily:'system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial' },
+
+
+  header:{ position:"sticky", top:0, display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, padding:"10px 16px", borderBottom:"1px solid #1f2937", background:"#0b0f19", zIndex:10 },
+
+
+  brand:{ fontWeight:800 },
+
+
+  nav:{ display:"flex", gap:10, flexWrap:"wrap" },
+
+
+  navItem:{ color:"#cbd5e1", textDecoration:"none", padding:"6px 8px", borderRadius:6 },
+
+
+  navItemActive:{ background:"#111827", color:"#fff" },
+
+
+  content:{ padding:"16px" }
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

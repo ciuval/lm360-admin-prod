@@ -1,5 +1,5 @@
-import { Routes, Route } from "react-router-dom";
-import AppShell from "./AppShell.jsx";
+﻿import { Routes, Route } from "react-router-dom";
+import AppShell from "./components/layout/AppShell.jsx";
 
 import Home from "./pages/Home.jsx";
 import Premium from "./pages/Premium.jsx";
@@ -14,8 +14,6 @@ import Cookie from "./pages/legal/Cookie.jsx";
 import Terms from "./pages/legal/Terms.jsx";
 import Refunds from "./pages/legal/Refunds.jsx";
 
-import QuantumPage from "./pages/QuantumPage.jsx";
-
 export default function App() {
   return (
     <AppShell>
@@ -26,9 +24,6 @@ export default function App() {
         <Route path="/profilo" element={<Profile />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/billing" element={<Billing />} />
-
-        {/* Nuova pagina â€œQuantumâ€ */}
-        <Route path="/quantum" element={<QuantumPage />} />
 
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/cookie" element={<Cookie />} />

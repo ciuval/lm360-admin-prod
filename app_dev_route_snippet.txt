@@ -1,0 +1,5 @@
+﻿// --- IMPORT (in cima ad App.jsx) ---
+import DevAuth from './pages/DevAuth';
+
+// --- ROUTE (dentro <Routes> ... </Routes>) ---
+<Route path='/dev-auth' element={<DevAuth />} />

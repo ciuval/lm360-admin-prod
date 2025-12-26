@@ -1,0 +1,19 @@
+﻿import { API_BASE } from './api';
+
+export async function getJSON(path, params = {}) {
+  const qs = new URLSearchParams(params);
+  const url = \\\\\;
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' },
+    // non inviamo credenziali; l'API è pubblica
+    credentials: 'omit',
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(()=>'');
+    throw new Error(\HTTP \ \ - \\);
+  }
+  return res.json();
+}
