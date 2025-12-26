@@ -29,3 +29,17 @@ yarn-error.log*
 
 # Extension package
 lm360-helper-ext.zip
+
+# SECURITY
+.env*
+!.env.example
+.vercel.env*.local
+.vercel/
+
+
+# SECURITY
+.env*
+!.env.example
+.vercel.env*.local
+.vercel/
+
