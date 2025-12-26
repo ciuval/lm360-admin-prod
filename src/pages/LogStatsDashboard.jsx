@@ -1,7 +1,8 @@
-// ✅ File: src/pages/LogStatsDashboard.jsx
-import React, { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { supabase } from "../lib/supabaseClient";
+﻿import { getJson, setJson } from '../lib/storage';
+// âœ… File: src/pages/LogStatsDashboard.jsx
+import React, { useEffect, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { supabase } from '../lib/supabaseClient';
 
 export default function LogStatsDashboard() {
   const [stats, setStats] = useState([]);
@@ -10,8 +11,8 @@ export default function LogStatsDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       const { data, error } = await supabase
-        .from("log_attività")
-        .select("tipo_azione, created_at");
+        .from('log_attivitÃ ')
+        .select('tipo_azione, created_at');
 
       if (error) return;
 
@@ -37,10 +38,17 @@ export default function LogStatsDashboard() {
   }, []);
 
   return (
-    <div style={{ padding: "2rem", backgroundColor: "#121212", color: "#fff", fontFamily: "monospace" }}>
-      <h2 style={{ color: "#f08fc0" }}>📊 Statistiche Log Attività</h2>
+    <div
+      style={{
+        padding: '2rem',
+        backgroundColor: '#121212',
+        color: '#fff',
+        fontFamily: 'monospace',
+      }}
+    >
+      <h2 style={{ color: '#f08fc0' }}>ðŸ“Š Statistiche Log AttivitÃ </h2>
 
-      <h3 style={{ marginTop: "2rem" }}>🔢 Totale per tipo_azione</h3>
+      <h3 style={{ marginTop: '2rem' }}>ðŸ”¢ Totale per tipo_azione</h3>
       <ul>
         {stats.map((entry) => (
           <li key={entry.tipo}>
@@ -49,7 +57,7 @@ export default function LogStatsDashboard() {
         ))}
       </ul>
 
-      <h3 style={{ marginTop: "2rem" }}>📈 Attività nel tempo (per giorno)</h3>
+      <h3 style={{ marginTop: '2rem' }}>ðŸ“ˆ AttivitÃ  nel tempo (per giorno)</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={timeline}>
           <XAxis dataKey="day" stroke="#ccc" />

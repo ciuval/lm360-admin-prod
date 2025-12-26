@@ -1,0 +1,9 @@
+﻿/* Disinnesca overlay Vercel Live & simili */
+vercel-live-feedback,
+#vercel-live-feedback,
+[class*='vercel-live-feedback'],
+[src*='vercel.live'] {
+  pointer-events: none !important;
+  z-index: 0 !important;
+  opacity: 0 !important;
+}

@@ -1,0 +1,21 @@
+﻿/* Accessibilità & Performance base (WCAG 2.2 AA) */
+:root { color-scheme: light dark; }
+* { outline-offset: 2px; }
+:focus-visible { outline: 3px solid #3B82F6; }
+
+.sr-only {
+  position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;
+}
+.sr-only:focus, .sr-only:active {
+  position: static; width:auto; height:auto; margin:0; clip:auto; overflow:visible;
+  padding:.5rem 1rem; border-radius:.5rem; background:#3B82F6; color:#fff; font-weight:600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+img { display:block; max-width:100%; height:auto; }
+[hidden] { display:none !important; }
+button, a { touch-action: manipulation; }
+@media (hover:hover) { a:hover { filter: brightness(1.02); } }

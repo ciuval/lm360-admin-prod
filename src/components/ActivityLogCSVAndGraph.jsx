@@ -1,3 +1,4 @@
+﻿import { getJson, setJson } from '../lib/storage';
 export default function ActivityLogCSVAndGraph() {
-  return <div>📈 ActivityLogCSVAndGraph (placeholder)</div>;
+  return <div>ðŸ“ˆ ActivityLogCSVAndGraph (placeholder)</div>;
 }

@@ -1,0 +1,5 @@
+﻿// --- IMPORT (in cima a src/App.jsx) ---
+import DevEnv from './pages/DevEnv';
+
+// --- ROUTE (dentro <Routes> ... </Routes>) ---
+<Route path="/dev-env" element={<DevEnv />} />

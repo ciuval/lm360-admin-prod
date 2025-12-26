@@ -1,0 +1,105 @@
+﻿import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { API_BASE } from "../lib/apiBase";
+import { setSEO } from "../lib/seo";
+
+function readingTime(text){
+  const w = (text||"").trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(w/200)); // ~200 wpm
+}
+function fmtDate(iso){ try { return new Date(iso).toLocaleDateString("it-IT"); } catch { return ""; } }
+function excerpt(t, n=140){ if(!t) return ""; return t.length>n? t.slice(0,n)+"…" : t; }
+
+export default function Consigli() {
+  const [items, setItems] = useState([]);
+  const [err, setErr] = useState("");
+  const [q, setQ] = useState("");
+  const [sort, setSort] = useState("recent"); // future: "oldest"
+
+  useEffect(() => { setSEO("Consigli utili — LoveMatch360", "Consigli pratici e percorsi guidati per scelte migliori, in un ambiente sicuro e ordinato."); }, []);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const url = `${API_BASE}/api/posts-list?status=published&visibility=public&page=1&limit=50`;
+        const r = await fetch(url, { credentials:"include" });
+        if (!r.ok) throw new Error("Errore API");
+        const j = await r.json();
+        if (!alive) return;
+        setItems(j?.items || []);
+      } catch (e) {
+        if (!alive) return;
+        setErr(e.message || "Errore di rete");
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    let list = items.slice(0);
+    if (needle) list = list.filter(p => ((p.title||"") + " " + (p.content||"")).toLowerCase().includes(needle));
+    list.sort((a,b) => {
+      if (sort === "recent") return (new Date(b.created_at)) - (new Date(a.created_at));
+      return (new Date(a.created_at)) - (new Date(b.created_at));
+    });
+    return list;
+  }, [items, q, sort]);
+
+  return (
+    <main style={{padding:"24px",maxWidth:1100,margin:"0 auto"}}>
+      <nav style={{fontSize:12,opacity:.7,marginBottom:8}}>
+        <Link to="/">Home</Link> · Consigli
+      </nav>
+
+      <header style={{display:"flex",flexWrap:"wrap",gap:10,alignItems:"center",marginBottom:14}}>
+        <h1 style={{fontSize:"clamp(20px,3vw,28px)",margin:"4px 14px 4px 0"}}>Consigli utili</h1>
+        <input
+          aria-label="Cerca consigli"
+          value={q}
+          onChange={(e)=>setQ(e.target.value)}
+          placeholder="Cerca per titolo o testo…"
+          style={{flex:"1 1 260px",minWidth:220,padding:"10px 12px",borderRadius:10,border:"1px solid #243043",background:"#0b1220",color:"#e5e7eb"}}
+        />
+        <select
+          aria-label="Ordina"
+          value={sort}
+          onChange={(e)=>setSort(e.target.value)}
+          style={{padding:"10px 12px",borderRadius:10,border:"1px solid #243043",background:"#0b1220",color:"#e5e7eb"}}
+        >
+          <option value="recent">Più recenti</option>
+          <option value="oldest">Più vecchi</option>
+        </select>
+      </header>
+
+      {err && <p style={{color:"#ef4444"}}>Errore: {err}</p>}
+
+      <section
+        aria-label="Elenco consigli"
+        style={{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(260px, 1fr))",gap:14}}
+      >
+        {filtered.map(p => {
+          const rt = readingTime(p.content||"");
+          return (
+            <article key={p.id} style={{border:"1px solid #1f2937",borderRadius:12,background:"#0b1220",padding:14,display:"grid",gap:8}}>
+              <Link to={`/post/${p.id}`} style={{textDecoration:"none",color:"#93c5fd",fontWeight:700}}>
+                {p.title || "Senza titolo"}
+              </Link>
+              <div style={{opacity:.6,fontSize:12}}>{fmtDate(p.created_at)} · {rt} min</div>
+              <p style={{margin:0,opacity:.9}}>{excerpt(p.content||"", 150)}</p>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:6}}>
+                <Link to={`/post/${p.id}`} style={{textDecoration:"none",padding:"8px 10px",borderRadius:8,background:"#111827",color:"#e5e7eb"}}>Leggi</Link>
+                <span aria-label="reading time" style={{fontSize:12,opacity:.65}}>{rt} min read</span>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+
+      {filtered.length===0 && !err && (
+        <p style={{opacity:.7,marginTop:16}}>Nessun risultato. Prova a cambiare ricerca o ordinamento.</p>
+      )}
+    </main>
+  );
+}

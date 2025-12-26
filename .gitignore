@@ -4,6 +4,7 @@ dist/
 .vite/
 
 # Config locali e ambienti
+.env*
 .env
 .env.local
 .env.*.local
@@ -30,9 +31,7 @@ yarn-error.log*
 # Extension package
 lm360-helper-ext.zip
 
-# SECURITY
-.env*
-!.env.example
-.vercel.env*.local
-.vercel/
+.vercel
 
+.env*.local
+.vercel

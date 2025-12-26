@@ -1,19 +1,28 @@
-import React from "react";
-
-const mods = import.meta.glob(
-  ["../Legal/Refunds.jsx","../Legal/Refunds.tsx","../Legal/RefundsPage.jsx","../Legal/RefundsPage.tsx"],
-  { eager: true }
-);
-
-const mod = Object.values(mods)[0];
-
-const Refunds = (mod && mod.default) || function RefundsFallback() {
+export default function Refunds() {
   return (
-    <section style={{ padding: 24 }}>
-      <h1>Rimborsi</h1>
-      <p>Contenuto non disponibile in questa build.</p>
-    </section>
-  );
-};
+    <main id="main" className="section">
+      <div className="card card-pad">
+        <h1 style={{ margin: 0 }}>Politica Rimborsi</h1>
+        <p className="lead" style={{ marginTop: 10 }}>
+          I pagamenti Premium sono gestiti tramite Stripe. In caso di problemi tecnici o addebiti non dovuti,
+          valuteremo richieste di rimborso secondo la normativa applicabile e le regole Stripe.
+        </p>
 
-export default Refunds;
+        <h2>Quando puoi richiedere un rimborso</h2>
+        <ul>
+          <li>Addebito duplicato o non autorizzato.</li>
+          <li>Premium non attivato per errore tecnico verificato.</li>
+        </ul>
+
+        <h2>Come richiederlo</h2>
+        <p className="lead">
+          Contatta l’assistenza indicando data e importo (non inviare dati carta). Ti rispondiamo con esito e tempi stimati.
+        </p>
+
+        <p className="mini" style={{ marginTop: 14 }}>
+          Ultimo aggiornamento: {new Date().toISOString().slice(0,10)}
+        </p>
+      </div>
+    </main>
+  );
+}

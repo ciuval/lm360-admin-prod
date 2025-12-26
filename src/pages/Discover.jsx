@@ -1,24 +1,13 @@
-import React from "react";
-
-const mods = import.meta.glob(
-  ["./PublicProfilesPage.jsx","./DiscoverPage.jsx","./VisitatoriPage.jsx","./GuidesIndex.jsx"],
-  { eager: true }
-);
-
-const mod =
-  mods["./PublicProfilesPage.jsx"] ||
-  mods["./DiscoverPage.jsx"] ||
-  mods["./VisitatoriPage.jsx"] ||
-  mods["./GuidesIndex.jsx"] ||
-  Object.values(mods)[0];
-
-const Discover = (mod && mod.default) || function DiscoverFallback() {
+﻿export default function Discover() {
   return (
-    <section style={{ padding: 24 }}>
-      <h1>Scopri</h1>
-      <p>Pagina non disponibile in questa build.</p>
-    </section>
+    <main id="main" className="section">
+      <div className="card card-pad">
+        <h1 style={{ margin: 0 }}>Scopri</h1>
+        <p className="lead" style={{ marginTop: 8 }}>
+          Qui andrà la lista profili pulita, con filtri veri e CTA essenziali.
+          Niente layout “incollato”. Solo UX che respira.
+        </p>
+      </div>
+    </main>
   );
-};
-
-export default Discover;
+}

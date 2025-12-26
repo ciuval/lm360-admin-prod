@@ -1,39 +1,80 @@
-import React, { useEffect, useState } from "react";
-import Button from "./ui/Button";
-import Card from "./ui/Card";
-import { getAbVariant } from "../lib/abTests";
-import { track } from "../lib/analytics";
-import { supabase } from "../lib/supabaseClient";
+﻿import { getJson, setJson } from '../lib/storage';
+import React, { useEffect, useMemo } from 'react';
 
-const copies = {
-  A:{h:"Trova chi è davvero compatibile (100/100).", s:"Chat solo con match reciproci — zero perdite di tempo.", cta:"Inizia ora"},
-  B:{h:"Match perfetti, conversazioni reali.", s:"Completa il profilo, sblocca lo score 100 e scrivi subito.", cta:"Crea il profilo"},
-  C:{h:"Più affinità, meno swipe.", s:"Algoritmo trasparente, chat solo a compatibilità 100/100.", cta:"Scopri i match"},
-  D:{h:"Incontri di qualità, non di quantità.", s:"Profilo al completo → più match reali → più chat.", cta:"Completa il profilo"},
-  E:{h:"Premium quando serve davvero.", s:"Filtri pro, boost visibilità e chat prioritarie.", cta:"Prova Premium"},
+const VARIANTS = {
+  A: {
+    h1: 'Match intelligenti. Ambiente sicuro.',
+    sub: 'Consigli puliti, zero caos. Il primo passo giusto, oggi.',
+    cta: { text: 'Iscriviti gratis', href: '#/signup', kind: 'primary' },
+  },
+  B: {
+    h1: 'Relazioni migliori, meno rumore.',
+    sub: 'Scopri persone affini e dritte utili â€” elegante e sereno.',
+    cta: { text: 'Sblocca Premium', href: import.meta.env.VITE_PAYMENT_LINK_URL, kind: 'outline' },
+  },
 };
-export default function HeroAB({ userId }){
-  const [v,setV]=useState("A");
-  const data = copies[v];
 
-  useEffect(()=>{ (async()=>{
-    const uid = userId ?? (await supabase.auth.getUser()).data.user?.id ?? null;
-    const variant = await getAbVariant(uid, "hero_copy", ["A","B","C","D","E"]);
-    setV(variant);
-  })(); },[userId]);
-
-  function onCTA(){
-    track("paywall_view",{placement:"hero_ab", variant:v}, userId);
-    // qui puoi fare navigate al paywall o onboarding
-    const el = document.getElementById("cta-primary");
-    if(el) el.blur();
+function assignVariant() {
+  try {
+    const k = 'ab_hero';
+    const ex = getJson(k);
+    if (ex === 'A' || ex === 'B') return ex;
+    const v = Math.random() < 0.5 ? 'A' : 'B';
+    setJson(k, v);
+    return v;
+  } catch {
+    return 'A';
   }
+}
+
+async function logEvent(variant, event, meta) {
+  try {
+    const cidKey = 'cid';
+    let cid = getJson(cidKey);
+    if (!cid) {
+      cid = Math.random().toString(16).slice(2) + Date.now().toString(36);
+      setJson(cidKey, cid);
+    }
+    await fetch('/api/ab-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        variant,
+        event,
+        path: location.hash || location.pathname,
+        client_id: cid,
+        meta,
+      }),
+    });
+  } catch {}
+}
+
+export default function HeroAB() {
+  const variant = useMemo(assignVariant, []);
+  const v = VARIANTS[variant];
+
+  useEffect(() => {
+    logEvent(variant, 'impression');
+  }, [variant]);
+
   return (
-    <Card style={{margin:"1rem auto",maxWidth:900,textAlign:"center"}}>
-      <h1 style={{margin:"0 0 .5rem 0"}}>{data.h}</h1>
-      <p style={{opacity:.85,margin:"0 0 1rem 0"}}>{data.s}</p>
-      <Button id="cta-primary" onClick={onCTA}> {data.cta} </Button>
-      <div style={{marginTop:8,opacity:.6,fontSize:12}}>Variante: {v}</div>
-    </Card>
+    <section className="hero">
+      <div className="hero__inner">
+        <h1 className="hero__title">{v.h1}</h1>
+        <p className="hero__sub">{v.sub}</p>
+        <div className="hero__cta">
+          <a
+            className={'btn ' + (v.cta.kind === 'outline' ? 'btn--outline' : '')}
+            href={v.cta.href}
+            target={v.cta.href.startsWith('http') ? '_blank' : undefined}
+            rel={v.cta.href.startsWith('http') ? 'noreferrer' : undefined}
+            onClick={() => logEvent(variant, 'cta_click')}
+          >
+            {v.cta.text}
+          </a>
+        </div>
+      </div>
+    </section>
   );
 }

@@ -1,0 +1,23 @@
+{
+  "root": true,
+  "env": { "browser": true, "es2022": true },
+  "parserOptions": { "ecmaVersion": "latest", "sourceType": "module", "ecmaFeatures": { "jsx": true } },
+  "plugins": ["react", "react-hooks"],
+  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended", "prettier"],
+  "settings": { "react": { "version": "detect" } },
+  "globals": {
+    "window": "readonly", "document": "readonly", "navigator": "readonly",
+    "localStorage": "readonly", "sessionStorage": "readonly", "fetch": "readonly",
+    "URL": "readonly", "Blob": "readonly", "Audio": "readonly", "CustomEvent": "readonly",
+    "performance": "readonly", "MutationObserver": "readonly", "alert": "readonly",
+    "setTimeout": "readonly", "clearTimeout": "readonly", "setInterval": "readonly",
+    "clearInterval": "readonly", "history": "readonly", "crypto": "readonly",
+    "console": "readonly", "location": "readonly"
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "no-console": "off"
+  }
+}
+

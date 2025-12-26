@@ -1,17 +1,28 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer style={{ padding: "18px", borderTop: "1px solid rgba(255,255,255,0.08)", opacity: 0.9 }}>
-      <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-        <Link to="/privacy">Privacy</Link>
-        <Link to="/cookie">Cookie</Link>
-        <Link to="/termini">Termini</Link>
-        <Link to="/rimborsi">Rimborsi</Link>
-      </div>
-      <div style={{ marginTop: 10, fontSize: 12, opacity: 0.8 }}>
-        © {new Date().getFullYear()} LoveMatch360
+    <footer className="footer" aria-label="Footer">
+      <div className="footer-grid">
+        <div>
+          <div className="footer-links">
+            <NavLink to="/privacy">Privacy</NavLink>
+            <NavLink to="/cookie">Cookie</NavLink>
+            <NavLink to="/termini">Termini</NavLink>
+            <NavLink to="/rimborsi">Rimborsi</NavLink>
+          </div>
+
+          <p className="mini" style={{ marginTop: 10 }}>
+            LoveMatch360 è un servizio di incontro e networking. Manteniamo un ambiente responsabile: niente contenuti espliciti,
+            niente molestie, niente PII nei log. Qui non si scherza.
+          </p>
+        </div>
+
+        <div className="mini" style={{ textAlign: "right" }}>
+          © {year} LoveMatch360
+        </div>
       </div>
     </footer>
   );

@@ -1,0 +1,21 @@
+﻿section.card {
+  position: relative;
+  z-index: 2;
+}
+section.card * {
+  pointer-events: auto;
+}
+
+/* Neutralizza overlay noti che mangiano i click */
+#USE_CHAT_GPT_AI_ROOT,
+use-chat-gpt-ai,
+#MAXAI_SNACKBAR_CONTAINER,
+[id^='MAXAI_'],
+[id^='use-chat-gpt-ai'],
+vercel-live-feedback,
+#vercel-live-feedback,
+[class*='vercel-live-feedback'] {
+  pointer-events: none !important;
+  z-index: 0 !important;
+  opacity: 0 !important;
+}

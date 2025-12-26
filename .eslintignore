@@ -1,0 +1,10 @@
+dist/
+node_modules/
+extension/**
+lm360-helper-ext/**
+src/agent/**
+src/patch/**
+src/src/**
+src/routes.cons.js
+**/*.bak
+**/*.backup.*

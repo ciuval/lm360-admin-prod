@@ -1,19 +1,39 @@
-import React from "react";
-export default function Button({variant="brand", disabled, style, ...props}){
-  const bg = {brand:"var(--brand)", ok:"var(--ok)", ghost:"transparent"}[variant]||"var(--brand)";
-  const color = variant==="ghost" ? "var(--txt)" : "#121212";
-  return (
-    <button
-      disabled={disabled}
-      style={{
-        background:bg,color,
-        border:variant==="ghost"?"var(--border)":"none",
-        borderRadius:"var(--radius)",padding:"8px 12px",
-        boxShadow:variant==="brand"&&!disabled?"var(--shadow)":"none",
-        opacity:disabled?.toString()==="true"?0.6:1,cursor:disabled?"not-allowed":"pointer",
-        ...style
-      }}
-      {...props}
-    />
-  );
+﻿import React from 'react';
+
+/**
+ * Button UI
+ * Props:
+ *  - variant: "primary" | "secondary" | "ghost"
+ *  - disabled, onClick, type, children, className, style
+ */
+export default function Button({ variant = 'primary', className = '', style = {}, ...rest }) {
+  const base = {
+    borderRadius: 10,
+    padding: '8px 14px',
+    border: '1px solid rgba(255,255,255,.12)',
+    fontSize: 14,
+    cursor: 'pointer',
+    background: 'rgba(15,23,42,0.9)',
+    color: '#e5e7eb',
+  };
+
+  const variants = {
+    primary: {
+      background: 'linear-gradient(90deg,#7c3aed,#6366f1)',
+      borderColor: 'transparent',
+      color: '#fff',
+    },
+    secondary: {
+      background: 'transparent',
+      borderColor: 'rgba(148,163,184,.6)',
+    },
+    ghost: {
+      background: 'transparent',
+      borderColor: 'transparent',
+    },
+  };
+
+  const styles = { ...base, ...(variants[variant] || {}), ...style };
+
+  return <button className={`btn ${className}`.trim()} style={styles} {...rest} />;
 }

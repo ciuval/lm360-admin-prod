@@ -1,0 +1,28 @@
+﻿<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph":[
+    {
+      "@type":"Organization",
+      "name":"LoveMatch360",
+      "url":"https://www.lovematch360.com",
+      "logo":"https://www.lovematch360.com/logo.png",
+      "contactPoint":[{"@type":"ContactPoint","contactType":"customer support","email":"*************supporto_email_ufficiale*************","areaServed":"IT"}],
+      "sameAs":[
+        "*************link_social_1*************",
+        "*************link_social_2*************"
+      ]
+    },
+    {
+      "@type":"WebSite",
+      "name":"LoveMatch360",
+      "url":"https://www.lovematch360.com",
+      "potentialAction":{
+        "@type":"SearchAction",
+        "target":"https://www.lovematch360.com/?q={search_term_string}",
+        "query-input":"required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>

@@ -1,11 +1,22 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
+﻿import { getJson, setJson } from '../lib/storage';
+// src/components/ProtectedRoute.jsx
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 
-const FAKE_ON  = import.meta.env.VITE_ENABLE_FAKE_USER === "true";
-const FAKE_ID  = import.meta.env.VITE_FAKE_USER_ID || null;
+/**
+ * Compatibile sia con:
+ *   <ProtectedRoute userId={id}><Pagina/></ProtectedRoute>
+ * che con:
+ *   <Route element={<ProtectedRoute userId={id} element={<Pagina/>} />} />
+ */
+export default function ProtectedRoute({ userId, element, children }) {
+  const location = useLocation();
 
-export default function ProtectedRoute({ userId, children }) {
-  const effectiveUser = userId || (FAKE_ON ? FAKE_ID : null);
-  if (!effectiveUser) return <Navigate to="/login" replace />;
-  return children;
+  // non loggato â†’ vai al login, tieni traccia della pagina di origine
+  if (!userId) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  // se passi element, usa quello; altrimenti usa i children
+  return element ?? children ?? null;
 }

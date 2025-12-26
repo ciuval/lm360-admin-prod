@@ -1,0 +1,51 @@
+﻿import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { API_BASE } from "../lib/apiBase";
+
+export default function Consigli() {
+  const [items, setItems] = useState([]);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const url = `${API_BASE}/api/posts-list?status=published&visibility=public&page=1&limit=50`;
+        const r = await fetch(url, { credentials: "include" });
+        if (!r.ok) throw new Error("Errore API");
+        const j = await r.json();
+        if (!alive) return;
+        setItems(j?.items || []);
+      } catch (e) {
+        if (!alive) return;
+        setErr(e.message || "Errore di rete");
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  return (
+    <main style={{padding:"24px",maxWidth:960,margin:"0 auto"}}>
+      <nav style={{fontSize:12,opacity:.7,marginBottom:8}}>
+        <Link to="/">Home</Link> · Consigli
+      </nav>
+      <h1 style={{fontSize:"clamp(20px,3vw,28px)",margin:"4px 0 12px"}}>Consigli utili</h1>
+
+      {err && <p style={{color:"#ef4444"}}>Errore: {err}</p>}
+
+      <ul style={{listStyle:"none",padding:0,margin:0,display:"grid",gap:10}}>
+        {items.map(p => (
+          <li key={p.id} style={{border:"1px solid #1f2937",borderRadius:10,padding:12,background:"#0b1220"}}>
+            <Link to={`/post/${p.id}`} style={{color:"#93c5fd",textDecoration:"none",fontWeight:600}}>
+              {p.title || "Senza titolo"}
+            </Link>
+            <div style={{opacity:.6,fontSize:12,marginTop:4}}>
+              {new Date(p.created_at).toLocaleDateString("it-IT")}
+            </div>
+          </li>
+        ))}
+        {items.length === 0 && !err && <li>Nessun contenuto disponibile.</li>}
+      </ul>
+    </main>
+  );
+}

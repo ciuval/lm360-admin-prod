@@ -1,0 +1,3 @@
+﻿Sostituisci in tutte le CTA:
+APP_URL/#/onboarding  ->  https://app.lovematch360.com/#/onboarding
+APP_URL/#/premium     ->  https://app.lovematch360.com/#/premium

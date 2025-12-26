@@ -1,0 +1,19 @@
+# robots.txt per LoveMatch360
+
+User-agent: *
+Allow: /
+
+# Sitemap principale
+Sitemap: https://www.lovematch360.com/sitemap.xml
+
+# Blocco di directory sensibili (se esistono)
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /debug/
+
+# Non indicizzare parametri dinamici (se usati)
+Disallow: /*?*
+
+# Consiglio per motori moderni
+Clean-param: ref&utm_source&utm_medium&utm_campaign

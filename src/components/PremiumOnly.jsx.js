@@ -1,8 +1,9 @@
+﻿import { getJson, setJson } from '../lib/storage';
 // src/components/PremiumOnly.jsx
-import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export default function PremiumOnly({ children }) {
   const [loading, setLoading] = useState(true);
@@ -16,26 +17,26 @@ export default function PremiumOnly({ children }) {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        toast("🚫 Devi essere loggato per accedere.");
-        navigate("/login");
+        toast('ðŸš« Devi essere loggato per accedere.');
+        navigate('/login');
         return;
       }
 
       const { data: profilo, error } = await supabase
-        .from("profili")
-        .select("premium")
-        .eq("id", user.id)
+        .from('profili')
+        .select('premium')
+        .eq('id', user.id)
         .maybeSingle();
 
       if (error || !profilo) {
-        toast.error("Errore nel controllo Premium.");
-        navigate("/paywall");
+        toast.error('Errore nel controllo Premium.');
+        navigate('/paywall');
         return;
       }
 
       if (profilo.premium !== true) {
-        toast("🔒 Funzione riservata agli utenti Premium");
-        navigate("/paywall");
+        toast('ðŸ”’ Funzione riservata agli utenti Premium');
+        navigate('/paywall');
         return;
       }
 
@@ -46,7 +47,7 @@ export default function PremiumOnly({ children }) {
     checkPremium();
   }, [navigate]);
 
-  if (loading) return <p style={{ padding: "2rem" }}>⏳ Verifica accesso Premium...</p>;
+  if (loading) return <p style={{ padding: '2rem' }}>â³ Verifica accesso Premium...</p>;
 
   return <>{isPremium && children}</>;
 }

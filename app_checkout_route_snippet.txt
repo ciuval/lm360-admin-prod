@@ -1,0 +1,5 @@
+﻿// --- IMPORT (in cima a src/App.jsx) ---
+import PremiumCheckoutTest from "./pages/PremiumCheckoutTest";
+
+// --- ROUTE (dentro <Routes> ... </Routes>) ---
+<Route path="/premium-checkout-test" element={<PremiumCheckoutTest />} />

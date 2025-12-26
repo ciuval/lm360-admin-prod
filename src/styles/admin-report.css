@@ -1,0 +1,130 @@
+/* Admin Report */
+.admin-wrap {
+  display: grid;
+  gap: 16px;
+}
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.kpi-card {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.03);
+}
+@media (prefers-color-scheme: dark) {
+  .kpi-card {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+.kpi-title {
+  font-size: 12px;
+  opacity: 0.8;
+  margin: 0 0 4px;
+}
+.kpi-value {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+.pill--green {
+  color: #14532d;
+  background: #bbf7d0;
+  border-color: #22c55e;
+}
+.pill--yellow {
+  color: #713f12;
+  background: #fde68a;
+  border-color: #f59e0b;
+}
+.pill--red {
+  color: #7f1d1d;
+  background: #fecaca;
+  border-color: #ef4444;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table th,
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  text-align: left;
+  white-space: nowrap;
+}
+@media (prefers-color-scheme: dark) {
+  .table th,
+  .table td {
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}
+.muted {
+  opacity: 0.75;
+}
+
+/* === Sparkline Admin === */
+:root {
+  --abA: #2563eb;
+  --abB: #f59e0b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --abA: #60a5fa;
+    --abB: #fbbf24;
+  }
+}
+.spark-card {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.03);
+}
+@media (prefers-color-scheme: dark) {
+  .spark-card {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+.small {
+  font-size: 12px;
+}
+
+/* === Sparkline Admin === */
+:root {
+  --abA: #2563eb;
+  --abB: #f59e0b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --abA: #60a5fa;
+    --abB: #fbbf24;
+  }
+}
+.spark-card {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.03);
+}
+@media (prefers-color-scheme: dark) {
+  .spark-card {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+.small {
+  font-size: 12px;
+}

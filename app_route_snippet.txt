@@ -1,0 +1,8 @@
+﻿// --- IMPORT (in cima al file App.jsx) ---
+import PremiumOnly from './components/PremiumOnly';
+import PremiumAreaDemo from './pages/PremiumAreaDemo';
+
+// --- ROUTE (dentro <Routes> ... </Routes>) ---
+<Route path='/premium-test' element={
+  <PremiumOnly><PremiumAreaDemo /></PremiumOnly>
+} />

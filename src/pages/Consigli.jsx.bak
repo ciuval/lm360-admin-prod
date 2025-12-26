@@ -1,0 +1,91 @@
+﻿import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getJSON } from '../lib/http';
+
+const LIMIT = 10;
+
+export default function Consigli() {
+  const [items, setItems] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  async function load(p = 1) {
+    setLoading(true);
+    try {
+      const json = await getJSON('/api/posts-list', {
+        status: 'published',
+        visibility: 'public',
+        page: p,
+        limit: LIMIT,
+      });
+
+      // Se l'API dovesse restituire ok:false, provo a lanciare l'errore
+      if (json?.ok === false) throw new Error(json?.error || 'Errore');
+
+      const batch = Array.isArray(json?.items) ? json.items : [];
+      setItems(prev => (p === 1 ? batch : [...prev, ...batch]));
+      // se l'ultimo batch è più piccolo del limit => non ci sono altre pagine
+      setHasMore(batch.length === LIMIT);
+      setError('');
+    } catch (e) {
+      const msg = String(e?.message || e);
+      // non mostrare errori per out-of-range
+      if (/Requested range not satisfiable/i.test(msg)) {
+        setHasMore(false);
+        setError('');
+      } else {
+        setError(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(1); }, []);
+
+  const onMore = () => {
+    if (loading || !hasMore) return;
+    const next = page + 1;
+    setPage(next);
+    load(next);
+  };
+
+  return (
+    <main style={{padding:'24px 16px', maxWidth: 900, margin: '0 auto'}}>
+      <nav style={{opacity:.7, fontSize:13, marginBottom:12}}>
+        <Link to="/">Home</Link> <span> / </span> <strong>Consigli</strong>
+      </nav>
+
+      <h1 style={{margin:'0 0 12px'}}>Consigli utili</h1>
+      {error && <p style={{color:'#f87171', margin:'0 0 8px'}}>{error}</p>}
+
+      <div style={{display:'grid', gap:12}}>
+        {items.map(p => (
+          <Link key={p.id} to={/post/} style={{
+            display:'block', padding:16, borderRadius:12, background:'#0f172a', border:'1px solid #1e293b',
+            color:'#e2e8f0', textDecoration:'none'
+          }}>
+            <div style={{fontSize:12, opacity:.7, marginBottom:6}}>
+              {new Date(p.created_at).toLocaleDateString('it-IT')}
+            </div>
+            <div style={{fontSize:18, fontWeight:700, marginBottom:4}}>{p.title}</div>
+            <div style={{opacity:.85}}>{p.content}</div>
+          </Link>
+        ))}
+      </div>
+
+      {hasMore ? (
+        <div style={{marginTop:16}}>
+          <button onClick={onMore} disabled={loading}
+                  style={{padding:'10px 14px', borderRadius:10, border:'1px solid #1e293b', background:'#111827', color:'#e5e7eb'}}>
+            {loading ? 'Carico…' : 'Carica altri'}
+          </button>
+        </div>
+      ) : (
+        items.length > 0 && <p style={{opacity:.6, marginTop:16}}>Fine elenco.</p>
+      )}
+    </main>
+  );
+}

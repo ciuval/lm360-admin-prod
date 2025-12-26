@@ -1,0 +1,41 @@
+/* src/styles/a11y.css */
+
+/* Evidenzia il focus da tastiera */
+:focus {
+  outline: 2px solid #bb86fc;
+  outline-offset: 2px;
+}
+
+/* Assicura che pulsanti/icone siano leggibili */
+button, a {
+  color: #ffffff;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+/* Pulsanti chiari su dark background */
+button {
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Migliora contrasto degli input */
+input, textarea {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+/* Tooltip accessibile */
+.tooltip[role="tooltip"] {
+  background: #333;
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+

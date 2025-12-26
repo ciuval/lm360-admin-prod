@@ -1,5 +1,16 @@
-import React from "react";
-export default function Badge({tone="brand",children,style}){
-  const map = {brand:"var(--brand)", ok:"var(--ok)", warn:"var(--warn)", err:"var(--err)"};
-  return <span style={{background:map[tone]||"var(--brand)",color:"#121212",borderRadius:999,padding:"2px 8px",fontSize:12, ...style}}>{children}</span>;
+﻿import { getJson, setJson } from '../lib/storage';
+import React from 'react';
+/** Badge con toni: info|success|warn|error|neutral (default) */
+export default function Badge({
+  children,
+  tone = 'neutral',
+  dot = false,
+  className = '',
+  ...rest
+}) {
+  return (
+    <span className={`ui-badge ${className}`} data-tone={tone} {...rest}>
+      {dot && <span className="dot" aria-hidden="true" />} {children}
+    </span>
+  );
 }

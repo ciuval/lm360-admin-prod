@@ -1,0 +1,9 @@
+﻿{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "redirects": [
+    { "source": "/premium", "destination": "https://app.lovematch360.com/#/premium", "permanent": false },
+    { "source": "/signup",  "destination": "https://app.lovematch360.com/#/signup",  "permanent": false }
+  ]
+}

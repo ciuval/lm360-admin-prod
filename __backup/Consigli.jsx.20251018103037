@@ -1,0 +1,64 @@
+﻿import { API_BASE } from '../lib/apiBase';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+const API = `${API_BASE}/api/posts-list?status=published&visibility=public&page=1&limit=10`;
+
+export default function Consigli() {
+  const [items, setItems]   = useState([]);
+  const [loading, setLoad]  = useState(true);
+  const [error, setError]   = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res  = await fetch(API, { headers: { Accept: "application/json" }});
+        const body = await res.text();
+
+        if (!res.ok) throw new Error(`HTTP ${res.status} – ${body.slice(0,120)}`);
+
+        let data;
+        try { data = JSON.parse(body); }
+        catch { throw new Error("Risposta non JSON dall'API:\n" + body.slice(0,200)); }
+
+        if (!cancelled) setItems(Array.isArray(data.items) ? data.items : []);
+      } catch (e) {
+        if (!cancelled) setError(String(e.message || e));
+      } finally {
+        if (!cancelled) setLoad(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div style={{ padding: "16px" }}>
+      <nav style={{ marginBottom: 8 }}>
+        <Link to="/">Home</Link> <span style={{ opacity:.6 }}>›</span> <strong>Consigli</strong>
+      </nav>
+
+      <h2 style={{ margin: "6px 0 14px" }}>Consigli utili</h2>
+
+      {loading && <p>Carico…</p>}
+      {error   && <p style={{ color:"#f66" }}>Errore: {error}</p>}
+      {!loading && !error && items.length === 0 && <p>Nessun post pubblicato.</p>}
+
+      <ul style={{ lineHeight: 1.6, paddingLeft: 18 }}>
+        {items.map(p => (
+          <li key={p.id}>
+            <Link to={`/post/${encodeURIComponent(p.id)}`} state={{ post: p }}>
+              {p.title || "(senza titolo)"}
+            </Link>
+            {" "}
+            <small style={{ opacity:.75 }}>
+              — {p.created_at ? new Date(p.created_at).toLocaleDateString("it-IT") : ""}
+            </small>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+

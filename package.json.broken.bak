@@ -1,0 +1,22 @@
+@'
+{
+  "name": "lm360-admin-prod",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node -e \"console.log('noop')\"",
+    "dev:api": "node -e \"console.log('noop')\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^16.4.5",
+    "nodemailer": "^6.9.13",
+    "raw-body": "^2.5.2",
+    "stripe": "^16.0.0"
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}
+'@ | Set-Content -Path package.json -Encoding ascii

@@ -1,0 +1,16 @@
+{
+    "ok":  true,
+    "items":  [
+
+              ],
+    "meta":  {
+                 "page":  1,
+                 "limit":  0,
+                 "total":  0,
+                 "pageCount":  1,
+                 "filters":  {
+
+                             }
+             },
+    "reason":  "column posts.title does not exist"
+}

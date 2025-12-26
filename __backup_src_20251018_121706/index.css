@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+/* Modalità scura + colori base */
+:root { color-scheme: dark; }
+body { @apply bg-dark text-light; }
+/* Glow sottile quando loading */
+body[data-loading="1"] {
+  cursor: progress;
+}
+
+
+

@@ -1,0 +1,9 @@
+﻿import React from 'react';
+export default function App(){
+  return (
+    <div style={{color:'#fff',padding:24,fontSize:18}}>
+      LoveMatch360 — dev stub OK.<br/>
+      Se vedi questo, il bundler è tornato vivo (poi rimettiamo le route).
+    </div>
+  );
+}
