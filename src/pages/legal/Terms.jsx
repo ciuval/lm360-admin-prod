@@ -1,19 +1,9 @@
-import React from "react";
-
-const mods = import.meta.glob(
-  ["../Legal/Terms.jsx","../Legal/Terms.tsx","../Legal/TermsPage.jsx","../Legal/TermsPage.tsx"],
-  { eager: true }
-);
-
-const mod = Object.values(mods)[0];
-
-const Terms = (mod && mod.default) || function TermsFallback() {
+export default function Terms() {
   return (
-    <section style={{ padding: 24 }}>
+    <main style={{ padding: 24, maxWidth: 920, margin: "0 auto" }}>
       <h1>Termini</h1>
-      <p>Contenuto non disponibile in questa build.</p>
-    </section>
+      <p>Pagina ripristinata (versione minimale). Termini completi in aggiornamento.</p>
+      <p><a href="/#/">Torna alla Home</a></p>
+    </main>
   );
-};
-
-export default Terms;
+}

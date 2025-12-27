@@ -1,19 +1,9 @@
-import React from "react";
-
-const mods = import.meta.glob(
-  ["../Legal/Cookie.jsx","../Legal/Cookie.tsx","../Legal/CookiePage.jsx","../Legal/CookiePage.tsx"],
-  { eager: true }
-);
-
-const mod = Object.values(mods)[0];
-
-const Cookie = (mod && mod.default) || function CookieFallback() {
+export default function Cookie() {
   return (
-    <section style={{ padding: 24 }}>
+    <main style={{ padding: 24, maxWidth: 920, margin: "0 auto" }}>
       <h1>Cookie</h1>
-      <p>Contenuto non disponibile in questa build.</p>
-    </section>
+      <p>Pagina ripristinata (versione minimale). Dettagli cookie in aggiornamento.</p>
+      <p><a href="/#/">Torna alla Home</a></p>
+    </main>
   );
-};
-
-export default Cookie;
+}

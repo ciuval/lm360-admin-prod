@@ -1,19 +1,9 @@
-import React from "react";
-
-const mods = import.meta.glob(
-  ["../Legal/Refunds.jsx","../Legal/Refunds.tsx","../Legal/RefundsPage.jsx","../Legal/RefundsPage.tsx"],
-  { eager: true }
-);
-
-const mod = Object.values(mods)[0];
-
-const Refunds = (mod && mod.default) || function RefundsFallback() {
+export default function Refunds() {
   return (
-    <section style={{ padding: 24 }}>
+    <main style={{ padding: 24, maxWidth: 920, margin: "0 auto" }}>
       <h1>Rimborsi</h1>
-      <p>Contenuto non disponibile in questa build.</p>
-    </section>
+      <p>Pagina ripristinata (versione minimale). Policy rimborsi in aggiornamento.</p>
+      <p><a href="/#/">Torna alla Home</a></p>
+    </main>
   );
-};
-
-export default Refunds;
+}
