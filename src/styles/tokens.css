@@ -1,0 +1,9 @@
+:root{
+  --bg:#121212;--surface:#1e1e1e;--elev:#2a2a2a;
+  --txt:#ffffff;--muted:#b7b7b7;--brand:#f08fc0;
+  --ok:#10b981;--warn:#f59e0b;--err:#ef4444;--focus:#93c5fd;
+  --radius:12px;--shadow:0 0 10px var(--brand);
+  --space-1:.5rem;--space-2:.75rem;--space-3:1rem;--border:1px solid #333;
+}
+html,body,#root{background:var(--bg);color:var(--txt)}
+a:focus,button:focus{outline:2px solid var(--focus);outline-offset:2px}
