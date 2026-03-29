@@ -40,3 +40,6 @@ node_modules
 dist
 _panic
 _vault
+.env*.local
+
+auth-password-report.csv
