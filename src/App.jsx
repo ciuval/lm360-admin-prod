@@ -1,42 +1,203 @@
+import React from "react";
 import { Routes, Route } from "react-router-dom";
-import AppShell from "./AppShell.jsx";
 
+/* ======================================================
+   SHELL & GUARDS
+====================================================== */
+import AppShell from "./AppShell.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
+import RequirePremium from "./components/RequirePremium.jsx";
+import RequireAdmin from "./components/RequireAdmin.jsx";
+
+/* ======================================================
+   CORE PAGES
+====================================================== */
 import Home from "./pages/Home.jsx";
 import Premium from "./pages/Premium.jsx";
-import Discover from "./pages/Discover.jsx";
 import Profile from "./pages/Profile.jsx";
-import Admin from "./pages/Admin.jsx";
-import Billing from "./pages/Billing.jsx";
+import ProfilePublicCard from "./pages/ProfilePublicCard.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
+/* ======================================================
+   DISCOVERY / APP
+====================================================== */
+import Discover from "./pages/Discover.jsx";
+import Admin from "./pages/Admin.jsx";
+import Billing from "./pages/Billing.jsx";
+import MatchesPage from "./pages/MatchesPage.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
+
+/* ======================================================
+   AUTH
+====================================================== */
+import LoginPage from "./pages/LoginPage.jsx";
+import LoginWithMFA from "./pages/LoginWithMFA.jsx";
+
+/* ======================================================
+   STRIPE / BILLING FLOW
+====================================================== */
+import AttivaPremium from "./pages/AttivaPremium.jsx";
+import CheckoutStripe from "./pages/CheckoutStripe.jsx";
+import CheckoutSuccess from "./pages/CheckoutSuccess.jsx";
+
+/* ======================================================
+   SPECIAL
+====================================================== */
+import QuantumPage from "./pages/QuantumPage.jsx";
+
+/* ======================================================
+   IDEAS
+====================================================== */
+import IdeasIndex from "./pages/IdeasIndex.jsx";
+import IdeasSystemMap from "./pages/IdeasSystemMap.jsx";
+
+/* ======================================================
+   LEGAL
+====================================================== */
 import Privacy from "./pages/legal/Privacy.jsx";
 import Cookie from "./pages/legal/Cookie.jsx";
 import Terms from "./pages/legal/Terms.jsx";
 import Refunds from "./pages/legal/Refunds.jsx";
 
-import QuantumPage from "./pages/QuantumPage.jsx";
+/* ======================================================
+   ONBOARDING (SAFE)
+   fuori da AppShell
+====================================================== */
+import Welcome from "./routes/welcome.jsx";
 
 export default function App() {
   return (
-    <AppShell>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/premium" element={<Premium />} />
-        <Route path="/scopri" element={<Discover />} />
-        <Route path="/profilo" element={<Profile />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/billing" element={<Billing />} />
+    <Routes>
+      {/* ======================================================
+          AUTH / WELCOME
+          fuori da AppShell
+      ====================================================== */}
+      <Route path="/welcome" element={<Welcome />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login-mfa" element={<LoginWithMFA />} />
 
-        {/* Nuova pagina Ã¢â‚¬Å“QuantumÃ¢â‚¬Â */}
-        <Route path="/quantum" element={<QuantumPage />} />
+      <Route
+        path="*"
+        element={
+          <AppShell>
+            <Routes>
+              {/* ======================================================
+                  PUBLIC
+              ====================================================== */}
+              <Route path="/" element={<Home />} />
+              <Route path="/premium" element={<Premium />} />
+              <Route path="/profilo" element={<Profile />} />
+              <Route path="/profilo/:id" element={<ProfilePublicCard />} />
 
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/cookie" element={<Cookie />} />
-        <Route path="/termini" element={<Terms />} />
-        <Route path="/rimborsi" element={<Refunds />} />
+              {/* ======================================================
+                  IDEAS / EDITORIAL
+              ====================================================== */}
+              <Route path="/ideas" element={<IdeasIndex />} />
+              <Route path="/ideas/system-map" element={<IdeasSystemMap />} />
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AppShell>
+              {/* ======================================================
+                  AUTH REQUIRED
+              ====================================================== */}
+              <Route
+                path="/scopri"
+                element={
+                  <RequireAuth>
+                    <Discover />
+                  </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/match"
+                element={
+                  <RequireAuth>
+                    <MatchesPage />
+                  </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/chat/:id"
+                element={
+                  <RequireAuth>
+                    <ChatPage />
+                  </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/admin"
+                element={
+                  <RequireAdmin>
+                    <Admin />
+                  </RequireAdmin>
+                }
+              />
+
+              {/* ======================================================
+                  PREMIUM / BILLING / STRIPE
+              ====================================================== */}
+              <Route
+                path="/billing"
+                element={
+                  <RequirePremium>
+                    <Billing />
+                  </RequirePremium>
+                }
+              />
+
+              <Route
+                path="/quantum"
+                element={
+                  <RequirePremium>
+                    <QuantumPage />
+                  </RequirePremium>
+                }
+              />
+
+              <Route
+                path="/attiva-premium"
+                element={
+                  <RequireAuth>
+                    <AttivaPremium />
+                  </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/checkout"
+                element={
+                  <RequireAuth>
+                    <CheckoutStripe />
+                  </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/checkout/success"
+                element={
+                  <RequireAuth>
+                    <CheckoutSuccess />
+                  </RequireAuth>
+                }
+              />
+
+              {/* ======================================================
+                  LEGAL
+              ====================================================== */}
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/cookie" element={<Cookie />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/refunds" element={<Refunds />} />
+
+              {/* ======================================================
+                  FALLBACK
+              ====================================================== */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AppShell>
+        }
+      />
+    </Routes>
   );
 }
