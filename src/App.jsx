@@ -14,14 +14,14 @@ import RequireAdmin from "./components/RequireAdmin.jsx";
 ====================================================== */
 import Home from "./pages/Home.jsx";
 import Premium from "./pages/Premium.jsx";
-import Profile from "./pages/Profile.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
 import ProfilePublicCard from "./pages/ProfilePublicCard.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
 /* ======================================================
    DISCOVERY / APP
 ====================================================== */
-import Discover from "./pages/Discover.jsx";
+import PublicProfilesPage from "./pages/PublicProfilesPage.jsx";
 import Admin from "./pages/Admin.jsx";
 import Billing from "./pages/Billing.jsx";
 
@@ -71,7 +71,7 @@ export default function App() {
               ====================================================== */}
               <Route path="/" element={<Home />} />
               <Route path="/premium" element={<Premium />} />
-              <Route path="/profilo" element={<Profile />} />
+              <Route path="/profilo" element={<ProfilePage />} />
               <Route path="/profilo/:id" element={<ProfilePublicCard />} />
 
               {/* ======================================================
@@ -81,7 +81,7 @@ export default function App() {
                 path="/scopri"
                 element={
                   <RequireAuth>
-                    <Discover />
+                    <PublicProfilesPage />
                   </RequireAuth>
                 }
               />
