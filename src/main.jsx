@@ -1,24 +1,18 @@
 import "./styles/tokens.css";
-import ErrorBoundary from "./components/ErrorBoundary";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { HashRouter } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import App from "./App.jsx";
-import { HashRouter } from "react-router-dom"; // ✅ Usiamo HashRouter
-import { Analytics } from '@vercel/analytics/react';
+import ErrorBoundary from "./components/ErrorBoundary";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <HashRouter>
-      <App />
-    </HashRouter>
-  </React.StrictMode>
-); 
-
-root.render(
-  <React.StrictMode>
-    <HashRouter>
-      <App />
-      <Analytics />   {/* componente di Vercel */}
-    </HashRouter>
+    <ErrorBoundary>
+      <HashRouter>
+        <App />
+        <Analytics />
+      </HashRouter>
+    </ErrorBoundary>
   </React.StrictMode>
 );
