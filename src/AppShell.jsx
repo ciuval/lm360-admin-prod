@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import useAccountTier from "./hooks/useAccountTier";
+import { loadCurrentAccountTier } from "./lib/accountTier";
 import { supabase } from "./lib/supabaseClient";
 
 function normalizeStatus(value) {
@@ -85,8 +85,48 @@ function Badge({ children, tone = "neutral" }) {
 
 export default function AppShell({ children }) {
   const navigate = useNavigate();
-  const { tier, loading, isAuthed, user, profile } = useAccountTier("shell");
+  const [loading, setLoading] = useState(true);
+  const [tier, setTier] = useState("free");
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function run() {
+      try {
+        setLoading(true);
+
+        const result = await loadCurrentAccountTier();
+
+        if (!alive) return;
+
+        setTier(result?.tier || "free");
+        setIsAuthed(Boolean(result?.isAuthed));
+        setUser(result?.user || null);
+        setProfile(result?.profile || null);
+      } catch {
+        if (!alive) return;
+
+        setTier("free");
+        setIsAuthed(false);
+        setUser(null);
+        setProfile(null);
+      } finally {
+        if (alive) {
+          setLoading(false);
+        }
+      }
+    }
+
+    run();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const displayName = useMemo(() => getDisplayName(profile, user), [profile, user]);
   const visibleEmail = useMemo(() => getVisibleEmail(profile, user), [profile, user]);
@@ -100,7 +140,7 @@ export default function AppShell({ children }) {
     try {
       setIsSigningOut(true);
       await supabase.auth.signOut();
-      navigate("/welcome", { replace: true });
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("AppShell logout error:", error);
     } finally {

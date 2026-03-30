@@ -24,8 +24,6 @@ import NotFound from "./pages/NotFound.jsx";
 import Discover from "./pages/Discover.jsx";
 import Admin from "./pages/Admin.jsx";
 import Billing from "./pages/Billing.jsx";
-import MatchesPage from "./pages/MatchesPage.jsx";
-import ChatPage from "./pages/ChatPage.jsx";
 
 /* ======================================================
    AUTH
@@ -46,12 +44,6 @@ import CheckoutSuccess from "./pages/CheckoutSuccess.jsx";
 import QuantumPage from "./pages/QuantumPage.jsx";
 
 /* ======================================================
-   IDEAS
-====================================================== */
-import IdeasIndex from "./pages/IdeasIndex.jsx";
-import IdeasSystemMap from "./pages/IdeasSystemMap.jsx";
-
-/* ======================================================
    LEGAL
 ====================================================== */
 import Privacy from "./pages/legal/Privacy.jsx";
@@ -59,20 +51,13 @@ import Cookie from "./pages/legal/Cookie.jsx";
 import Terms from "./pages/legal/Terms.jsx";
 import Refunds from "./pages/legal/Refunds.jsx";
 
-/* ======================================================
-   ONBOARDING (SAFE)
-   fuori da AppShell
-====================================================== */
-import Welcome from "./routes/welcome.jsx";
-
 export default function App() {
   return (
     <Routes>
       {/* ======================================================
-          AUTH / WELCOME
+          AUTH
           fuori da AppShell
       ====================================================== */}
-      <Route path="/welcome" element={<Welcome />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/login-mfa" element={<LoginWithMFA />} />
 
@@ -90,12 +75,6 @@ export default function App() {
               <Route path="/profilo/:id" element={<ProfilePublicCard />} />
 
               {/* ======================================================
-                  IDEAS / EDITORIAL
-              ====================================================== */}
-              <Route path="/ideas" element={<IdeasIndex />} />
-              <Route path="/ideas/system-map" element={<IdeasSystemMap />} />
-
-              {/* ======================================================
                   AUTH REQUIRED
               ====================================================== */}
               <Route
@@ -103,24 +82,6 @@ export default function App() {
                 element={
                   <RequireAuth>
                     <Discover />
-                  </RequireAuth>
-                }
-              />
-
-              <Route
-                path="/match"
-                element={
-                  <RequireAuth>
-                    <MatchesPage />
-                  </RequireAuth>
-                }
-              />
-
-              <Route
-                path="/chat/:id"
-                element={
-                  <RequireAuth>
-                    <ChatPage />
                   </RequireAuth>
                 }
               />

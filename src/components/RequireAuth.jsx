@@ -1,20 +1,45 @@
+import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useSession } from "../hooks/useSession.jsx";
+import { loadCurrentAccountTier } from "../lib/accountTier";
 
 export default function RequireAuth({ children, redirectTo = "/login" }) {
-  const { user, loading } = useSession();
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  const from = location.pathname + location.search + location.hash;
+
+  useEffect(() => {
+    let alive = true;
+
+    async function run() {
+      try {
+        setLoading(true);
+
+        const result = await loadCurrentAccountTier();
+
+        if (!alive) return;
+
+        setIsAuthed(Boolean(result?.isAuthed));
+      } catch {
+        if (!alive) return;
+        setIsAuthed(false);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    }
+
+    run();
+
+    return () => {
+      alive = false;
+    };
+  }, [location.pathname]);
 
   if (loading) return null;
 
-  if (!user) {
-    return (
-      <Navigate
-        to={redirectTo}
-        replace
-        state={{ from: location.pathname + location.search + location.hash }}
-      />
-    );
+  if (!isAuthed) {
+    return <Navigate to={redirectTo} replace state={{ from }} />;
   }
 
   return children;

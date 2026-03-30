@@ -1,12 +1,50 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import useAccountTier from "../hooks/useAccountTier";
+import { loadCurrentAccountTier } from "../lib/accountTier";
 
 export default function RequirePremium({ children, redirectTo = "/premium" }) {
   const location = useLocation();
-  const { loading, isAuthed, hasPremiumAccess } = useAccountTier(location.pathname);
+  const [loading, setLoading] = useState(true);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
 
   const from = location.pathname + location.search + location.hash;
+
+  useEffect(() => {
+    let alive = true;
+
+    async function run() {
+      try {
+        setLoading(true);
+
+        const result = await loadCurrentAccountTier();
+
+        if (!alive) return;
+
+        setIsAuthed(Boolean(result?.isAuthed));
+        setHasPremiumAccess(
+          result?.tier === "premium" ||
+            result?.tier === "super" ||
+            result?.tier === "admin"
+        );
+      } catch {
+        if (!alive) return;
+
+        setIsAuthed(false);
+        setHasPremiumAccess(false);
+      } finally {
+        if (alive) {
+          setLoading(false);
+        }
+      }
+    }
+
+    run();
+
+    return () => {
+      alive = false;
+    };
+  }, [location.pathname]);
 
   if (loading) return null;
 
