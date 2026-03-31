@@ -40,34 +40,65 @@ export default function PremiumPage() {
     return tier === "premium" || tier === "super" || tier === "admin";
   }, [tier]);
 
-  const title = useMemo(() => {
-    if (tier === "admin") return "Controllo admin attivo";
-    if (tier === "super") return "Piano Super attivo";
-    if (tier === "premium") return "Piano Premium attivo";
-    return "Premium quando serve davvero.";
-  }, [tier]);
+  const content = useMemo(() => {
+    if (!isAuthed) {
+      return {
+        badge: "Accesso ospite",
+        title: "Premium quando serve davvero.",
+        description:
+          "Più visibilità, filtri migliori e un’esperienza più fluida per chi vuole entrare nel cuore vivo di LoveMatch360.",
+        primaryLabel: "Accedi per continuare",
+        secondaryLabel: "Torna Home",
+        note: "Per attivare o gestire il piano è necessario accedere con un account valido.",
+      };
+    }
 
-  const description = useMemo(() => {
     if (tier === "admin") {
-      return "Il tuo account ha privilegi amministrativi. Le funzioni premium commerciali non sono necessarie per accedere ai controlli di gestione.";
+      return {
+        badge: "Admin",
+        title: "Controllo admin attivo",
+        description:
+          "Il tuo account ha privilegi amministrativi. Le funzioni premium commerciali non sono necessarie per accedere ai controlli di gestione.",
+        primaryLabel: "Vai al profilo",
+        secondaryLabel: "Apri Admin",
+        note: "Questo account non richiede una nuova attivazione commerciale.",
+      };
     }
 
     if (tier === "super") {
-      return "Hai già accesso al livello più alto disponibile nel flusso commerciale attuale.";
+      return {
+        badge: "Super attivo",
+        title: "Hai già il livello più alto.",
+        description:
+          "Il tuo account ha già accesso esteso. Nessuna nuova attivazione premium è necessaria in questo flusso.",
+        primaryLabel: "Vai al profilo",
+        secondaryLabel: "Apri Quantum",
+        note: "Il piano Super risulta già attivo.",
+      };
     }
 
     if (tier === "premium") {
-      return "Il tuo accesso premium è già attivo. Puoi continuare a usare le funzioni sbloccate senza effettuare una nuova attivazione.";
+      return {
+        badge: "Premium attivo",
+        title: "Il tuo Premium è già acceso.",
+        description:
+          "Hai già accesso alle funzioni premium disponibili. Da qui non è necessaria una nuova attivazione.",
+        primaryLabel: "Vai al profilo",
+        secondaryLabel: "Apri Billing",
+        note: "Il tuo account risulta già abilitato.",
+      };
     }
 
-    return "Filtri pro, boost visibilità e accesso esteso alle funzioni premium di LoveMatch360.";
-  }, [tier]);
-
-  const ctaLabel = useMemo(() => {
-    if (!isAuthed) return "Accedi per continuare";
-    if (hasPremiumAccess) return "Vai al profilo";
-    return "Attiva Premium";
-  }, [isAuthed, hasPremiumAccess]);
+    return {
+      badge: "Free",
+      title: "Sblocca il lato più vivo di LoveMatch360.",
+      description:
+        "Filtri pro, più qualità nella scoperta dei profili e un percorso più diretto verso connessioni che meritano davvero attenzione.",
+      primaryLabel: "Attiva Premium",
+      secondaryLabel: "Scopri i profili",
+      note: "Puoi attivare il piano in pochi passaggi dal flusso dedicato.",
+    };
+  }, [isAuthed, tier]);
 
   const handlePrimaryAction = () => {
     if (!isAuthed) {
@@ -75,7 +106,7 @@ export default function PremiumPage() {
       return;
     }
 
-    if (hasPremiumAccess) {
+    if (tier === "admin" || tier === "premium" || tier === "super") {
       navigate("/profilo");
       return;
     }
@@ -83,12 +114,39 @@ export default function PremiumPage() {
     navigate("/attiva-premium");
   };
 
+  const handleSecondaryAction = () => {
+    if (!isAuthed) {
+      navigate("/");
+      return;
+    }
+
+    if (tier === "admin") {
+      navigate("/admin");
+      return;
+    }
+
+    if (tier === "super") {
+      navigate("/quantum");
+      return;
+    }
+
+    if (tier === "premium") {
+      navigate("/billing");
+      return;
+    }
+
+    navigate("/scopri");
+  };
+
   if (loading) {
     return (
       <section style={sectionStyle}>
         <div style={cardStyle}>
-          <h1 style={titleStyle}>Premium</h1>
-          <p style={textStyle}>Caricamento stato account...</p>
+          <span style={badgeStyle("neutral")}>Premium</span>
+          <h1 style={titleStyle}>Caricamento stato account...</h1>
+          <p style={textStyle}>
+            Stiamo verificando il tuo accesso per mostrarti il percorso corretto.
+          </p>
         </div>
       </section>
     );
@@ -97,24 +155,34 @@ export default function PremiumPage() {
   return (
     <section style={sectionStyle}>
       <div style={cardStyle}>
-        <h1 style={titleStyle}>{title}</h1>
-        <p style={textStyle}>{description}</p>
+        <span
+          style={badgeStyle(
+            tier === "admin"
+              ? "admin"
+              : tier === "super"
+                ? "super"
+                : tier === "premium"
+                  ? "premium"
+                  : "neutral"
+          )}
+        >
+          {content.badge}
+        </span>
 
-        <button type="button" style={buttonStyle} onClick={handlePrimaryAction}>
-          {ctaLabel}
-        </button>
+        <h1 style={titleStyle}>{content.title}</h1>
+        <p style={textStyle}>{content.description}</p>
 
-        {!isAuthed && (
-          <p style={noteStyle}>
-            Per attivare o gestire il piano è necessario accedere con un account valido.
-          </p>
-        )}
+        <div style={actionsRowStyle}>
+          <button type="button" style={primaryButtonStyle} onClick={handlePrimaryAction}>
+            {content.primaryLabel}
+          </button>
 
-        {isAuthed && hasPremiumAccess && (
-          <p style={noteStyle}>
-            Il tuo account risulta già abilitato. Da qui non è necessaria alcuna nuova attivazione.
-          </p>
-        )}
+          <button type="button" style={secondaryButtonStyle} onClick={handleSecondaryAction}>
+            {content.secondaryLabel}
+          </button>
+        </div>
+
+        <p style={noteStyle}>{content.note}</p>
       </div>
     </section>
   );
@@ -129,32 +197,42 @@ const sectionStyle = {
 
 const cardStyle = {
   width: "100%",
-  maxWidth: "760px",
-  padding: "32px 24px",
+  maxWidth: "820px",
+  padding: "36px 24px",
   borderRadius: "24px",
   border: "1px solid rgba(255,255,255,0.08)",
-  background: "linear-gradient(180deg, rgba(28,28,34,0.96) 0%, rgba(16,16,22,0.96) 100%)",
+  background:
+    "linear-gradient(180deg, rgba(28,28,34,0.96) 0%, rgba(16,16,22,0.96) 100%)",
   boxShadow: "0 20px 50px rgba(0,0,0,0.28)",
   textAlign: "center",
 };
 
 const titleStyle = {
-  margin: 0,
-  fontSize: "clamp(2rem, 4vw, 3rem)",
+  margin: "16px 0 0",
+  fontSize: "clamp(2rem, 4vw, 3.2rem)",
   lineHeight: 1.05,
   color: "#ffffff",
 };
 
 const textStyle = {
-  marginTop: "16px",
+  marginTop: "18px",
   marginBottom: 0,
-  fontSize: "1.15rem",
-  lineHeight: 1.75,
+  fontSize: "1.12rem",
+  lineHeight: 1.8,
   color: "rgba(255,255,255,0.88)",
+  maxWidth: "62ch",
+  marginInline: "auto",
 };
 
-const buttonStyle = {
-  marginTop: "28px",
+const actionsRowStyle = {
+  marginTop: "30px",
+  display: "flex",
+  gap: "12px",
+  justifyContent: "center",
+  flexWrap: "wrap",
+};
+
+const primaryButtonStyle = {
   padding: "14px 24px",
   minWidth: "220px",
   border: "none",
@@ -166,9 +244,59 @@ const buttonStyle = {
   cursor: "pointer",
 };
 
+const secondaryButtonStyle = {
+  padding: "14px 24px",
+  minWidth: "220px",
+  borderRadius: "14px",
+  border: "1px solid rgba(255,255,255,0.14)",
+  background: "rgba(255,255,255,0.05)",
+  color: "#ffffff",
+  fontSize: "1rem",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
 const noteStyle = {
   marginTop: "18px",
   fontSize: "0.95rem",
   lineHeight: 1.6,
   color: "rgba(255,255,255,0.68)",
 };
+
+function badgeStyle(tone) {
+  const tones = {
+    premium: {
+      background: "rgba(240,143,192,0.16)",
+      border: "1px solid rgba(240,143,192,0.26)",
+      color: "#ffd9e8",
+    },
+    super: {
+      background: "rgba(125,211,252,0.16)",
+      border: "1px solid rgba(125,211,252,0.28)",
+      color: "#d8f1ff",
+    },
+    admin: {
+      background: "rgba(250,204,21,0.16)",
+      border: "1px solid rgba(250,204,21,0.28)",
+      color: "#ffe79a",
+    },
+    neutral: {
+      background: "rgba(255,255,255,0.06)",
+      border: "1px solid rgba(255,255,255,0.10)",
+      color: "#f3f4f6",
+    },
+  };
+
+  return {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 36,
+    padding: "0 14px",
+    borderRadius: 999,
+    fontSize: 13,
+    fontWeight: 800,
+    letterSpacing: "0.01em",
+    ...tones[tone],
+  };
+}
