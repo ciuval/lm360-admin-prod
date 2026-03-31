@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { loadCurrentAccountTier } from "./lib/accountTier";
 import { supabase } from "./lib/supabaseClient";
 
@@ -65,6 +65,100 @@ function getTierMeta(tier) {
   };
 }
 
+function getCurrentSection(pathname, isAuthed, tier) {
+  if (pathname === "/") {
+    return {
+      label: "Home",
+      helper: isAuthed
+        ? "Questa è la tua base: da qui puoi orientarti e ripartire pulito."
+        : "Questa è la vetrina iniziale del prodotto.",
+    };
+  }
+
+  if (pathname.startsWith("/login")) {
+    return {
+      label: "Accesso",
+      helper: "Qui entri nel flusso del tuo account.",
+    };
+  }
+
+  if (pathname.startsWith("/profilo")) {
+    return {
+      label: "Profilo",
+      helper: "Qui gestisci presenza, dati e stato del tuo account.",
+    };
+  }
+
+  if (pathname.startsWith("/scopri")) {
+    return {
+      label: "Scopri",
+      helper: "Qui esplori i profili disponibili nel flusso reale di discovery.",
+    };
+  }
+
+  if (pathname.startsWith("/premium")) {
+    return {
+      label: "Premium",
+      helper:
+        tier === "premium" || tier === "super" || tier === "admin"
+          ? "Qui verifichi il valore del tuo livello attuale, senza attivazioni inutili."
+          : "Qui capisci se e quando ha senso sbloccare il livello premium.",
+    };
+  }
+
+  if (pathname.startsWith("/billing")) {
+    return {
+      label: "Billing",
+      helper: "Qui verifichi lo stato del piano e il percorso corretto per il tuo account.",
+    };
+  }
+
+  if (pathname.startsWith("/quantum")) {
+    return {
+      label: "Quantum",
+      helper: "Qui vivi l’area avanzata disponibile solo per i livelli abilitati.",
+    };
+  }
+
+  if (pathname.startsWith("/admin")) {
+    return {
+      label: "Admin",
+      helper: "Qui sono disponibili i controlli di gestione riservati agli account autorizzati.",
+    };
+  }
+
+  if (pathname.startsWith("/attiva-premium")) {
+    return {
+      label: "Attivazione Premium",
+      helper: "Qui entri nel flusso manuale di attivazione, se il tuo account ne ha davvero bisogno.",
+    };
+  }
+
+  if (pathname.startsWith("/checkout")) {
+    return {
+      label: "Checkout",
+      helper: "Qui si apre il passaggio tecnico di pagamento, solo se il flusso commerciale è attivo.",
+    };
+  }
+
+  if (
+    pathname.startsWith("/privacy") ||
+    pathname.startsWith("/cookie") ||
+    pathname.startsWith("/terms") ||
+    pathname.startsWith("/refunds")
+  ) {
+    return {
+      label: "Area legale",
+      helper: "Qui trovi le informazioni legali e i contatti pubblici del servizio.",
+    };
+  }
+
+  return {
+    label: "Sezione",
+    helper: "Sei in un punto del sito attivo, ma fuori dai percorsi principali.",
+  };
+}
+
 function ShellLink({ to, children }) {
   return (
     <NavLink
@@ -85,6 +179,8 @@ function Badge({ children, tone = "neutral" }) {
 
 export default function AppShell({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [loading, setLoading] = useState(true);
   const [tier, setTier] = useState("free");
   const [isAuthed, setIsAuthed] = useState(false);
@@ -126,12 +222,16 @@ export default function AppShell({ children }) {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [location.pathname]);
 
   const displayName = useMemo(() => getDisplayName(profile, user), [profile, user]);
   const visibleEmail = useMemo(() => getVisibleEmail(profile, user), [profile, user]);
   const accountState = useMemo(() => getAccountState(profile), [profile]);
   const tierMeta = useMemo(() => getTierMeta(tier), [tier]);
+  const currentSection = useMemo(
+    () => getCurrentSection(location.pathname, isAuthed, tier),
+    [location.pathname, isAuthed, tier]
+  );
 
   const showAdminLink = tier === "admin";
   const content = children ?? <Outlet />;
@@ -156,13 +256,25 @@ export default function AppShell({ children }) {
             <div style={brandColStyle}>
               <div style={brandTitleStyle}>LoveMatch360</div>
 
-              {!loading && isAuthed ? (
+              {!loading && (
                 <div style={badgeRowStyle}>
                   <Badge tone={tierMeta.tone}>{tierMeta.label}</Badge>
-                  <Badge tone={accountState.tone}>{accountState.label}</Badge>
-                  <Badge tone="neutral">{tierMeta.accessLabel}</Badge>
+                  {isAuthed ? (
+                    <>
+                      <Badge tone={accountState.tone}>{accountState.label}</Badge>
+                      <Badge tone="neutral">{tierMeta.accessLabel}</Badge>
+                    </>
+                  ) : (
+                    <Badge tone="neutral">Accesso ospite</Badge>
+                  )}
                 </div>
-              ) : null}
+              )}
+            </div>
+
+            <div style={identityCardStyle}>
+              <div style={identityCardLabelStyle}>Dove sei</div>
+              <div style={identityNameStyle}>{currentSection.label}</div>
+              <div style={identityEmailStyle}>{currentSection.helper}</div>
             </div>
 
             {!loading && isAuthed ? (
@@ -174,19 +286,26 @@ export default function AppShell({ children }) {
             ) : null}
           </div>
 
-          {!loading && isAuthed ? (
-            <div style={bottomRowStyle}>
-              <nav aria-label="Navigazione principale" style={navStyle}>
-                <ShellLink to="/">Home</ShellLink>
-                <ShellLink to="/premium">Premium</ShellLink>
-                <ShellLink to="/billing">Billing</ShellLink>
-                <ShellLink to="/quantum">Quantum</ShellLink>
-                <ShellLink to="/scopri">Scopri</ShellLink>
-                <ShellLink to="/profilo">Profilo</ShellLink>
-                {showAdminLink ? <ShellLink to="/admin">Admin</ShellLink> : null}
-              </nav>
+          <div style={bottomRowStyle}>
+            <nav aria-label="Navigazione principale" style={navStyle}>
+              <ShellLink to="/">Home</ShellLink>
+              <ShellLink to="/premium">Premium</ShellLink>
 
-              <div style={actionsStyle}>
+              {isAuthed ? (
+                <>
+                  <ShellLink to="/billing">Billing</ShellLink>
+                  <ShellLink to="/quantum">Quantum</ShellLink>
+                  <ShellLink to="/scopri">Scopri</ShellLink>
+                  <ShellLink to="/profilo">Profilo</ShellLink>
+                  {showAdminLink ? <ShellLink to="/admin">Admin</ShellLink> : null}
+                </>
+              ) : (
+                <ShellLink to="/login">Accedi</ShellLink>
+              )}
+            </nav>
+
+            <div style={actionsStyle}>
+              {isAuthed ? (
                 <button
                   type="button"
                   style={logoutButtonStyle}
@@ -195,9 +314,17 @@ export default function AppShell({ children }) {
                 >
                   {isSigningOut ? "Uscita..." : "Esci"}
                 </button>
-              </div>
+              ) : (
+                <button
+                  type="button"
+                  style={logoutButtonStyle}
+                  onClick={() => navigate("/login")}
+                >
+                  Accedi
+                </button>
+              )}
             </div>
-          ) : null}
+          </div>
         </div>
       </header>
 
