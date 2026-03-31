@@ -1,0 +1,401 @@
+import React from "react";
+
+const MAX_PHOTOS = 5;
+
+export default function ProfilePhotoGallery({
+  photos = [],
+  onSetPrimary,
+  onRemove,
+  onAdd,
+  disabled = false,
+}) {
+  const normalizedPhotos = Array.isArray(photos) ? photos.slice(0, MAX_PHOTOS) : [];
+  const primaryPhoto =
+    normalizedPhotos.find((photo) => photo?.isPrimary) || normalizedPhotos[0] || null;
+
+  const secondaryPhotos = normalizedPhotos
+    .filter((photo) => primaryPhoto && photo.id !== primaryPhoto.id)
+    .slice(0, MAX_PHOTOS - 1);
+
+  const emptySlots = Math.max(0, MAX_PHOTOS - normalizedPhotos.length);
+
+  return (
+    <section style={sectionStyle} aria-labelledby="profile-gallery-title">
+      <div style={headerRowStyle}>
+        <div>
+          <h3 id="profile-gallery-title" style={titleStyle}>
+            Foto profilo
+          </h3>
+          <p style={subtitleStyle}>
+            Aggiungi fino a 5 foto. Una foto principale al centro, le altre come supporto visivo.
+          </p>
+        </div>
+
+        <div style={counterBadgeStyle}>
+          {normalizedPhotos.length}/{MAX_PHOTOS}
+        </div>
+      </div>
+
+      <div style={mainGridStyle}>
+        <div style={heroWrapStyle}>
+          {primaryPhoto ? (
+            <div style={heroCardStyle}>
+              <img
+                src={primaryPhoto.url}
+                alt={primaryPhoto.alt || "Foto principale del profilo"}
+                style={heroImageStyle}
+              />
+
+              <div style={heroOverlayStyle}>
+                <span style={primaryBadgeStyle}>Principale</span>
+
+                <div style={heroActionsStyle}>
+                  <button
+                    type="button"
+                    style={{
+                      ...overlayButtonStyle,
+                      ...(disabled ? disabledButtonStyle : null),
+                    }}
+                    onClick={() => onRemove?.(primaryPhoto.id)}
+                    disabled={disabled}
+                  >
+                    Rimuovi
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              style={{
+                ...heroEmptyStyle,
+                ...(disabled ? disabledButtonStyle : null),
+              }}
+              onClick={() => onAdd?.()}
+              disabled={disabled}
+            >
+              <span style={emptyPlusStyle}>＋</span>
+              <span style={emptyTitleStyle}>Aggiungi la tua foto principale</span>
+              <span style={emptyTextStyle}>
+                È la prima immagine che racconta chi sei.
+              </span>
+            </button>
+          )}
+        </div>
+
+        <div style={thumbsWrapStyle}>
+          {secondaryPhotos.map((photo, index) => (
+            <div key={photo.id || `${photo.url}-${index}`} style={thumbCardStyle}>
+              <button
+                type="button"
+                style={thumbImageButtonStyle}
+                onClick={() => onSetPrimary?.(photo.id)}
+                disabled={disabled}
+                aria-label="Imposta come foto principale"
+              >
+                <img
+                  src={photo.url}
+                  alt={photo.alt || `Foto secondaria ${index + 1}`}
+                  style={thumbImageStyle}
+                />
+              </button>
+
+              <div style={thumbMetaStyle}>
+                <button
+                  type="button"
+                  style={{
+                    ...thumbActionStyle,
+                    ...(disabled ? disabledButtonStyle : null),
+                  }}
+                  onClick={() => onSetPrimary?.(photo.id)}
+                  disabled={disabled}
+                >
+                  Metti al centro
+                </button>
+
+                <button
+                  type="button"
+                  style={{
+                    ...thumbDangerStyle,
+                    ...(disabled ? disabledButtonStyle : null),
+                  }}
+                  onClick={() => onRemove?.(photo.id)}
+                  disabled={disabled}
+                >
+                  Rimuovi
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {Array.from({ length: emptySlots }).map((_, index) => (
+            <button
+              key={`empty-slot-${index}`}
+              type="button"
+              style={{
+                ...thumbEmptyStyle,
+                ...(disabled ? disabledButtonStyle : null),
+              }}
+              onClick={() => onAdd?.()}
+              disabled={disabled}
+            >
+              <span style={thumbEmptyPlusStyle}>＋</span>
+              <span style={thumbEmptyLabelStyle}>Aggiungi</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p style={footerNoteStyle}>
+        Questa galleria è disponibile anche per il profilo base. Premium non cambia il diritto di avere una presenza bella:
+        semmai la rende più visibile.
+      </p>
+    </section>
+  );
+}
+
+const sectionStyle = {
+  marginTop: "1.5rem",
+  padding: "1.25rem",
+  borderRadius: "20px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.03)",
+};
+
+const headerRowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: "1rem",
+  flexWrap: "wrap",
+};
+
+const titleStyle = {
+  margin: 0,
+  fontSize: "1.2rem",
+  color: "#fff",
+};
+
+const subtitleStyle = {
+  margin: "0.45rem 0 0",
+  color: "rgba(255,255,255,0.72)",
+  lineHeight: 1.6,
+  maxWidth: "62ch",
+};
+
+const counterBadgeStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: 34,
+  minWidth: 54,
+  padding: "0 12px",
+  borderRadius: 999,
+  background: "rgba(240,143,192,0.14)",
+  border: "1px solid rgba(240,143,192,0.25)",
+  color: "#ffd7ea",
+  fontWeight: 800,
+};
+
+const mainGridStyle = {
+  marginTop: "1rem",
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1.6fr) minmax(260px, 1fr)",
+  gap: "1rem",
+};
+
+const heroWrapStyle = {
+  minWidth: 0,
+};
+
+const heroCardStyle = {
+  position: "relative",
+  minHeight: 420,
+  borderRadius: "22px",
+  overflow: "hidden",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.04)",
+  boxShadow: "0 18px 40px rgba(0,0,0,0.24)",
+};
+
+const heroImageStyle = {
+  width: "100%",
+  height: "100%",
+  minHeight: 420,
+  objectFit: "cover",
+  display: "block",
+  transform: "scale(1.02)",
+};
+
+const heroOverlayStyle = {
+  position: "absolute",
+  inset: 0,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  padding: "14px",
+  background:
+    "linear-gradient(180deg, rgba(5,7,11,0.22) 0%, rgba(5,7,11,0.02) 35%, rgba(5,7,11,0.38) 100%)",
+};
+
+const primaryBadgeStyle = {
+  alignSelf: "flex-start",
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: 34,
+  padding: "0 12px",
+  borderRadius: 999,
+  background: "rgba(255,255,255,0.16)",
+  border: "1px solid rgba(255,255,255,0.20)",
+  color: "#ffffff",
+  fontWeight: 800,
+  backdropFilter: "blur(10px)",
+};
+
+const heroActionsStyle = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: "10px",
+};
+
+const overlayButtonStyle = {
+  minHeight: 40,
+  padding: "0 14px",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.18)",
+  background: "rgba(5,7,11,0.42)",
+  color: "#ffffff",
+  fontWeight: 700,
+  cursor: "pointer",
+  backdropFilter: "blur(10px)",
+};
+
+const heroEmptyStyle = {
+  width: "100%",
+  minHeight: 420,
+  display: "grid",
+  placeItems: "center",
+  textAlign: "center",
+  padding: "24px",
+  borderRadius: "22px",
+  border: "1px dashed rgba(240,143,192,0.35)",
+  background: "rgba(255,255,255,0.03)",
+  color: "#fff",
+  cursor: "pointer",
+};
+
+const emptyPlusStyle = {
+  display: "block",
+  fontSize: "3rem",
+  lineHeight: 1,
+  color: "#f08fc0",
+};
+
+const emptyTitleStyle = {
+  display: "block",
+  marginTop: "12px",
+  fontSize: "1.1rem",
+  fontWeight: 800,
+};
+
+const emptyTextStyle = {
+  display: "block",
+  marginTop: "8px",
+  color: "rgba(255,255,255,0.72)",
+  lineHeight: 1.6,
+};
+
+const thumbsWrapStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "12px",
+  alignContent: "start",
+};
+
+const thumbCardStyle = {
+  borderRadius: "16px",
+  overflow: "hidden",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.03)",
+};
+
+const thumbImageButtonStyle = {
+  width: "100%",
+  border: "none",
+  padding: 0,
+  background: "transparent",
+  cursor: "pointer",
+  display: "block",
+};
+
+const thumbImageStyle = {
+  width: "100%",
+  aspectRatio: "1 / 1",
+  objectFit: "cover",
+  display: "block",
+};
+
+const thumbMetaStyle = {
+  display: "grid",
+  gap: "8px",
+  padding: "10px",
+};
+
+const thumbActionStyle = {
+  minHeight: 38,
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.10)",
+  background: "rgba(255,255,255,0.06)",
+  color: "#fff",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const thumbDangerStyle = {
+  minHeight: 38,
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.10)",
+  background: "rgba(240,143,192,0.14)",
+  color: "#ffd7ea",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const thumbEmptyStyle = {
+  minHeight: 170,
+  borderRadius: "16px",
+  border: "1px dashed rgba(255,255,255,0.18)",
+  background: "rgba(255,255,255,0.02)",
+  color: "#fff",
+  display: "grid",
+  placeItems: "center",
+  textAlign: "center",
+  cursor: "pointer",
+  padding: "12px",
+};
+
+const thumbEmptyPlusStyle = {
+  display: "block",
+  fontSize: "2rem",
+  lineHeight: 1,
+  color: "#f08fc0",
+};
+
+const thumbEmptyLabelStyle = {
+  display: "block",
+  marginTop: "8px",
+  fontWeight: 800,
+  color: "rgba(255,255,255,0.84)",
+};
+
+const footerNoteStyle = {
+  marginTop: "1rem",
+  color: "rgba(255,255,255,0.64)",
+  lineHeight: 1.6,
+  fontSize: "0.95rem",
+};
+
+const disabledButtonStyle = {
+  opacity: 0.6,
+  cursor: "not-allowed",
+};

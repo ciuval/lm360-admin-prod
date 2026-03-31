@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import PremiumStatusBox from "../components/PremiumStatusBox";
 import StoricoAbbonamenti from "../components/StoricoAbbonamenti";
+import ProfilePhotoGallery from "../components/profile/ProfilePhotoGallery";
 
 function normalizeRole(value) {
   return String(value || "").trim().toLowerCase();
@@ -40,6 +41,7 @@ export default function ProfilePage() {
   const [interests, setInterests] = useState("");
   const [photo, setPhoto] = useState("");
   const [preview, setPreview] = useState("");
+  const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
     let alive = true;
@@ -67,6 +69,7 @@ export default function ProfilePage() {
           setInterests("");
           setPhoto("");
           setPreview("");
+          setPhotos([]);
           return;
         }
 
@@ -104,6 +107,8 @@ export default function ProfilePage() {
           status_account: "attivo",
         };
 
+        const initialPhoto = safeProfile.foto_url || safeProfile.avatar_url || "";
+
         setProfilo(safeProfile);
         setName(safeProfile.nome || "");
         setBio(safeProfile.bio || "");
@@ -112,8 +117,20 @@ export default function ProfilePage() {
             ? safeProfile.interessi.join(", ")
             : safeProfile.interessi || ""
         );
-        setPhoto(safeProfile.foto_url || safeProfile.avatar_url || "");
-        setPreview(safeProfile.foto_url || safeProfile.avatar_url || "");
+        setPhoto(initialPhoto);
+        setPreview(initialPhoto);
+        setPhotos(
+          initialPhoto
+            ? [
+                {
+                  id: "main",
+                  url: initialPhoto,
+                  isPrimary: true,
+                  alt: "Foto principale del profilo",
+                },
+              ]
+            : []
+        );
       } catch (error) {
         console.error("ProfilePage fetch error:", error);
         if (!alive) return;
@@ -132,6 +149,29 @@ export default function ProfilePage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!photo) {
+      setPhotos((prev) => prev.filter((item) => item.id !== "main"));
+      return;
+    }
+
+    setPhotos((prev) => {
+      const withoutMain = prev.filter((item) => item.id !== "main");
+      return [
+        {
+          id: "main",
+          url: photo,
+          isPrimary: true,
+          alt: "Foto principale del profilo",
+        },
+        ...withoutMain.slice(0, 4).map((item) => ({
+          ...item,
+          isPrimary: false,
+        })),
+      ];
+    });
+  }, [photo]);
+
   const isPremium = useMemo(() => {
     return hasCommercialPremium(profilo);
   }, [profilo]);
@@ -143,11 +183,92 @@ export default function ProfilePage() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const value = String(reader.result || "");
+
+      setPhotos((prev) => {
+        const withoutSame = prev.filter((item) => item.url !== value);
+        const othersWithoutMain = withoutSame.filter((item) => item.id !== "main");
+
+        const next = [
+          {
+            id: "main",
+            url: value,
+            isPrimary: true,
+            alt: "Foto principale del profilo",
+          },
+          ...othersWithoutMain.slice(0, 4).map((item) => ({
+            ...item,
+            isPrimary: false,
+          })),
+        ];
+
+        return next.slice(0, 5);
+      });
+
       setPhoto(value);
       setPreview(value);
       toast.success("📸 Foto caricata");
     };
+
     reader.readAsDataURL(file);
+  };
+
+  const handleAddPhoto = () => {
+    toast("Per ora usa il campo upload qui sotto: collegheremo il multi-upload reale nel prossimo passo.");
+  };
+
+  const handleSetPrimaryPhoto = (photoId) => {
+    setPhotos((prev) => {
+      const selected = prev.find((item) => item.id === photoId);
+      if (!selected) return prev;
+
+      const others = prev.filter((item) => item.id !== photoId);
+
+      const next = [
+        {
+          ...selected,
+          id: "main",
+          isPrimary: true,
+          alt: selected.alt || "Foto principale del profilo",
+        },
+        ...others
+          .filter((item) => item.id !== "main")
+          .slice(0, 4)
+          .map((item, index) => ({
+            ...item,
+            id: item.id === "main" ? `photo-${Date.now()}-${index}` : item.id,
+            isPrimary: false,
+          })),
+      ];
+
+      const primary = next[0];
+      setPhoto(primary.url);
+      setPreview(primary.url);
+
+      return next;
+    });
+  };
+
+  const handleRemovePhoto = (photoId) => {
+    setPhotos((prev) => {
+      const next = prev.filter((item) => item.id !== photoId);
+
+      if (next.length === 0) {
+        setPhoto("");
+        setPreview("");
+        return [];
+      }
+
+      const normalized = next.map((item, index) => ({
+        ...item,
+        id: index === 0 ? "main" : item.id,
+        isPrimary: index === 0,
+      }));
+
+      setPhoto(normalized[0].url);
+      setPreview(normalized[0].url);
+
+      return normalized.slice(0, 5);
+    });
   };
 
   const handleSave = async () => {
@@ -160,12 +281,14 @@ export default function ProfilePage() {
     try {
       setSaving(true);
 
+      const primaryPhoto = photos.find((item) => item.isPrimary)?.url || photo || null;
+
       const payload = {
         id: userId,
         nome: name.trim(),
         bio: bio.trim(),
         interessi: interests.trim(),
-        foto_url: photo || null,
+        foto_url: primaryPhoto,
         updated_at: new Date().toISOString(),
       };
 
@@ -189,6 +312,7 @@ export default function ProfilePage() {
       };
 
       setProfilo(nextProfile);
+      setPhoto(nextProfile.foto_url || "");
       setPreview(nextProfile.foto_url || "");
       toast.success("✅ Profilo aggiornato!");
     } catch (error) {
@@ -255,6 +379,14 @@ export default function ProfilePage() {
           💎 Diventa Premium
         </button>
       )}
+
+      <ProfilePhotoGallery
+        photos={photos}
+        onSetPrimary={handleSetPrimaryPhoto}
+        onRemove={handleRemovePhoto}
+        onAdd={handleAddPhoto}
+        disabled={loading || saving}
+      />
 
       <input
         type="text"
