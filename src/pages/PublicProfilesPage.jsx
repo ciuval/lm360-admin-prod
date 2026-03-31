@@ -1,135 +1,244 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 
+function normalizeRole(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isFutureDate(value) {
+  if (!value) return false;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) && time > Date.now();
+}
+
+function hasPremiumAccess(profile) {
+  const role = normalizeRole(profile?.ruolo);
+
+  return (
+    Boolean(profile?.premium) ||
+    role === "premium" ||
+    role === "super" ||
+    isFutureDate(profile?.premium_fine)
+  );
+}
+
+function toInterestArray(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
 export default function PublicProfilesPage() {
   const [profili, setProfili] = useState([]);
+  const [myProfile, setMyProfile] = useState(null);
   const [userId, setUserId] = useState(null);
   const [likes, setLikes] = useState([]);
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [filtroCittà, setFiltroCittà] = useState("");
   const [filtroInteresse, setFiltroInteresse] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchAll = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const id = user?.id || null;
-      setUserId(id);
+    let alive = true;
 
-      const { data: profiliData } = await supabase
-        .from("profili")
-        .select("id, nome, eta, bio, foto_url, città, interessi, premium")
-        .eq("profilo_pubblico", true)
-        .eq("status_account", "attivo")
-        .order("nome", { ascending: true });
+    async function fetchAll() {
+      try {
+        setLoading(true);
 
-      if (id) {
-        const { data: likeData } = await supabase
-          .from("likes")
-          .select("profilo_piaciuto")
-          .eq("utente_id", id);
-        setLikes(likeData.map((l) => l.profilo_piaciuto));
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-        const { data: matchData } = await supabase
-          .from("match_scores")
-          .select("matched_user_id")
-          .eq("user_id", id)
-          .eq("score", 100);
-        setMatches(matchData.map((m) => m.matched_user_id));
+        const currentUserId = user?.id || null;
+        if (!alive) return;
+
+        setUserId(currentUserId);
+
+        if (currentUserId) {
+          const { data: myProfileData } = await supabase
+            .from("profili")
+            .select("id, nome, ruolo, premium, premium_fine, status_account")
+            .eq("id", currentUserId)
+            .maybeSingle();
+
+          if (!alive) return;
+          setMyProfile(myProfileData || null);
+
+          const { data: likeData } = await supabase
+            .from("likes")
+            .select("user_to")
+            .eq("user_from", currentUserId);
+
+          if (!alive) return;
+          setLikes((likeData || []).map((row) => row.user_to));
+
+          const { data: matchData } = await supabase
+            .from("match_scores")
+            .select("user_a, user_b, score")
+            .or(`user_a.eq.${currentUserId},user_b.eq.${currentUserId}`)
+            .eq("score", 100);
+
+          if (!alive) return;
+
+          const matchedIds = (matchData || []).map((row) =>
+            row.user_a === currentUserId ? row.user_b : row.user_a
+          );
+
+          setMatches(matchedIds);
+        }
+
+        const { data: profiliData, error: profiliError } = await supabase
+          .from("profili")
+          .select("id, nome, bio, foto_url, avatar_url, interessi, premium, premium_fine, ruolo, status_account")
+          .eq("status_account", "attivo")
+          .order("nome", { ascending: true });
+
+        if (!alive) return;
+
+        if (profiliError) {
+          console.error("Errore caricamento profili:", profiliError);
+          toast.error("Errore nel caricamento dei profili.");
+          setProfili([]);
+          return;
+        }
+
+        const pubblici = (profiliData || []).filter((profilo) => profilo.id !== currentUserId);
+        setProfili(pubblici);
+      } catch (error) {
+        console.error("Errore fetchAll PublicProfilesPage:", error);
+        if (!alive) return;
+        toast.error("Errore temporaneo nella sezione scopri.");
+        setProfili([]);
+      } finally {
+        if (alive) {
+          setLoading(false);
+        }
       }
-
-      if (profiliData) setProfili(profiliData);
-      setLoading(false);
-    };
+    }
 
     fetchAll();
+
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  const isUserPremium = userId && profili.find(p => p.id === userId)?.premium;
-
-  const registraVisita = async (profiloVisitatoId) => {
-    if (!userId || userId === profiloVisitatoId) return;
-    await supabase.from("visite").insert([
-      { visitatore_id: userId, profilo_visitato: profiloVisitatoId },
-    ]);
-  };
+  const isUserPremium = useMemo(() => {
+    return hasPremiumAccess(myProfile);
+  }, [myProfile]);
 
   const handleLike = async (profiloId) => {
     if (!userId || userId === profiloId) return;
     if (likes.includes(profiloId)) return;
 
     const { error } = await supabase.from("likes").insert([
-      { utente_id: userId, profilo_piaciuto: profiloId },
+      {
+        user_from: userId,
+        user_to: profiloId,
+      },
     ]);
 
-    if (!error) {
-      setLikes((prev) => [...prev, profiloId]);
-
-      const { data: likeBack } = await supabase
-        .from("likes")
-        .select("*")
-        .eq("utente_id", profiloId)
-        .eq("profilo_piaciuto", userId)
-        .maybeSingle();
-
-      if (likeBack && !matches.includes(profiloId)) {
-        await supabase.from("match_scores").upsert([
-          { user_id: userId, matched_user_id: profiloId, score: 100 },
-          { user_id: profiloId, matched_user_id: userId, score: 100 },
-        ], { onConflict: ["user_id", "matched_user_id"] });
-
-        const audio = new Audio("/notify.mp3");
-        audio.play();
-        toast.success("💘 Match reciproco trovato!", { icon: "💌" });
-
-        setMatches((prev) => [...prev, profiloId]);
-      }
+    if (error) {
+      console.error("Errore like:", error);
+      toast.error("Impossibile salvare il like.");
+      return;
     }
+
+    setLikes((prev) => [...prev, profiloId]);
+
+    const { data: likeBack } = await supabase
+      .from("likes")
+      .select("user_from, user_to")
+      .eq("user_from", profiloId)
+      .eq("user_to", userId)
+      .maybeSingle();
+
+    if (!likeBack || matches.includes(profiloId)) return;
+
+    const pair = [userId, profiloId].sort();
+
+    const { error: matchError } = await supabase.from("match_scores").upsert(
+      [
+        {
+          user_a: pair[0],
+          user_b: pair[1],
+          score: 100,
+          matched_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ],
+      { onConflict: "user_a,user_b" }
+    );
+
+    if (matchError) {
+      console.error("Errore match:", matchError);
+      toast.error("Like salvato, ma il match non è stato registrato.");
+      return;
+    }
+
+    toast.success("💘 Match reciproco trovato!");
+    setMatches((prev) => [...prev, profiloId]);
   };
 
-  const cittàUniche = [...new Set(profili.map((p) => p.città).filter(Boolean))];
-  const interessiUnici = [...new Set(profili.flatMap((p) =>
-    typeof p.interessi === "string"
-      ? p.interessi.split(",").map((i) => i.trim())
-      : Array.isArray(p.interessi)
-      ? p.interessi
-      : []
-  ))];
+  const interessiUnici = useMemo(() => {
+    return [...new Set(profili.flatMap((profilo) => toInterestArray(profilo.interessi)))];
+  }, [profili]);
 
-  const profiliFiltrati = profili.filter((p) => {
-    const testo = (p.nome + " " + p.bio).toLowerCase();
-    const includeTesto = testo.includes(query.trim().toLowerCase());
-    const matchCittà = !filtroCittà || p.città === filtroCittà;
-    const interessiUtente = typeof p.interessi === "string"
-      ? p.interessi.split(",").map((i) => i.trim())
-      : Array.isArray(p.interessi)
-      ? p.interessi
-      : [];
-    const matchInteresse = !filtroInteresse || interessiUtente.includes(filtroInteresse);
-    return includeTesto && matchCittà && matchInteresse;
-  });
+  const profiliFiltrati = useMemo(() => {
+    return profili.filter((profilo) => {
+      const testo = `${profilo.nome || ""} ${profilo.bio || ""}`.toLowerCase();
+      const includeTesto = testo.includes(query.trim().toLowerCase());
+
+      const interessiProfilo = toInterestArray(profilo.interessi);
+      const matchInteresse =
+        !filtroInteresse || interessiProfilo.includes(filtroInteresse);
+
+      return includeTesto && matchInteresse;
+    });
+  }, [profili, query, filtroInteresse]);
 
   return (
     <div style={containerStyle}>
       <style>{`
-        @keyframes glow { from { text-shadow: 0 0 5px #f08fc0; } to { text-shadow: 0 0 15px #f08fc0; } }
+        @keyframes glow {
+          from { text-shadow: 0 0 5px #f08fc0; }
+          to { text-shadow: 0 0 15px #f08fc0; }
+        }
+
         @media (max-width: 600px) {
-          .responsive-item { flex-direction: column !important; align-items: flex-start !important; }
-          .responsive-text { font-size: 1rem !important; }
+          .responsive-item {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+
+          .responsive-text {
+            font-size: 1rem !important;
+          }
         }
       `}</style>
+
       <Toaster position="top-right" />
       <h2 style={titleStyle}>🌐 Profili Pubblici</h2>
 
       {!isUserPremium && (
         <div style={promoBox}>
-          <p>🔒 Attiva l'accesso Premium per usare i filtri avanzati!</p>
-          <button style={promoBtn} onClick={() => navigate("/paywall")}>🌟 Passa a Premium</button>
+          <p>🔒 Attiva l'accesso Premium per usare i filtri avanzati.</p>
+          <button style={promoBtn} onClick={() => navigate("/premium")}>
+            🌟 Passa a Premium
+          </button>
         </div>
       )}
 
@@ -143,28 +252,12 @@ export default function PublicProfilesPage() {
 
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
         <select
-          value={filtroCittà}
-          onChange={(e) => {
-            if (!isUserPremium) return toast("🔐 Solo per utenti premium");
-            setFiltroCittà(e.target.value);
-          }}
-          disabled={!isUserPremium}
-          style={{
-            ...dropdownStyle,
-            opacity: !isUserPremium ? 0.5 : 1,
-            cursor: !isUserPremium ? "not-allowed" : "pointer",
-          }}
-        >
-          <option value="">Tutte le città</option>
-          {cittàUniche.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-
-        <select
           value={filtroInteresse}
           onChange={(e) => {
-            if (!isUserPremium) return toast("🔐 Solo per utenti premium");
+            if (!isUserPremium) {
+              toast("🔐 Solo per utenti premium");
+              return;
+            }
             setFiltroInteresse(e.target.value);
           }}
           disabled={!isUserPremium}
@@ -175,8 +268,10 @@ export default function PublicProfilesPage() {
           }}
         >
           <option value="">Tutti gli interessi</option>
-          {interessiUnici.map((i) => (
-            <option key={i} value={i}>{i}</option>
+          {interessiUnici.map((interesse) => (
+            <option key={interesse} value={interesse}>
+              {interesse}
+            </option>
           ))}
         </select>
       </div>
@@ -187,70 +282,67 @@ export default function PublicProfilesPage() {
         <p>Nessun profilo corrisponde alla ricerca.</p>
       ) : (
         <ul style={listStyle}>
-          {profiliFiltrati.map((p, index) => {
-            const isMatch = matches.includes(p.id);
+          {profiliFiltrati.map((profilo, index) => {
+            const isMatch = matches.includes(profilo.id);
+            const interessiProfilo = toInterestArray(profilo.interessi);
+            const premiumLabel = hasPremiumAccess(profilo);
+
             return (
               <motion.li
-                key={p.id}
+                key={profilo.id}
                 className="responsive-item"
                 style={itemStyle}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.05 * index }}
               >
-                <Link to={`/profilo/${p.id}`} style={linkStyle} onClick={() => registraVisita(p.id)}>
+                <Link to={`/profilo/${profilo.id}`} style={linkStyle}>
                   <img
-                    src={p.foto_url || "/default-avatar.png"}
-                    alt={`Foto di ${p.nome}`}
+                    src={profilo.foto_url || profilo.avatar_url || "/default-avatar.png"}
+                    alt={`Foto di ${profilo.nome}`}
                     style={avatarStyle}
                   />
                   <div>
                     <strong className="responsive-text" style={{ fontSize: "1.2rem" }}>
-                      {p.nome}, {p.eta} {p.premium && <span style={badgePremium}>🌟 Premium</span>} {isMatch && <span style={{ animation: "glow 1s infinite alternate" }}>💘</span>}
+                      {profilo.nome || "Profilo"}
+                      {premiumLabel && <span style={badgePremium}>🌟 Premium</span>}
+                      {isMatch && (
+                        <span style={{ animation: "glow 1s infinite alternate", marginLeft: "0.5rem" }}>
+                          💘
+                        </span>
+                      )}
                     </strong>
-                    <p className="responsive-text">{p.bio?.slice(0, 80)}{p.bio?.length > 80 ? "..." : ""}</p>
-                    <small>📍 {p.città} · 💡 {Array.isArray(p.interessi) ? p.interessi.join(", ") : p.interessi}</small>
+
+                    <p className="responsive-text">
+                      {profilo.bio?.slice(0, 80)}
+                      {profilo.bio?.length > 80 ? "..." : ""}
+                    </p>
+
+                    <small>
+                      💡 {interessiProfilo.length ? interessiProfilo.join(", ") : "Interessi non disponibili"}
+                    </small>
                   </div>
                 </Link>
 
-                {userId && userId !== p.id && (
-                  <>
-                    <button
-                      onClick={() => handleLike(p.id)}
-                      disabled={likes.includes(p.id)}
-                      style={{
-                        marginTop: "0.5rem",
-                        backgroundColor: likes.includes(p.id) ? "#555" : "#f08fc0",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        padding: "0.6rem 1.4rem",
-                        cursor: likes.includes(p.id) ? "not-allowed" : "pointer",
-                        marginRight: "0.5rem",
-                        fontWeight: "bold",
-                        fontSize: "1rem"
-                      }}
-                    >
-                      💗 {likes.includes(p.id) ? "Già messo" : "Mi Piace"}
-                    </button>
-
-                    {isMatch && (
-                      <Link
-                        to={`/chat/${p.id}`}
-                        style={{
-                          backgroundColor: "#1e88e5",
-                          color: "#fff",
-                          padding: "0.6rem 1.4rem",
-                          borderRadius: "6px",
-                          textDecoration: "none",
-                          fontWeight: "bold",
-                          fontSize: "1rem"
-                        }}
-                      >
-                        💬 Chatta ora
-                      </Link>
-                    )}
-                  </>
+                {userId && userId !== profilo.id && (
+                  <button
+                    onClick={() => handleLike(profilo.id)}
+                    disabled={likes.includes(profilo.id)}
+                    style={{
+                      marginTop: "0.5rem",
+                      backgroundColor: likes.includes(profilo.id) ? "#555" : "#f08fc0",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "0.6rem 1.4rem",
+                      cursor: likes.includes(profilo.id) ? "not-allowed" : "pointer",
+                      marginRight: "0.5rem",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                    }}
+                  >
+                    💗 {likes.includes(profilo.id) ? "Già messo" : "Mi Piace"}
+                  </button>
                 )}
               </motion.li>
             );
@@ -261,7 +353,6 @@ export default function PublicProfilesPage() {
   );
 }
 
-// STILI
 const containerStyle = {
   padding: "2rem",
   backgroundColor: "#121212",
@@ -314,7 +405,7 @@ const promoBtn = {
   borderRadius: "6px",
   fontWeight: "bold",
   color: "#000",
-  cursor: "pointer"
+  cursor: "pointer",
 };
 
 const listStyle = {
@@ -359,6 +450,5 @@ const badgePremium = {
   padding: "2px 6px",
   fontSize: "0.75rem",
   marginLeft: "0.5rem",
-  fontWeight: "bold"
+  fontWeight: "bold",
 };
-
