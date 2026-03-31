@@ -73,6 +73,7 @@ export default function App() {
               <Route path="/premium" element={<Premium />} />
               <Route path="/profilo" element={<ProfilePage />} />
               <Route path="/profilo/:id" element={<ProfilePublicCard />} />
+              <Route path="/paywall" element={<Premium />} />
 
               {/* ======================================================
                   AUTH REQUIRED
