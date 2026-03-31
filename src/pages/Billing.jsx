@@ -1,23 +1,181 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loadCurrentAccountTier } from "../lib/accountTier";
 
-const mods = import.meta.glob(
-  ["./CheckoutStripe.jsx","./BillingPage.jsx","./StripePortal.jsx"],
-  { eager: true }
-);
+export default function BillingPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [tier, setTier] = useState("free");
+  const [isAuthed, setIsAuthed] = useState(false);
 
-const mod =
-  mods["./CheckoutStripe.jsx"] ||
-  mods["./BillingPage.jsx"] ||
-  mods["./StripePortal.jsx"] ||
-  Object.values(mods)[0];
+  useEffect(() => {
+    let alive = true;
 
-const Billing = (mod && mod.default) || function BillingFallback() {
+    async function run() {
+      try {
+        setLoading(true);
+        const result = await loadCurrentAccountTier();
+
+        if (!alive) return;
+
+        setTier(result?.tier || "free");
+        setIsAuthed(Boolean(result?.isAuthed));
+      } catch {
+        if (!alive) return;
+
+        setTier("free");
+        setIsAuthed(false);
+      } finally {
+        if (alive) {
+          setLoading(false);
+        }
+      }
+    }
+
+    run();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const hasPremiumAccess = useMemo(() => {
+    return tier === "premium" || tier === "super" || tier === "admin";
+  }, [tier]);
+
+  const title = useMemo(() => {
+    if (tier === "admin") return "Controllo account attivo";
+    if (tier === "super") return "Gestione piano Super";
+    if (tier === "premium") return "Gestione piano Premium";
+    return "Billing";
+  }, [tier]);
+
+  const description = useMemo(() => {
+    if (!isAuthed) {
+      return "Accedi per visualizzare lo stato del tuo account e le opzioni disponibili.";
+    }
+
+    if (tier === "admin") {
+      return "Il tuo account ha privilegi amministrativi. Da qui non è necessario acquistare un piano commerciale.";
+    }
+
+    if (tier === "super") {
+      return "Il tuo account ha già accesso al livello Super. Non è necessaria una nuova attivazione premium.";
+    }
+
+    if (tier === "premium") {
+      return "Il tuo account premium è già attivo. Puoi continuare a usare le funzionalità disponibili senza acquistare di nuovo.";
+    }
+
+    return "Accedi a funzionalità avanzate e gestisci il tuo piano dal flusso premium.";
+  }, [isAuthed, tier]);
+
+  const primaryLabel = useMemo(() => {
+    if (!isAuthed) return "Vai al login";
+    if (hasPremiumAccess) return "Vai al profilo";
+    return "Vai a Premium";
+  }, [isAuthed, hasPremiumAccess]);
+
+  const handlePrimaryAction = () => {
+    if (!isAuthed) {
+      navigate("/login");
+      return;
+    }
+
+    if (hasPremiumAccess) {
+      navigate("/profilo");
+      return;
+    }
+
+    navigate("/premium");
+  };
+
+  if (loading) {
+    return (
+      <section style={sectionStyle}>
+        <div style={cardStyle}>
+          <h1 style={titleStyle}>Billing</h1>
+          <p style={textStyle}>Caricamento stato account...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section style={{ padding: 24 }}>
-      <h1>Billing</h1>
-      <p>Pagina non disponibile in questa build.</p>
+    <section style={sectionStyle}>
+      <div style={cardStyle}>
+        <h1 style={titleStyle}>{title}</h1>
+        <p style={textStyle}>{description}</p>
+
+        <button type="button" style={buttonStyle} onClick={handlePrimaryAction}>
+          {primaryLabel}
+        </button>
+
+        {!isAuthed && (
+          <p style={noteStyle}>
+            Devi effettuare l’accesso per consultare o gestire il tuo stato account.
+          </p>
+        )}
+
+        {isAuthed && hasPremiumAccess && (
+          <p style={noteStyle}>
+            Il tuo account risulta già abilitato. Da qui non è prevista una nuova attivazione commerciale.
+          </p>
+        )}
+      </div>
     </section>
   );
+}
+
+const sectionStyle = {
+  minHeight: "60vh",
+  display: "grid",
+  placeItems: "center",
+  padding: "24px 16px",
 };
 
-export default Billing;
+const cardStyle = {
+  width: "100%",
+  maxWidth: "760px",
+  padding: "32px 24px",
+  borderRadius: "24px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "linear-gradient(180deg, rgba(28,28,34,0.96) 0%, rgba(16,16,22,0.96) 100%)",
+  boxShadow: "0 20px 50px rgba(0,0,0,0.28)",
+  textAlign: "center",
+};
+
+const titleStyle = {
+  margin: 0,
+  fontSize: "clamp(2rem, 4vw, 3rem)",
+  lineHeight: 1.05,
+  color: "#ffffff",
+};
+
+const textStyle = {
+  marginTop: "16px",
+  marginBottom: 0,
+  fontSize: "1.15rem",
+  lineHeight: 1.75,
+  color: "rgba(255,255,255,0.88)",
+};
+
+const buttonStyle = {
+  marginTop: "28px",
+  padding: "14px 24px",
+  minWidth: "220px",
+  border: "none",
+  borderRadius: "14px",
+  backgroundColor: "#e48abb",
+  color: "#111111",
+  fontSize: "1rem",
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
+const noteStyle = {
+  marginTop: "18px",
+  fontSize: "0.95rem",
+  lineHeight: 1.6,
+  color: "rgba(255,255,255,0.68)",
+};
