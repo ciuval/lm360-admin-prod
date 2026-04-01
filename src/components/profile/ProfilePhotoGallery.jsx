@@ -17,8 +17,6 @@ export default function ProfilePhotoGallery({
     .filter((photo) => primaryPhoto && photo.id !== primaryPhoto.id)
     .slice(0, MAX_PHOTOS - 1);
 
-  const emptySlots = Math.max(0, MAX_PHOTOS - normalizedPhotos.length);
-
   return (
     <section style={sectionStyle} aria-labelledby="profile-gallery-title">
       <div style={headerRowStyle}>
@@ -27,7 +25,7 @@ export default function ProfilePhotoGallery({
             Foto profilo
           </h3>
           <p style={subtitleStyle}>
-            Aggiungi fino a 5 foto. Una foto principale al centro, le altre come supporto visivo.
+            Le tue immagini devono parlare bene di te, senza rumore e senza spazi morti.
           </p>
         </div>
 
@@ -36,9 +34,9 @@ export default function ProfilePhotoGallery({
         </div>
       </div>
 
-      <div style={mainGridStyle}>
-        <div style={heroWrapStyle}>
-          {primaryPhoto ? (
+      {primaryPhoto ? (
+        <div style={mainGridStyle}>
+          <div style={heroWrapStyle}>
             <div style={heroCardStyle}>
               <img
                 src={primaryPhoto.url}
@@ -64,91 +62,79 @@ export default function ProfilePhotoGallery({
                 </div>
               </div>
             </div>
-          ) : (
-            <button
-              type="button"
-              style={{
-                ...heroEmptyStyle,
-                ...(disabled ? disabledButtonStyle : null),
-              }}
-              onClick={() => onAdd?.()}
-              disabled={disabled}
-            >
-              <span style={emptyPlusStyle}>＋</span>
-              <span style={emptyTitleStyle}>Aggiungi la tua foto principale</span>
-              <span style={emptyTextStyle}>
-                È la prima immagine che racconta chi sei.
-              </span>
-            </button>
-          )}
-        </div>
+          </div>
 
-        <div style={thumbsWrapStyle}>
-          {secondaryPhotos.map((photo, index) => (
-            <div key={photo.id || `${photo.url}-${index}`} style={thumbCardStyle}>
-              <button
-                type="button"
-                style={thumbImageButtonStyle}
-                onClick={() => onSetPrimary?.(photo.id)}
-                disabled={disabled}
-                aria-label="Imposta come foto principale"
-              >
-                <img
-                  src={photo.url}
-                  alt={photo.alt || `Foto secondaria ${index + 1}`}
-                  style={thumbImageStyle}
-                />
-              </button>
+          {secondaryPhotos.length > 0 ? (
+            <div style={thumbsWrapStyle}>
+              {secondaryPhotos.map((photo, index) => (
+                <div key={photo.id || `${photo.url}-${index}`} style={thumbCardStyle}>
+                  <button
+                    type="button"
+                    style={thumbImageButtonStyle}
+                    onClick={() => onSetPrimary?.(photo.id)}
+                    disabled={disabled}
+                    aria-label="Imposta come foto principale"
+                  >
+                    <img
+                      src={photo.url}
+                      alt={photo.alt || `Foto secondaria ${index + 1}`}
+                      style={thumbImageStyle}
+                    />
+                  </button>
 
-              <div style={thumbMetaStyle}>
-                <button
-                  type="button"
-                  style={{
-                    ...thumbActionStyle,
-                    ...(disabled ? disabledButtonStyle : null),
-                  }}
-                  onClick={() => onSetPrimary?.(photo.id)}
-                  disabled={disabled}
-                >
-                  Metti al centro
-                </button>
+                  <div style={thumbMetaStyle}>
+                    <button
+                      type="button"
+                      style={{
+                        ...thumbActionStyle,
+                        ...(disabled ? disabledButtonStyle : null),
+                      }}
+                      onClick={() => onSetPrimary?.(photo.id)}
+                      disabled={disabled}
+                    >
+                      Metti al centro
+                    </button>
 
-                <button
-                  type="button"
-                  style={{
-                    ...thumbDangerStyle,
-                    ...(disabled ? disabledButtonStyle : null),
-                  }}
-                  onClick={() => onRemove?.(photo.id)}
-                  disabled={disabled}
-                >
-                  Rimuovi
-                </button>
-              </div>
+                    <button
+                      type="button"
+                      style={{
+                        ...thumbDangerStyle,
+                        ...(disabled ? disabledButtonStyle : null),
+                      }}
+                      onClick={() => onRemove?.(photo.id)}
+                      disabled={disabled}
+                    >
+                      Rimuovi
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-
-          {Array.from({ length: emptySlots }).map((_, index) => (
-            <button
-              key={`empty-slot-${index}`}
-              type="button"
-              style={{
-                ...thumbEmptyStyle,
-                ...(disabled ? disabledButtonStyle : null),
-              }}
-              onClick={() => onAdd?.()}
-              disabled={disabled}
-            >
-              <span style={thumbEmptyPlusStyle}>＋</span>
-              <span style={thumbEmptyLabelStyle}>Aggiungi</span>
-            </button>
-          ))}
+          ) : null}
         </div>
-      </div>
+      ) : null}
+
+      {!primaryPhoto ? (
+        <div style={emptyGalleryStyle}>
+          <p style={emptyTextStyle}>
+            Nessuna foto caricata ancora. Appena ne aggiungi una, qui comparirà la tua immagine principale.
+          </p>
+          <button
+            type="button"
+            style={{
+              ...addFirstButtonStyle,
+              ...(disabled ? disabledButtonStyle : null),
+            }}
+            onClick={() => onAdd?.()}
+            disabled={disabled}
+          >
+            Carica la prima foto
+          </button>
+        </div>
+      ) : null}
 
       <p style={footerNoteStyle}>
-        Questa galleria è disponibile anche per il profilo base. Premium non cambia il diritto di avere una presenza bella:
-        semmai la rende più visibile.
+        Mostriamo solo ciò che esiste davvero: il profilo deve sembrare vivo, non incompleto.
       </p>
     </section>
   );
@@ -270,41 +256,6 @@ const overlayButtonStyle = {
   backdropFilter: "blur(10px)",
 };
 
-const heroEmptyStyle = {
-  width: "100%",
-  minHeight: 420,
-  display: "grid",
-  placeItems: "center",
-  textAlign: "center",
-  padding: "24px",
-  borderRadius: "22px",
-  border: "1px dashed rgba(240,143,192,0.35)",
-  background: "rgba(255,255,255,0.03)",
-  color: "#fff",
-  cursor: "pointer",
-};
-
-const emptyPlusStyle = {
-  display: "block",
-  fontSize: "3rem",
-  lineHeight: 1,
-  color: "#f08fc0",
-};
-
-const emptyTitleStyle = {
-  display: "block",
-  marginTop: "12px",
-  fontSize: "1.1rem",
-  fontWeight: 800,
-};
-
-const emptyTextStyle = {
-  display: "block",
-  marginTop: "8px",
-  color: "rgba(255,255,255,0.72)",
-  lineHeight: 1.6,
-};
-
 const thumbsWrapStyle = {
   display: "grid",
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
@@ -361,31 +312,31 @@ const thumbDangerStyle = {
   cursor: "pointer",
 };
 
-const thumbEmptyStyle = {
-  minHeight: 170,
-  borderRadius: "16px",
-  border: "1px dashed rgba(255,255,255,0.18)",
+const emptyGalleryStyle = {
+  marginTop: "1rem",
+  padding: "20px",
+  borderRadius: "18px",
+  border: "1px dashed rgba(255,255,255,0.16)",
   background: "rgba(255,255,255,0.02)",
-  color: "#fff",
-  display: "grid",
-  placeItems: "center",
   textAlign: "center",
-  cursor: "pointer",
-  padding: "12px",
 };
 
-const thumbEmptyPlusStyle = {
-  display: "block",
-  fontSize: "2rem",
-  lineHeight: 1,
-  color: "#f08fc0",
+const emptyTextStyle = {
+  margin: 0,
+  color: "rgba(255,255,255,0.72)",
+  lineHeight: 1.7,
 };
 
-const thumbEmptyLabelStyle = {
-  display: "block",
-  marginTop: "8px",
+const addFirstButtonStyle = {
+  marginTop: "14px",
+  minHeight: 42,
+  padding: "0 18px",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(240,143,192,0.14)",
+  color: "#ffd7ea",
   fontWeight: 800,
-  color: "rgba(255,255,255,0.84)",
+  cursor: "pointer",
 };
 
 const footerNoteStyle = {
