@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HeroAB from "../components/HeroAB";
 import { loadCurrentAccountTier } from "../lib/accountTier";
 
 export default function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState(false);
-  const [userId, setUserId] = useState(null);
   const [tier, setTier] = useState("free");
 
   useEffect(() => {
@@ -16,24 +14,18 @@ export default function Home() {
     async function run() {
       try {
         setLoading(true);
-
         const result = await loadCurrentAccountTier();
 
         if (!alive) return;
 
         setIsAuthed(Boolean(result?.isAuthed));
-        setUserId(result?.user?.id || null);
         setTier(result?.tier || "free");
       } catch {
         if (!alive) return;
-
         setIsAuthed(false);
-        setUserId(null);
         setTier("free");
       } finally {
-        if (alive) {
-          setLoading(false);
-        }
+        if (alive) setLoading(false);
       }
     }
 
@@ -44,22 +36,21 @@ export default function Home() {
     };
   }, []);
 
-  const homeContent = useMemo(() => {
+  const content = useMemo(() => {
     if (loading) {
       return {
-        title: "LoveMatch360, connessioni con una direzione.",
-        description:
-          "Stiamo preparando il tuo spazio e verificando lo stato del tuo account.",
-        primaryLabel: "Caricamento...",
-        secondaryLabel: "Torna più su",
+        title: "LoveMatch360",
+        description: "Stiamo preparando il tuo spazio.",
+        primaryLabel: "Attendi",
+        secondaryLabel: "Home",
       };
     }
 
     if (!isAuthed) {
       return {
-        title: "Incontri veri, connessioni responsabili, meno rumore.",
+        title: "Connessioni vere. Meno rumore. Più direzione.",
         description:
-          "LoveMatch360 è pensato per chi vuole profili chiari, scoperta pulita e un flusso semplice: scopri → match → relazione.",
+          "LoveMatch360 ti aiuta a scoprire profili, creare match e costruire relazioni con un flusso più pulito e più serio.",
         primaryLabel: "Accedi",
         secondaryLabel: "Scopri Premium",
       };
@@ -67,9 +58,9 @@ export default function Home() {
 
     if (tier === "admin") {
       return {
-        title: "Sistema attivo, visione chiara.",
+        title: "Controllo attivo. Visione chiara.",
         description:
-          "Il tuo account ha accesso di controllo. Puoi rientrare nel flusso operativo o verificare subito le aree sensibili del progetto.",
+          "Il tuo account ha accesso amministrativo. Puoi entrare subito nelle aree operative o tornare al profilo.",
         primaryLabel: "Apri Admin",
         secondaryLabel: "Vai al profilo",
       };
@@ -77,9 +68,9 @@ export default function Home() {
 
     if (tier === "super") {
       return {
-        title: "Hai già il massimo accesso disponibile.",
+        title: "Hai già l’accesso più alto disponibile.",
         description:
-          "Il tuo profilo è attivo al livello più alto del flusso commerciale. Ora il punto è usare bene scoperta, qualità e continuità.",
+          "Ora il punto è usare bene scoperta, profilo e continuità. Nessun upsell inutile.",
         primaryLabel: "Scopri i profili",
         secondaryLabel: "Vai al profilo",
       };
@@ -87,30 +78,21 @@ export default function Home() {
 
     if (tier === "premium") {
       return {
-        title: "Il tuo accesso premium è già vivo.",
+        title: "Il tuo Premium è già attivo.",
         description:
-          "Ora conta usarlo bene: più qualità nella scoperta, più ordine nel percorso, meno attrito nel trovare persone compatibili.",
+          "Usa il livello sbloccato per entrare più in profondità nella scoperta e nel matching.",
         primaryLabel: "Scopri i profili",
         secondaryLabel: "Vai al profilo",
       };
     }
 
     return {
-      title: "Il tuo profilo è acceso. Adesso dagli direzione.",
+      title: "Il tuo profilo è acceso. Ora dagli direzione.",
       description:
-        "Completa il profilo, entra nella scoperta e usa LoveMatch360 con un flusso più pulito, più serio, più intenzionale.",
+        "Completa il profilo, entra nella scoperta e usa LoveMatch360 in modo più intenzionale.",
       primaryLabel: "Scopri i profili",
       secondaryLabel: "Vai a Premium",
     };
-  }, [loading, isAuthed, tier]);
-
-  const statusLine = useMemo(() => {
-    if (loading) return "Caricamento stato account...";
-    if (!isAuthed) return "Non sei loggato.";
-    if (tier === "admin") return "Accesso amministrativo attivo.";
-    if (tier === "super") return "Accesso Super attivo.";
-    if (tier === "premium") return "Accesso Premium attivo.";
-    return "Bentornato. Il tuo account è attivo.";
   }, [loading, isAuthed, tier]);
 
   const handlePrimaryAction = () => {
@@ -146,49 +128,46 @@ export default function Home() {
   };
 
   return (
-    <>
-      <HeroAB userId={userId} />
+    <section style={sectionStyle}>
+      <div style={heroCardStyle}>
+        <span style={eyebrowStyle}>LoveMatch360</span>
+        <h1 style={titleStyle}>{content.title}</h1>
+        <p style={descriptionStyle}>{content.description}</p>
 
-      <section style={sectionStyle}>
-        <div style={heroCardStyle}>
-          <span style={eyebrowStyle}>LoveMatch360</span>
+        <div style={actionsStyle}>
+          <button type="button" style={primaryButtonStyle} onClick={handlePrimaryAction}>
+            {content.primaryLabel}
+          </button>
 
-          <h1 style={titleStyle}>{homeContent.title}</h1>
-
-          <p style={descriptionStyle}>{homeContent.description}</p>
-
-          <div style={actionsStyle}>
-            <button type="button" style={primaryButtonStyle} onClick={handlePrimaryAction}>
-              {homeContent.primaryLabel}
-            </button>
-
-            <button type="button" style={secondaryButtonStyle} onClick={handleSecondaryAction}>
-              {homeContent.secondaryLabel}
-            </button>
-          </div>
-
-          <p style={statusStyle}>{statusLine}</p>
+          <button type="button" style={secondaryButtonStyle} onClick={handleSecondaryAction}>
+            {content.secondaryLabel}
+          </button>
         </div>
+      </div>
 
-        <div style={gridStyle}>
-          <article style={infoCardStyle}>
-            <h2 style={cardTitleStyle}>Come funziona</h2>
-            <p style={cardTextStyle}>
-              1) Scopri profili → 2) Metti like → 3) Match reciproco → 4) Chat.
-              Premium sblocca funzioni avanzate senza cambiare le regole del rispetto.
-            </p>
-          </article>
+      <div style={gridStyle}>
+        <article style={infoCardStyle}>
+          <h2 style={cardTitleStyle}>Scopri</h2>
+          <p style={cardTextStyle}>
+            Entra nei profili pubblici, filtra meglio e costruisci il tuo percorso con meno attrito.
+          </p>
+        </article>
 
-          <article style={infoCardStyle}>
-            <h2 style={cardTitleStyle}>Perché qui</h2>
-            <p style={cardTextStyle}>
-              Meno caos, più chiarezza. LoveMatch360 mette al centro profili vivi,
-              connessioni responsabili e un flusso semplice da seguire.
-            </p>
-          </article>
-        </div>
-      </section>
-    </>
+        <article style={infoCardStyle}>
+          <h2 style={cardTitleStyle}>Profilo</h2>
+          <p style={cardTextStyle}>
+            Cura presenza, immagini e bio. Il profilo deve essere vivo, non vuoto.
+          </p>
+        </article>
+
+        <article style={infoCardStyle}>
+          <h2 style={cardTitleStyle}>Premium</h2>
+          <p style={cardTextStyle}>
+            Il premium serve quando aggiunge valore reale. Non quando crea confusione.
+          </p>
+        </article>
+      </div>
+    </section>
   );
 }
 
@@ -258,13 +237,6 @@ const secondaryButtonStyle = {
   fontWeight: 700,
   fontSize: "1rem",
   cursor: "pointer",
-};
-
-const statusStyle = {
-  marginTop: "16px",
-  color: "rgba(255,255,255,0.68)",
-  fontSize: "0.95rem",
-  lineHeight: 1.6,
 };
 
 const gridStyle = {
