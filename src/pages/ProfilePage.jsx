@@ -27,11 +27,29 @@ function hasCommercialPremium(profile) {
   );
 }
 
+function normalizePhotos(rows = []) {
+  const ordered = [...rows].sort((a, b) => {
+    if (a.is_primary === b.is_primary) {
+      return (a.ordine ?? 99) - (b.ordine ?? 99);
+    }
+    return a.is_primary ? -1 : 1;
+  });
+
+  return ordered.slice(0, 5).map((row, index) => ({
+    id: row.id,
+    url: row.foto_url,
+    isPrimary: index === 0,
+    alt: index === 0 ? "Foto principale del profilo" : `Foto profilo ${index + 1}`,
+    order: row.ordine ?? index,
+  }));
+}
+
 export default function ProfilePage() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [profilo, setProfilo] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -39,8 +57,6 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [interests, setInterests] = useState("");
-  const [photo, setPhoto] = useState("");
-  const [preview, setPreview] = useState("");
   const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
@@ -55,10 +71,7 @@ export default function ProfilePage() {
           error: userError,
         } = await supabase.auth.getUser();
 
-        if (userError) {
-          throw userError;
-        }
-
+        if (userError) throw userError;
         if (!alive) return;
 
         if (!user?.id) {
@@ -67,8 +80,6 @@ export default function ProfilePage() {
           setName("");
           setBio("");
           setInterests("");
-          setPhoto("");
-          setPreview("");
           setPhotos([]);
           return;
         }
@@ -83,13 +94,8 @@ export default function ProfilePage() {
           .eq("id", user.id)
           .maybeSingle();
 
+        if (profileError) throw profileError;
         if (!alive) return;
-
-        if (profileError) {
-          console.error("Errore caricamento profilo:", profileError);
-          toast.error("Errore nel caricamento del profilo.");
-          return;
-        }
 
         const safeProfile = profileData || {
           id: user.id,
@@ -107,8 +113,6 @@ export default function ProfilePage() {
           status_account: "attivo",
         };
 
-        const initialPhoto = safeProfile.foto_url || safeProfile.avatar_url || "";
-
         setProfilo(safeProfile);
         setName(safeProfile.nome || "");
         setBio(safeProfile.bio || "");
@@ -117,28 +121,26 @@ export default function ProfilePage() {
             ? safeProfile.interessi.join(", ")
             : safeProfile.interessi || ""
         );
-        setPhoto(initialPhoto);
-        setPreview(initialPhoto);
-        setPhotos(
-          initialPhoto
-            ? [
-                {
-                  id: "main",
-                  url: initialPhoto,
-                  isPrimary: true,
-                  alt: "Foto principale del profilo",
-                },
-              ]
-            : []
-        );
+
+        const { data: photoRows, error: photoError } = await supabase
+          .from("profili_foto")
+          .select("id, foto_url, ordine, is_primary, created_at")
+          .eq("profilo_id", user.id)
+          .order("ordine", { ascending: true });
+
+        if (photoError) {
+          console.error("Errore caricamento foto profilo:", photoError);
+          toast.error("Errore nel caricamento delle foto.");
+        }
+
+        const normalized = normalizePhotos(photoRows || []);
+        setPhotos(normalized);
       } catch (error) {
         console.error("ProfilePage fetch error:", error);
         if (!alive) return;
         toast.error("Errore temporaneo nel profilo.");
       } finally {
-        if (alive) {
-          setLoading(false);
-        }
+        if (alive) setLoading(false);
       }
     }
 
@@ -149,126 +151,160 @@ export default function ProfilePage() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!photo) {
-      setPhotos((prev) => prev.filter((item) => item.id !== "main"));
+  const isPremium = useMemo(() => hasCommercialPremium(profilo), [profilo]);
+
+  const handleAddPhoto = () => {
+    const input = document.getElementById("profile-photo-input");
+    input?.click();
+  };
+
+  const handlePhoto = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!userId || files.length === 0) return;
+
+    if (photos.length >= 5) {
+      toast.error("Puoi caricare massimo 5 foto.");
+      event.target.value = "";
       return;
     }
 
-    setPhotos((prev) => {
-      const withoutMain = prev.filter((item) => item.id !== "main");
-      return [
-        {
-          id: "main",
-          url: photo,
-          isPrimary: true,
-          alt: "Foto principale del profilo",
-        },
-        ...withoutMain.slice(0, 4).map((item) => ({
-          ...item,
-          isPrimary: false,
-        })),
-      ];
-    });
-  }, [photo]);
+    const availableSlots = Math.max(0, 5 - photos.length);
+    const filesToUse = files.slice(0, availableSlots);
 
-  const isPremium = useMemo(() => {
-    return hasCommercialPremium(profilo);
-  }, [profilo]);
+    try {
+      setUploading(true);
 
-  const handlePhoto = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+      const currentPhotos = [...photos];
+      const rowsToInsert = [];
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const value = String(reader.result || "");
+      for (const file of filesToUse) {
+        const value = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(String(reader.result || ""));
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
 
-      setPhotos((prev) => {
-        const withoutSame = prev.filter((item) => item.url !== value);
-        const othersWithoutMain = withoutSame.filter((item) => item.id !== "main");
-
-        const next = [
-          {
-            id: "main",
-            url: value,
-            isPrimary: true,
-            alt: "Foto principale del profilo",
-          },
-          ...othersWithoutMain.slice(0, 4).map((item) => ({
-            ...item,
-            isPrimary: false,
-          })),
-        ];
-
-        return next.slice(0, 5);
-      });
-
-      setPhoto(value);
-      setPreview(value);
-      toast.success("📸 Foto caricata");
-    };
-
-    reader.readAsDataURL(file);
-  };
-
-  const handleAddPhoto = () => {
-    toast("Per ora usa il campo upload qui sotto: collegheremo il multi-upload reale nel prossimo passo.");
-  };
-
-  const handleSetPrimaryPhoto = (photoId) => {
-    setPhotos((prev) => {
-      const selected = prev.find((item) => item.id === photoId);
-      if (!selected) return prev;
-
-      const others = prev.filter((item) => item.id !== photoId);
-
-      const next = [
-        {
-          ...selected,
-          id: "main",
-          isPrimary: true,
-          alt: selected.alt || "Foto principale del profilo",
-        },
-        ...others
-          .filter((item) => item.id !== "main")
-          .slice(0, 4)
-          .map((item, index) => ({
-            ...item,
-            id: item.id === "main" ? `photo-${Date.now()}-${index}` : item.id,
-            isPrimary: false,
-          })),
-      ];
-
-      const primary = next[0];
-      setPhoto(primary.url);
-      setPreview(primary.url);
-
-      return next;
-    });
-  };
-
-  const handleRemovePhoto = (photoId) => {
-    setPhotos((prev) => {
-      const next = prev.filter((item) => item.id !== photoId);
-
-      if (next.length === 0) {
-        setPhoto("");
-        setPreview("");
-        return [];
+        rowsToInsert.push({
+          profilo_id: userId,
+          foto_url: value,
+          ordine: currentPhotos.length + rowsToInsert.length,
+          is_primary: currentPhotos.length === 0 && rowsToInsert.length === 0,
+        });
       }
 
-      const normalized = next.map((item, index) => ({
+      const { error } = await supabase.from("profili_foto").insert(rowsToInsert);
+
+      if (error) {
+        console.error("Errore caricamento foto:", error);
+        toast.error("Impossibile caricare le foto.");
+        return;
+      }
+
+      const { data: refreshed, error: refreshError } = await supabase
+        .from("profili_foto")
+        .select("id, foto_url, ordine, is_primary, created_at")
+        .eq("profilo_id", userId)
+        .order("ordine", { ascending: true });
+
+      if (refreshError) {
+        console.error("Errore refresh foto:", refreshError);
+        toast.error("Foto caricate, ma elenco non aggiornato.");
+        return;
+      }
+
+      const normalized = normalizePhotos(refreshed || []);
+      setPhotos(normalized);
+      toast.success("📸 Foto caricate");
+    } catch (error) {
+      console.error("Profile photo upload error:", error);
+      toast.error("Errore temporaneo durante il caricamento.");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleSetPrimaryPhoto = async (photoId) => {
+    if (!userId) return;
+
+    try {
+      setSaving(true);
+
+      const reordered = photos.map((item, index) => {
+        if (item.id === photoId) {
+          return { ...item, isPrimary: true, order: 0 };
+        }
+        return { ...item, isPrimary: false, order: index + 1 };
+      });
+
+      const primary = reordered.find((item) => item.id === photoId);
+      const rest = reordered.filter((item) => item.id !== photoId);
+      const normalizedOrder = [primary, ...rest].filter(Boolean).map((item, index) => ({
         ...item,
-        id: index === 0 ? "main" : item.id,
         isPrimary: index === 0,
+        order: index,
       }));
 
-      setPhoto(normalized[0].url);
-      setPreview(normalized[0].url);
+      for (const item of normalizedOrder) {
+        const { error } = await supabase
+          .from("profili_foto")
+          .update({
+            is_primary: item.isPrimary,
+            ordine: item.order,
+          })
+          .eq("id", item.id)
+          .eq("profilo_id", userId);
 
-      return normalized.slice(0, 5);
-    });
+        if (error) throw error;
+      }
+
+      setPhotos(normalizedOrder);
+      toast.success("✨ Foto principale aggiornata");
+    } catch (error) {
+      console.error("Errore foto principale:", error);
+      toast.error("Impossibile aggiornare la foto principale.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemovePhoto = async (photoId) => {
+    if (!userId) return;
+
+    try {
+      setSaving(true);
+
+      const { error } = await supabase
+        .from("profili_foto")
+        .delete()
+        .eq("id", photoId)
+        .eq("profilo_id", userId);
+
+      if (error) throw error;
+
+      const { data: refreshed, error: refreshError } = await supabase
+        .from("profili_foto")
+        .select("id, foto_url, ordine, is_primary, created_at")
+        .eq("profilo_id", userId)
+        .order("ordine", { ascending: true });
+
+      if (refreshError) throw refreshError;
+
+      const normalized = normalizePhotos(refreshed || []);
+
+      if (normalized.length > 0 && !normalized.some((item) => item.isPrimary)) {
+        normalized[0] = { ...normalized[0], isPrimary: true, order: 0 };
+      }
+
+      setPhotos(normalized);
+      toast.success("🗑️ Foto rimossa");
+    } catch (error) {
+      console.error("Errore rimozione foto:", error);
+      toast.error("Impossibile rimuovere la foto.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = async () => {
@@ -281,7 +317,7 @@ export default function ProfilePage() {
     try {
       setSaving(true);
 
-      const primaryPhoto = photos.find((item) => item.isPrimary)?.url || photo || null;
+      const primaryPhoto = photos.find((item) => item.isPrimary)?.url || null;
 
       const payload = {
         id: userId,
@@ -312,8 +348,6 @@ export default function ProfilePage() {
       };
 
       setProfilo(nextProfile);
-      setPhoto(nextProfile.foto_url || "");
-      setPreview(nextProfile.foto_url || "");
       toast.success("✅ Profilo aggiornato!");
     } catch (error) {
       console.error("ProfilePage save error:", error);
@@ -332,10 +366,6 @@ export default function ProfilePage() {
           .profile-input {
             font-size: 1rem !important;
             padding: 1rem !important;
-          }
-
-          .profile-img {
-            max-width: 100% !important;
           }
         }
 
@@ -385,7 +415,17 @@ export default function ProfilePage() {
         onSetPrimary={handleSetPrimaryPhoto}
         onRemove={handleRemovePhoto}
         onAdd={handleAddPhoto}
-        disabled={loading || saving}
+        disabled={loading || saving || uploading}
+      />
+
+      <input
+        id="profile-photo-input"
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handlePhoto}
+        style={hiddenFileInputStyle}
+        disabled={loading || saving || uploading}
       />
 
       <input
@@ -417,26 +457,8 @@ export default function ProfilePage() {
         disabled={loading || saving}
       />
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handlePhoto}
-        style={inputStyle}
-        className="profile-input"
-        disabled={loading || saving}
-      />
-
-      {preview && (
-        <img
-          src={preview}
-          alt="Anteprima"
-          className="profile-img"
-          style={{ maxWidth: "200px", borderRadius: "8px", marginTop: "1rem" }}
-        />
-      )}
-
-      <button style={saveBtn} onClick={handleSave} disabled={loading || saving}>
-        {saving ? "Salvataggio..." : "💾 Salva modifiche"}
+      <button style={saveBtn} onClick={handleSave} disabled={loading || saving || uploading}>
+        {saving ? "Salvataggio..." : uploading ? "Caricamento foto..." : "💾 Salva modifiche"}
       </button>
 
       <p style={{ opacity: 0.6, marginTop: "2rem" }}>
@@ -471,6 +493,10 @@ const inputStyle = {
   backgroundColor: "#1e1e1e",
   color: "#fff",
   fontSize: "1.1rem",
+};
+
+const hiddenFileInputStyle = {
+  display: "none",
 };
 
 const premiumBadgeAnim = {
