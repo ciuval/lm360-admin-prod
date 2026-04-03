@@ -17,6 +17,8 @@ export default function ProfilePhotoGallery({
     .filter((photo) => primaryPhoto && photo.id !== primaryPhoto.id)
     .slice(0, MAX_PHOTOS - 1);
 
+  const canAddMore = normalizedPhotos.length < MAX_PHOTOS;
+
   return (
     <section style={sectionStyle} aria-labelledby="profile-gallery-title">
       <div style={headerRowStyle}>
@@ -25,12 +27,28 @@ export default function ProfilePhotoGallery({
             Foto profilo
           </h3>
           <p style={subtitleStyle}>
-            Le tue immagini devono parlare bene di te, senza rumore e senza spazi morti.
+            Fino a 5 foto. La numero 1 è la principale e sta al centro.
           </p>
         </div>
 
-        <div style={counterBadgeStyle}>
-          {normalizedPhotos.length}/{MAX_PHOTOS}
+        <div style={headerActionsStyle}>
+          <div style={counterBadgeStyle}>
+            {normalizedPhotos.length}/{MAX_PHOTOS}
+          </div>
+
+          {canAddMore ? (
+            <button
+              type="button"
+              style={{
+                ...addButtonStyle,
+                ...(disabled ? disabledButtonStyle : null),
+              }}
+              onClick={() => onAdd?.()}
+              disabled={disabled}
+            >
+              Carica foto
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -45,7 +63,10 @@ export default function ProfilePhotoGallery({
               />
 
               <div style={heroOverlayStyle}>
-                <span style={primaryBadgeStyle}>Principale</span>
+                <div style={heroTopRowStyle}>
+                  <span style={primaryBadgeStyle}>Principale</span>
+                  <span style={numberBadgeStyle}>1</span>
+                </div>
 
                 <div style={heroActionsStyle}>
                   <button
@@ -68,19 +89,23 @@ export default function ProfilePhotoGallery({
             <div style={thumbsWrapStyle}>
               {secondaryPhotos.map((photo, index) => (
                 <div key={photo.id || `${photo.url}-${index}`} style={thumbCardStyle}>
-                  <button
-                    type="button"
-                    style={thumbImageButtonStyle}
-                    onClick={() => onSetPrimary?.(photo.id)}
-                    disabled={disabled}
-                    aria-label="Imposta come foto principale"
-                  >
-                    <img
-                      src={photo.url}
-                      alt={photo.alt || `Foto secondaria ${index + 1}`}
-                      style={thumbImageStyle}
-                    />
-                  </button>
+                  <div style={thumbImageWrapStyle}>
+                    <button
+                      type="button"
+                      style={thumbImageButtonStyle}
+                      onClick={() => onSetPrimary?.(photo.id)}
+                      disabled={disabled}
+                      aria-label="Imposta come foto principale"
+                    >
+                      <img
+                        src={photo.url}
+                        alt={photo.alt || `Foto secondaria ${index + 2}`}
+                        style={thumbImageStyle}
+                      />
+                    </button>
+
+                    <span style={thumbNumberBadgeStyle}>{index + 2}</span>
+                  </div>
 
                   <div style={thumbMetaStyle}>
                     <button
@@ -110,15 +135,34 @@ export default function ProfilePhotoGallery({
                 </div>
               ))}
             </div>
-          ) : null}
-        </div>
-      ) : null}
+          ) : (
+            <div style={singlePhotoHelperStyle}>
+              <p style={emptyTextStyle}>
+                Hai già la foto principale. Puoi aggiungerne ancora {MAX_PHOTOS - 1}.
+              </p>
 
-      {!primaryPhoto ? (
+              {canAddMore ? (
+                <button
+                  type="button"
+                  style={{
+                    ...addButtonStyle,
+                    ...(disabled ? disabledButtonStyle : null),
+                  }}
+                  onClick={() => onAdd?.()}
+                  disabled={disabled}
+                >
+                  Carica un’altra foto
+                </button>
+              ) : null}
+            </div>
+          )}
+        </div>
+      ) : (
         <div style={emptyGalleryStyle}>
           <p style={emptyTextStyle}>
-            Nessuna foto caricata ancora. Appena ne aggiungi una, qui comparirà la tua immagine principale.
+            Nessuna foto caricata ancora. Aggiungi la prima e qui comparirà la tua immagine principale.
           </p>
+
           <button
             type="button"
             style={{
@@ -131,7 +175,7 @@ export default function ProfilePhotoGallery({
             Carica la prima foto
           </button>
         </div>
-      ) : null}
+      )}
 
       <p style={footerNoteStyle}>
         Mostriamo solo ciò che esiste davvero: il profilo deve sembrare vivo, non incompleto.
@@ -153,6 +197,13 @@ const headerRowStyle = {
   justifyContent: "space-between",
   alignItems: "flex-start",
   gap: "1rem",
+  flexWrap: "wrap",
+};
+
+const headerActionsStyle = {
+  display: "flex",
+  gap: "10px",
+  alignItems: "center",
   flexWrap: "wrap",
 };
 
@@ -181,6 +232,17 @@ const counterBadgeStyle = {
   border: "1px solid rgba(240,143,192,0.25)",
   color: "#ffd7ea",
   fontWeight: 800,
+};
+
+const addButtonStyle = {
+  minHeight: 40,
+  padding: "0 16px",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.06)",
+  color: "#fff",
+  fontWeight: 800,
+  cursor: "pointer",
 };
 
 const mainGridStyle = {
@@ -224,8 +286,14 @@ const heroOverlayStyle = {
     "linear-gradient(180deg, rgba(5,7,11,0.22) 0%, rgba(5,7,11,0.02) 35%, rgba(5,7,11,0.38) 100%)",
 };
 
+const heroTopRowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: "10px",
+};
+
 const primaryBadgeStyle = {
-  alignSelf: "flex-start",
   display: "inline-flex",
   alignItems: "center",
   minHeight: 34,
@@ -236,6 +304,19 @@ const primaryBadgeStyle = {
   color: "#ffffff",
   fontWeight: 800,
   backdropFilter: "blur(10px)",
+};
+
+const numberBadgeStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minWidth: 34,
+  minHeight: 34,
+  borderRadius: 999,
+  background: "rgba(240,143,192,0.18)",
+  border: "1px solid rgba(240,143,192,0.24)",
+  color: "#ffd7ea",
+  fontWeight: 900,
 };
 
 const heroActionsStyle = {
@@ -270,6 +351,10 @@ const thumbCardStyle = {
   background: "rgba(255,255,255,0.03)",
 };
 
+const thumbImageWrapStyle = {
+  position: "relative",
+};
+
 const thumbImageButtonStyle = {
   width: "100%",
   border: "none",
@@ -284,6 +369,23 @@ const thumbImageStyle = {
   aspectRatio: "1 / 1",
   objectFit: "cover",
   display: "block",
+};
+
+const thumbNumberBadgeStyle = {
+  position: "absolute",
+  top: 10,
+  right: 10,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minWidth: 30,
+  minHeight: 30,
+  borderRadius: 999,
+  background: "rgba(5,7,11,0.62)",
+  border: "1px solid rgba(255,255,255,0.18)",
+  color: "#ffffff",
+  fontWeight: 900,
+  backdropFilter: "blur(10px)",
 };
 
 const thumbMetaStyle = {
@@ -310,6 +412,16 @@ const thumbDangerStyle = {
   color: "#ffd7ea",
   fontWeight: 700,
   cursor: "pointer",
+};
+
+const singlePhotoHelperStyle = {
+  display: "grid",
+  alignContent: "start",
+  gap: "12px",
+  padding: "16px",
+  borderRadius: "18px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.03)",
 };
 
 const emptyGalleryStyle = {
