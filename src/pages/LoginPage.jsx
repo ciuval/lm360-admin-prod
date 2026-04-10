@@ -27,22 +27,49 @@ function normalizeAuthError(error) {
   return "Errore temporaneo di accesso. Riprova.";
 }
 
+function normalizeSignupError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  const status = Number(error?.status || 0);
+
+  if (message.includes("user already registered")) {
+    return "Questo account esiste già. Prova ad accedere.";
+  }
+
+  if (message.includes("password should be at least")) {
+    return "La password è troppo corta.";
+  }
+
+  if (message.includes("invalid email") || status === 400) {
+    return "Controlla email e password prima di registrarti.";
+  }
+
+  if (message.includes("too many requests") || status === 429) {
+    return "Troppi tentativi. Riprova tra poco.";
+  }
+
+  return "Errore temporaneo durante la registrazione.";
+}
+
 export default function LoginPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = useMemo(() => {
-    const candidate = location.state?.from;
-    return typeof candidate === "string" && candidate.trim() ? candidate : "/profilo";
+  const redirectTo = useMemo(() => {
+    const from = location.state?.from;
+    return typeof from === "string" && from.trim() ? from : "/profilo";
   }, [location.state]);
 
   const isDisabled = useMemo(() => {
-    return submitting || !email.trim() || !password;
+    return submitting || !email.trim() || !password.trim();
   }, [submitting, email, password]);
+
+  const normalizedEmail = useMemo(() => {
+    return email.trim().toLowerCase();
+  }, [email]);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -51,11 +78,9 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      const normalizedEmail = email.trim().toLowerCase();
-
       const { error } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
-        password,
+        password: password.trim(),
       });
 
       if (error) {
@@ -64,9 +89,39 @@ export default function LoginPage() {
       }
 
       toast.success("Accesso riuscito.");
-      navigate(from, { replace: true });
+      navigate(redirectTo, { replace: true });
     } catch {
       toast.error("Errore temporaneo di accesso. Riprova.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSignup = async () => {
+    if (isDisabled) return;
+
+    setSubmitting(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password: password.trim(),
+      });
+
+      if (error) {
+        toast.error(normalizeSignupError(error));
+        return;
+      }
+
+      if (data?.session) {
+        toast.success("Account creato e accesso effettuato.");
+        navigate("/profilo", { replace: true });
+        return;
+      }
+
+      toast.success("Account creato. Controlla la tua email per completare l’accesso.");
+    } catch {
+      toast.error("Errore temporaneo durante la registrazione.");
     } finally {
       setSubmitting(false);
     }
@@ -79,12 +134,13 @@ export default function LoginPage() {
           <div aria-hidden="true" style={iconStyle}>
             🔐
           </div>
+
           <div>
             <h1 id="login-title" style={titleStyle}>
               Accedi
             </h1>
             <p style={subtitleStyle}>
-              Inserisci le tue credenziali per entrare in LoveMatch360.
+              Entra nel tuo spazio oppure crea subito il tuo account.
             </p>
           </div>
         </header>
@@ -104,7 +160,6 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             style={inputStyle}
             disabled={submitting}
-            aria-describedby="login-help"
           />
 
           <label htmlFor="login-password" style={labelStyle}>
@@ -122,21 +177,35 @@ export default function LoginPage() {
             disabled={submitting}
           />
 
-          <p id="login-help" style={helpStyle}>
-            Usa un account attivo con credenziali valide.
+          <p style={helpStyle}>
+            Usa un account attivo con credenziali valide. Se sei nuovo, puoi registrarti da qui.
           </p>
 
-          <button
-            type="submit"
-            style={{
-              ...buttonStyle,
-              ...(isDisabled ? buttonDisabledStyle : null),
-            }}
-            disabled={isDisabled}
-            aria-busy={submitting ? "true" : "false"}
-          >
-            {submitting ? "Accesso in corso..." : "Accedi"}
-          </button>
+          <div style={actionsStyle}>
+            <button
+              type="submit"
+              style={{
+                ...primaryButtonStyle,
+                ...(isDisabled ? buttonDisabledStyle : null),
+              }}
+              disabled={isDisabled}
+              aria-busy={submitting ? "true" : "false"}
+            >
+              {submitting ? "Attendi..." : "Accedi"}
+            </button>
+
+            <button
+              type="button"
+              style={{
+                ...secondaryButtonStyle,
+                ...(isDisabled ? buttonDisabledStyle : null),
+              }}
+              onClick={handleSignup}
+              disabled={isDisabled}
+            >
+              Registrati
+            </button>
+          </div>
         </form>
       </section>
     </main>
@@ -153,7 +222,7 @@ const pageStyle = {
 
 const cardStyle = {
   width: "100%",
-  maxWidth: "480px",
+  maxWidth: "520px",
   padding: "24px",
   background: "linear-gradient(180deg, rgba(24,24,30,0.98) 0%, rgba(18,18,24,0.98) 100%)",
   color: "#ffffff",
@@ -216,7 +285,12 @@ const helpStyle = {
   fontSize: "0.92rem",
 };
 
-const buttonStyle = {
+const actionsStyle = {
+  display: "grid",
+  gap: "10px",
+};
+
+const primaryButtonStyle = {
   width: "100%",
   backgroundColor: "#e58abb",
   padding: "14px 16px",
@@ -226,7 +300,18 @@ const buttonStyle = {
   fontWeight: 700,
   fontSize: "1rem",
   cursor: "pointer",
-  transition: "opacity 120ms ease",
+};
+
+const secondaryButtonStyle = {
+  width: "100%",
+  background: "rgba(255,255,255,0.05)",
+  padding: "14px 16px",
+  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: "12px",
+  color: "#ffffff",
+  fontWeight: 700,
+  fontSize: "1rem",
+  cursor: "pointer",
 };
 
 const buttonDisabledStyle = {
