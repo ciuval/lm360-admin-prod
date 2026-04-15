@@ -35,6 +35,10 @@ function normalizeSignupError(error) {
     return "Questo account esiste già. Prova ad accedere.";
   }
 
+  if (message.includes("weak_password") || message.includes("password should contain at least")) {
+  return "La password è troppo debole. Usa almeno una maiuscola, una minuscola, un numero e una password non banale.";
+  }
+  
   if (message.includes("password should be at least")) {
     return "La password è troppo corta.";
   }
