@@ -143,7 +143,16 @@ export default function App() {
                   </RequireAuth>
                 }
               />
-
+              
+              <Route
+                path="/checkout-success"
+                element={
+                  <RequireAuth>
+                    <CheckoutSuccess />
+                  </RequireAuth>
+                }
+              />
+              
               {/* ======================================================
                   LEGAL
               ====================================================== */}
