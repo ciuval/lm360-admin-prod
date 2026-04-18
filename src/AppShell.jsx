@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { loadCurrentAccountTier } from "./lib/accountTier";
 import { supabase } from "./lib/supabaseClient";
+import SiteFooter from "./components/SiteFooter.jsx";
 
 function normalizeStatus(value) {
   return String(value || "").trim().toLowerCase();
@@ -329,8 +330,9 @@ export default function AppShell({ children }) {
       </header>
 
       <>
-        <main style={mainStyle}>{content}</main>
-        <SiteFooter />
+      <main style={mainStyle}>{content}</main>
+      <SiteFooter />
+
       </>
     </div>
   );
