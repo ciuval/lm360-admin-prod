@@ -328,7 +328,10 @@ export default function AppShell({ children }) {
         </div>
       </header>
 
-      <main style={mainStyle}>{content}</main>
+      <>
+        <main style={mainStyle}>{content}</main>
+        <SiteFooter />
+      </>
     </div>
   );
 }
