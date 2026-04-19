@@ -27,8 +27,8 @@ export default function SiteFooter() {
             <div style={stackStyle}>
               <FooterLink to="/privacy">Privacy</FooterLink>
               <FooterLink to="/cookie">Cookie</FooterLink>
-              <FooterLink to="/terms">Terms</FooterLink>
-              <FooterLink to="/refunds">Refunds</FooterLink>
+              <FooterLink to="/terms">Termini</FooterLink>
+              <FooterLink to="/refunds">Rimborsi</FooterLink>
             </div>
           </div>
 
