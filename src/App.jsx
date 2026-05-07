@@ -71,7 +71,14 @@ export default function App() {
               ====================================================== */}
               <Route path="/" element={<Home />} />
               <Route path="/premium" element={<Premium />} />
-              <Route path="/profilo" element={<ProfilePage />} />
+              <Route 
+                path="/profilo"
+                element={
+                  <RequireAuth>
+                    <ProfilePage />
+                  </RequireAuth>
+                }
+              />
               <Route path="/profilo/:id" element={<ProfilePublicCard />} />
               <Route path="/paywall" element={<Premium />} />
 

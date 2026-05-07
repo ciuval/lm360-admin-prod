@@ -4,6 +4,7 @@ import { loadCurrentAccountTier } from "../lib/accountTier";
 
 export default function RequirePremium({ children, redirectTo = "/premium" }) {
   const location = useLocation();
+
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState(false);
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
@@ -33,9 +34,7 @@ export default function RequirePremium({ children, redirectTo = "/premium" }) {
         setIsAuthed(false);
         setHasPremiumAccess(false);
       } finally {
-        if (alive) {
-          setLoading(false);
-        }
+        if (alive) setLoading(false);
       }
     }
 
@@ -44,12 +43,18 @@ export default function RequirePremium({ children, redirectTo = "/premium" }) {
     return () => {
       alive = false;
     };
-  }, [location.pathname]);
+  }, [from]);
 
   if (loading) return null;
 
   if (!isAuthed) {
-    return <Navigate to="/login" replace state={{ from }} />;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from, reason: "auth_required" }}
+      />
+    );
   }
 
   if (!hasPremiumAccess) {
@@ -57,7 +62,7 @@ export default function RequirePremium({ children, redirectTo = "/premium" }) {
       <Navigate
         to={redirectTo}
         replace
-        state={{ from, premiumRequired: true }}
+        state={{ from, reason: "premium_required" }}
       />
     );
   }

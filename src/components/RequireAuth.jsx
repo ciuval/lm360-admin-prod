@@ -4,6 +4,7 @@ import { loadCurrentAccountTier } from "../lib/accountTier";
 
 export default function RequireAuth({ children, redirectTo = "/login" }) {
   const location = useLocation();
+
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState(false);
 
@@ -19,7 +20,6 @@ export default function RequireAuth({ children, redirectTo = "/login" }) {
         const result = await loadCurrentAccountTier();
 
         if (!alive) return;
-
         setIsAuthed(Boolean(result?.isAuthed));
       } catch {
         if (!alive) return;
@@ -34,12 +34,18 @@ export default function RequireAuth({ children, redirectTo = "/login" }) {
     return () => {
       alive = false;
     };
-  }, [location.pathname]);
+  }, [from]);
 
   if (loading) return null;
 
   if (!isAuthed) {
-    return <Navigate to={redirectTo} replace state={{ from }} />;
+    return (
+      <Navigate
+        to={redirectTo}
+        replace
+        state={{ from, reason: "auth_required" }}
+      />
+    );
   }
 
   return children;

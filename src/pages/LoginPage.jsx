@@ -1,15 +1,23 @@
 import React, { useMemo, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { supabase } from "../lib/supabaseClient";
 
 function normalizeAuthError(error) {
+  const code = String(error?.code || "").toLowerCase();
   const message = String(error?.message || "").toLowerCase();
   const status = Number(error?.status || 0);
 
   if (
+    code === "email_not_confirmed" ||
+    message.includes("email not confirmed")
+  ) {
+    return "Controlla la tua email prima di accedere.";
+  }
+
+  if (
+    code === "invalid_credentials" ||
     message.includes("invalid login credentials") ||
-    message.includes("email not confirmed") ||
     message.includes("invalid email or password") ||
     status === 400
   ) {
@@ -28,26 +36,54 @@ function normalizeAuthError(error) {
 }
 
 function normalizeSignupError(error) {
+  const code = String(error?.code || "").toLowerCase();
   const message = String(error?.message || "").toLowerCase();
   const status = Number(error?.status || 0);
 
-  if (message.includes("user already registered")) {
+  if (
+    code === "user_already_exists" ||
+    message.includes("user already registered")
+  ) {
     return "Questo account esiste già. Prova ad accedere.";
   }
 
-  if (message.includes("weak_password") || message.includes("password should contain at least")) {
-  return "La password è troppo debole. Usa almeno una maiuscola, una minuscola, un numero e una password non banale.";
+  if (
+    code === "weak_password" ||
+    message.includes("weak_password") ||
+    message.includes("password should contain at least")
+  ) {
+    return "La password è troppo debole. Usa almeno una maiuscola, una minuscola, un numero e una password non banale.";
   }
-  
+
   if (message.includes("password should be at least")) {
     return "La password è troppo corta.";
   }
 
-  if (message.includes("invalid email") || status === 400) {
+  if (code === "email_address_not_authorized") {
+    return "Questo indirizzo email non è autorizzato per la registrazione in questo momento.";
+  }
+
+  if (
+    code === "signup_disabled" ||
+    code === "email_provider_disabled"
+  ) {
+    return "La registrazione via email non è attiva in questo momento.";
+  }
+
+  if (
+    code === "validation_failed" ||
+    code === "email_address_invalid" ||
+    message.includes("invalid email") ||
+    status === 400 ||
+    status === 422
+  ) {
     return "Controlla email e password prima di registrarti.";
   }
 
-  if (message.includes("too many requests") || status === 429) {
+  if (
+    message.includes("too many requests") ||
+    status === 429
+  ) {
     return "Troppi tentativi. Riprova tra poco.";
   }
 
@@ -61,10 +97,23 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   const redirectTo = useMemo(() => {
     const from = location.state?.from;
     return typeof from === "string" && from.trim() ? from : "/profilo";
+  }, [location.state]);
+
+  const guardNotice = useMemo(() => {
+    if (location.state?.reason === "premium_required") {
+      return "Per continuare serve un account Premium attivo.";
+    }
+
+    if (location.state?.reason === "auth_required" || location.state?.from) {
+      return "Per continuare devi accedere prima di aprire questa pagina.";
+    }
+
+    return "";
   }, [location.state]);
 
   const isDisabled = useMemo(() => {
@@ -79,6 +128,7 @@ export default function LoginPage() {
     event.preventDefault();
     if (isDisabled) return;
 
+    setAuthError("");
     setSubmitting(true);
 
     try {
@@ -88,14 +138,18 @@ export default function LoginPage() {
       });
 
       if (error) {
-        toast.error(normalizeAuthError(error));
+        const uiMessage = normalizeAuthError(error);
+        setAuthError(uiMessage);
+        toast.error(uiMessage);
         return;
       }
 
       toast.success("Accesso riuscito.");
       navigate(redirectTo, { replace: true });
     } catch {
-      toast.error("Errore temporaneo di accesso. Riprova.");
+      const uiMessage = "Errore temporaneo di accesso. Riprova.";
+      setAuthError(uiMessage);
+      toast.error(uiMessage);
     } finally {
       setSubmitting(false);
     }
@@ -104,6 +158,7 @@ export default function LoginPage() {
   const handleSignup = async () => {
     if (isDisabled) return;
 
+    setAuthError("");
     setSubmitting(true);
 
     try {
@@ -113,7 +168,9 @@ export default function LoginPage() {
       });
 
       if (error) {
-        toast.error(normalizeSignupError(error));
+        const uiMessage = normalizeSignupError(error);
+        setAuthError(uiMessage);
+        toast.error(uiMessage);
         return;
       }
 
@@ -125,7 +182,9 @@ export default function LoginPage() {
 
       toast.success("Account creato. Controlla la tua email per completare l’accesso.");
     } catch {
-      toast.error("Errore temporaneo durante la registrazione.");
+      const uiMessage = "Errore temporaneo durante la registrazione.";
+      setAuthError(uiMessage);
+      toast.error(uiMessage);
     } finally {
       setSubmitting(false);
     }
@@ -143,6 +202,7 @@ export default function LoginPage() {
             <h1 id="login-title" style={titleStyle}>
               Accedi
             </h1>
+
             <p style={subtitleStyle}>
               Entra nel tuo spazio oppure crea subito il tuo account.
             </p>
@@ -150,9 +210,22 @@ export default function LoginPage() {
         </header>
 
         <form onSubmit={handleLogin} noValidate>
+          {guardNotice ? (
+            <div role="status" aria-live="polite" style={noticeStyle}>
+              {guardNotice}
+            </div>
+          ) : null}
+
+          {authError ? (
+            <div role="alert" aria-live="polite" style={errorBoxStyle}>
+              {authError}
+            </div>
+          ) : null}
+
           <label htmlFor="login-email" style={labelStyle}>
             Email
           </label>
+
           <input
             id="login-email"
             name="email"
@@ -161,7 +234,10 @@ export default function LoginPage() {
             autoComplete="email"
             placeholder="nome@dominio.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (authError) setAuthError("");
+            }}
             style={inputStyle}
             disabled={submitting}
           />
@@ -169,6 +245,7 @@ export default function LoginPage() {
           <label htmlFor="login-password" style={labelStyle}>
             Password
           </label>
+
           <input
             id="login-password"
             name="password"
@@ -176,7 +253,10 @@ export default function LoginPage() {
             autoComplete="current-password"
             placeholder="La tua password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (authError) setAuthError("");
+            }}
             style={inputStyle}
             disabled={submitting}
           />
@@ -258,6 +338,28 @@ const subtitleStyle = {
   color: "rgba(255,255,255,0.78)",
   lineHeight: 1.6,
   fontSize: "0.96rem",
+};
+
+const noticeStyle = {
+  margin: "0 0 16px",
+  padding: "12px 14px",
+  borderRadius: "12px",
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  color: "rgba(255,255,255,0.92)",
+  lineHeight: 1.5,
+  fontSize: "0.94rem",
+};
+
+const errorBoxStyle = {
+  margin: "0 0 16px",
+  padding: "12px 14px",
+  borderRadius: "12px",
+  background: "rgba(220,38,38,0.12)",
+  border: "1px solid rgba(248,113,113,0.35)",
+  color: "#fecaca",
+  lineHeight: 1.5,
+  fontSize: "0.94rem",
 };
 
 const labelStyle = {
