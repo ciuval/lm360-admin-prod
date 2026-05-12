@@ -5,6 +5,8 @@ import toast, { Toaster } from "react-hot-toast";
 import PremiumStatusBox from "../components/PremiumStatusBox";
 import StoricoAbbonamenti from "../components/StoricoAbbonamenti";
 import ProfilePhotoGallery from "../components/profile/ProfilePhotoGallery";
+import ProfileCompletionCard from "../components/profile/ProfileCompletionCard";
+import { calculateProfileCompletion } from "../lib/profileCompletion";
 
 function normalizeRole(value) {
   return String(value || "").trim().toLowerCase();
@@ -58,6 +60,20 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [interests, setInterests] = useState("");
   const [photos, setPhotos] = useState([]);
+
+  const profileCompletion = useMemo(
+    () =>
+      calculateProfileCompletion({
+        profile: {
+          ...(profilo || {}),
+          nome: name,
+          bio,
+          interessi: interests,
+        },
+        photos,
+      }),
+    [profilo, name, bio, interests, photos]
+  );
 
   useEffect(() => {
     let alive = true;
@@ -357,6 +373,29 @@ export default function ProfilePage() {
     }
   };
 
+  const handleProfileCompletionAction = () => {
+    if (profileCompletion.isComplete) {
+      navigate("/scopri");
+      return;
+    }
+
+    const firstMissing = profileCompletion.missingKeys[0];
+
+    if (firstMissing === "photos") {
+      document.getElementById("profile-photo-input")?.click();
+      return;
+    }
+
+    const fieldByKey = {
+      name: "profile-name-input",
+      bio: "profile-bio-input",
+      interests: "profile-interests-input",
+    };
+
+    const targetId = fieldByKey[firstMissing] || "profile-name-input";
+    document.getElementById(targetId)?.focus();
+  };
+
   return (
     <div style={containerStyle}>
       <Toaster position="top-right" />
@@ -410,6 +449,12 @@ export default function ProfilePage() {
         </button>
       )}
 
+      <ProfileCompletionCard
+        completion={profileCompletion}
+        onPrimaryAction={handleProfileCompletionAction}
+        disabled={loading || saving || uploading}
+      />
+
       <ProfilePhotoGallery
         photos={photos}
         onSetPrimary={handleSetPrimaryPhoto}
@@ -429,6 +474,7 @@ export default function ProfilePage() {
       />
 
       <input
+        id="profile-name-input"
         type="text"
         placeholder="Nome"
         value={name}
@@ -439,6 +485,7 @@ export default function ProfilePage() {
       />
 
       <textarea
+        id="profile-bio-input"
         placeholder="Bio"
         value={bio}
         onChange={(e) => setBio(e.target.value)}
@@ -448,6 +495,7 @@ export default function ProfilePage() {
       />
 
       <input
+        id="profile-interests-input"
         type="text"
         placeholder="Interessi (es: musica, lettura)"
         value={interests}
