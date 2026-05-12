@@ -43,3 +43,6 @@ _vault
 .env*.local
 
 auth-password-report.csv
+
+# LoveMatch360 private business operations
+.lm360-private/
