@@ -282,10 +282,8 @@ export default function LoginPage() {
               type="button"
               style={{
                 ...secondaryButtonStyle,
-                ...(isDisabled ? buttonDisabledStyle : null),
               }}
-              onClick={handleSignup}
-              disabled={isDisabled}
+              onClick={() => navigate("/register")}
             >
               Registrati
             </button>

@@ -29,6 +29,7 @@ import Billing from "./pages/Billing.jsx";
    AUTH
 ====================================================== */
 import LoginPage from "./pages/LoginPage.jsx";
+import RegisterPage from "./pages/RegisterPage.jsx";
 import LoginWithMFA from "./pages/LoginWithMFA.jsx";
 
 /* ======================================================
@@ -59,6 +60,7 @@ export default function App() {
           fuori da AppShell
       ====================================================== */}
       <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       <Route path="/login-mfa" element={<LoginWithMFA />} />
 
       <Route
