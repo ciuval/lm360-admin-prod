@@ -55,6 +55,7 @@ export default function ProfilePage() {
 
   const [profilo, setProfilo] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [userEmail, setUserEmail] = useState("");
 
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -92,6 +93,7 @@ export default function ProfilePage() {
 
         if (!user?.id) {
           setUserId(null);
+          setUserEmail("");
           setProfilo(null);
           setName("");
           setBio("");
@@ -101,6 +103,7 @@ export default function ProfilePage() {
         }
 
         setUserId(user.id);
+        setUserEmail(user.email || "");
 
         const { data: profileData, error: profileError } = await supabase
           .from("profili")
@@ -169,6 +172,40 @@ export default function ProfilePage() {
 
   const isPremium = useMemo(() => hasCommercialPremium(profilo), [profilo]);
 
+  const ensureProfileRow = async () => {
+    if (!userId) {
+      throw new Error("Utente non autenticato.");
+    }
+
+    const payload = {
+      id: userId,
+      email: profilo?.email || userEmail || "",
+      nome: name.trim(),
+      bio: bio.trim(),
+      interessi: interests.trim(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await supabase
+      .from("profili")
+      .upsert(payload, { onConflict: "id" })
+      .select("id, nome, email, bio, interessi, foto_url, avatar_url, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account")
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    const nextProfile = data || {
+      ...(profilo || {}),
+      ...payload,
+    };
+
+    setProfilo(nextProfile);
+
+    return nextProfile;
+  };
+
   const handleAddPhoto = () => {
     const input = document.getElementById("profile-photo-input");
     input?.click();
@@ -190,7 +227,13 @@ export default function ProfilePage() {
     try {
       setUploading(true);
 
+      await ensureProfileRow();
+
+
+
       const currentPhotos = [...photos];
+
+
       const rowsToInsert = [];
 
       for (const file of filesToUse) {
@@ -261,6 +304,21 @@ export default function ProfilePage() {
         isPrimary: index === 0,
         order: index,
       }));
+
+      const tempOrderOffset = 1000;
+
+      for (const [index, item] of normalizedOrder.entries()) {
+        const { error } = await supabase
+          .from("profili_foto")
+          .update({
+            is_primary: false,
+            ordine: tempOrderOffset + index,
+          })
+          .eq("id", item.id)
+          .eq("profilo_id", userId);
+
+        if (error) throw error;
+      }
 
       for (const item of normalizedOrder) {
         const { error } = await supabase
@@ -337,6 +395,7 @@ export default function ProfilePage() {
 
       const payload = {
         id: userId,
+        email: profilo?.email || userEmail || "",
         nome: name.trim(),
         bio: bio.trim(),
         interessi: interests.trim(),
