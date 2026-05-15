@@ -305,6 +305,21 @@ export default function ProfilePage() {
         order: index,
       }));
 
+      const tempOrderOffset = 1000;
+
+      for (const [index, item] of normalizedOrder.entries()) {
+        const { error } = await supabase
+          .from("profili_foto")
+          .update({
+            is_primary: false,
+            ordine: tempOrderOffset + index,
+          })
+          .eq("id", item.id)
+          .eq("profilo_id", userId);
+
+        if (error) throw error;
+      }
+
       for (const item of normalizedOrder) {
         const { error } = await supabase
           .from("profili_foto")
