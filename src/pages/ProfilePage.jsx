@@ -290,50 +290,36 @@ export default function ProfilePage() {
     try {
       setSaving(true);
 
-      const reordered = photos.map((item, index) => {
-        if (item.id === photoId) {
-          return { ...item, isPrimary: true, order: 0 };
-        }
-        return { ...item, isPrimary: false, order: index + 1 };
-      });
-
-      const primary = reordered.find((item) => item.id === photoId);
-      const rest = reordered.filter((item) => item.id !== photoId);
-      const normalizedOrder = [primary, ...rest].filter(Boolean).map((item, index) => ({
-        ...item,
-        isPrimary: index === 0,
-        order: index,
-      }));
-
-      const tempOrderOffset = 1000;
-
-      for (const [index, item] of normalizedOrder.entries()) {
-        const { error } = await supabase
-          .from("profili_foto")
-          .update({
-            is_primary: false,
-            ordine: tempOrderOffset + index,
-          })
-          .eq("id", item.id)
-          .eq("profilo_id", userId);
-
-        if (error) throw error;
+      const selectedExists = photos.some((item) => item.id === photoId);
+      if (!selectedExists) {
+        toast.error("Foto non trovata.");
+        return;
       }
 
-      for (const item of normalizedOrder) {
-        const { error } = await supabase
-          .from("profili_foto")
-          .update({
-            is_primary: item.isPrimary,
-            ordine: item.order,
-          })
-          .eq("id", item.id)
-          .eq("profilo_id", userId);
+      const { error: resetError } = await supabase
+        .from("profili_foto")
+        .update({ is_primary: false })
+        .eq("profilo_id", userId);
 
-        if (error) throw error;
-      }
+      if (resetError) throw resetError;
 
-      setPhotos(normalizedOrder);
+      const { error: primaryError } = await supabase
+        .from("profili_foto")
+        .update({ is_primary: true })
+        .eq("id", photoId)
+        .eq("profilo_id", userId);
+
+      if (primaryError) throw primaryError;
+
+      const { data: refreshed, error: refreshError } = await supabase
+        .from("profili_foto")
+        .select("id, foto_url, ordine, is_primary, created_at")
+        .eq("profilo_id", userId)
+        .order("ordine", { ascending: true });
+
+      if (refreshError) throw refreshError;
+
+      setPhotos(normalizePhotos(refreshed || []));
       toast.success("✨ Foto principale aggiornata");
     } catch (error) {
       console.error("Errore foto principale:", error);
@@ -365,12 +351,32 @@ export default function ProfilePage() {
 
       if (refreshError) throw refreshError;
 
-      const normalized = normalizePhotos(refreshed || []);
+      const orderedRows = [...(refreshed || [])].sort((a, b) => {
+        return (a.ordine ?? 99) - (b.ordine ?? 99);
+      });
 
-      if (normalized.length > 0 && !normalized.some((item) => item.isPrimary)) {
-        normalized[0] = { ...normalized[0], isPrimary: true, order: 0 };
+      for (const [index, row] of orderedRows.entries()) {
+        const { error: reorderError } = await supabase
+          .from("profili_foto")
+          .update({
+            ordine: index,
+            is_primary: index === 0,
+          })
+          .eq("id", row.id)
+          .eq("profilo_id", userId);
+
+        if (reorderError) throw reorderError;
       }
 
+      const { data: compacted, error: compactedError } = await supabase
+        .from("profili_foto")
+        .select("id, foto_url, ordine, is_primary, created_at")
+        .eq("profilo_id", userId)
+        .order("ordine", { ascending: true });
+
+      if (compactedError) throw compactedError;
+
+      const normalized = normalizePhotos(compacted || []);
       setPhotos(normalized);
       toast.success("🗑️ Foto rimossa");
     } catch (error) {
