@@ -25,7 +25,7 @@ export default function CookiePage() {
     intro: {
       marginTop: 14,
       marginBottom: 0,
-      maxWidth: 760,
+      maxWidth: 780,
       fontSize: 16,
       lineHeight: 1.7,
       opacity: 0.92,
@@ -98,88 +98,138 @@ export default function CookiePage() {
     <main style={styles.page} aria-labelledby="cookie-title">
       <header style={styles.header}>
         <span style={styles.eyebrow}>LoveMatch360</span>
+
         <h1 id="cookie-title" style={styles.h1}>
           Cookie Policy
         </h1>
+
         <p style={styles.intro}>
-          Questa pagina descrive in modo sintetico l’uso dei cookie e di tecnologie
-          simili all’interno di LoveMatch360. Il testo completo ufficiale può essere
-          reinserito dalla versione canonica senza modificare la struttura della pagina.
+          Questa pagina descrive in modo sintetico e trasparente l’uso di cookie,
+          localStorage e tecnologie analoghe all’interno di LoveMatch360. Gli
+          analytics non essenziali vengono attivati solo dopo consenso esplicito.
         </p>
       </header>
 
       <section style={styles.section} aria-labelledby="cookie-section-1">
         <h2 id="cookie-section-1" style={styles.h2}>
-          1. Cosa sono i cookie
+          1. Cosa sono cookie e tecnologie analoghe
         </h2>
+
         <p style={styles.p}>
-          I cookie sono piccoli file o identificatori tecnici che possono essere
-          utilizzati per far funzionare correttamente il sito, ricordare preferenze,
-          migliorare l’esperienza d’uso e raccogliere informazioni aggregate sul
-          funzionamento del servizio.
+          Cookie, localStorage e tecnologie analoghe possono essere usati per far
+          funzionare correttamente il sito, ricordare alcune preferenze, proteggere
+          la sessione e, solo quando l’utente lo accetta, misurare in forma
+          minimizzata l’utilizzo del servizio.
         </p>
       </section>
 
       <section style={styles.section} aria-labelledby="cookie-section-2">
         <h2 id="cookie-section-2" style={styles.h2}>
-          2. Tipologie di cookie
+          2. Tipologie utilizzate
         </h2>
+
         <ul style={styles.ul}>
           <li style={styles.li}>
-            Cookie tecnici, necessari al funzionamento essenziale della piattaforma.
+            <strong>Cookie e tecnologie tecniche:</strong> necessari al
+            funzionamento essenziale della piattaforma, alla sicurezza e alla
+            navigazione.
           </li>
+
           <li style={styles.li}>
-            Cookie funzionali, utili a ricordare preferenze e impostazioni.
+            <strong>Preferenze locali:</strong> alcune scelte possono essere
+            salvate nel browser tramite localStorage, per esempio la chiave
+            <code> cmp.analytics </code> che ricorda la scelta sugli analytics.
           </li>
+
           <li style={styles.li}>
-            Cookie analitici, ove utilizzati, per comprendere in forma aggregata come
-            viene usato il servizio.
+            <strong>Analytics opzionali:</strong> Vercel Analytics e gli eventi
+            analytics custom di LoveMatch360 vengono attivati solo se l’utente
+            accetta gli analytics.
           </li>
+
           <li style={styles.li}>
-            Eventuali cookie di terze parti, nei limiti delle integrazioni attive e
-            realmente presenti nel prodotto.
+            <strong>Terze parti:</strong> alcuni fornitori tecnici, come Vercel e
+            Supabase, possono essere coinvolti solo per le funzionalità realmente
+            attive e necessarie.
           </li>
         </ul>
       </section>
 
       <section style={styles.section} aria-labelledby="cookie-section-3">
         <h2 id="cookie-section-3" style={styles.h2}>
-          3. Finalità dell’utilizzo
+          3. Consenso analytics
         </h2>
+
         <p style={styles.p}>
-          I cookie possono essere impiegati per garantire sessioni stabili, sicurezza,
-          continuità di navigazione, memorizzazione di preferenze e analisi tecniche
-          aggregate finalizzate al miglioramento del prodotto.
+          Quando non è presente una scelta salvata, LoveMatch360 mostra un banner
+          con due azioni: <strong>Rifiuta</strong> e <strong>Accetta</strong>.
         </p>
+
+        <ul style={styles.ul}>
+          <li style={styles.li}>
+            Se l’utente clicca <strong>Rifiuta</strong>, viene salvato
+            <code> cmp.analytics = false </code> e gli analytics opzionali non
+            vengono montati.
+          </li>
+
+          <li style={styles.li}>
+            Se l’utente clicca <strong>Accetta</strong>, viene salvato
+            <code> cmp.analytics = true </code> e gli analytics opzionali possono
+            essere attivati.
+          </li>
+
+          <li style={styles.li}>
+            Se la scelta viene rimossa dal browser, il banner può essere mostrato
+            nuovamente.
+          </li>
+        </ul>
       </section>
 
       <section style={styles.section} aria-labelledby="cookie-section-4">
         <h2 id="cookie-section-4" style={styles.h2}>
-          4. Gestione delle preferenze
+          4. Analytics custom e minimizzazione
         </h2>
+
         <p style={styles.p}>
-          L’utente può gestire o limitare i cookie attraverso le impostazioni del proprio
-          browser o tramite gli eventuali strumenti di consenso presenti sul sito, quando
-          applicabili. La disattivazione di alcuni cookie può influire su determinate
-          funzionalità della piattaforma.
+          Gli eventi analytics custom vengono inviati solo dopo consenso e sono
+          progettati per ridurre il rischio di dati personali: nomi evento, percorso
+          e proprietà vengono sanitizzati, limitati e filtrati per evitare email,
+          token, URL sensibili, messaggi, dati pagamento, foto o altri contenuti
+          personali.
         </p>
       </section>
 
       <section style={styles.section} aria-labelledby="cookie-section-5">
         <h2 id="cookie-section-5" style={styles.h2}>
-          5. Terze parti
+          5. Cosa non usiamo in questa fase
         </h2>
+
         <p style={styles.p}>
-          Alcune funzionalità possono coinvolgere servizi terzi realmente attivi nel
-          progetto. In tali casi, il trattamento tramite tecnologie analoghe ai cookie
-          dipende anche dalle rispettive policy dei fornitori coinvolti.
+          In questa fase LoveMatch360 non dichiara l’uso di cookie marketing,
+          remarketing o profilazione pubblicitaria personalizzata. Se verranno
+          introdotte integrazioni di questo tipo, la Cookie Policy e i controlli di
+          consenso dovranno essere aggiornati prima dell’attivazione.
         </p>
       </section>
 
       <section style={styles.section} aria-labelledby="cookie-section-6">
         <h2 id="cookie-section-6" style={styles.h2}>
-          6. Contatti e aggiornamenti
+          6. Gestione delle preferenze
         </h2>
+
+        <p style={styles.p}>
+          L’utente può gestire o cancellare le preferenze tramite gli strumenti del
+          browser. La cancellazione della chiave <code>cmp.analytics</code> può far
+          riapparire il banner di consenso. La disattivazione degli analytics non
+          impedisce l’uso delle funzioni principali del sito.
+        </p>
+      </section>
+
+      <section style={styles.section} aria-labelledby="cookie-section-7">
+        <h2 id="cookie-section-7" style={styles.h2}>
+          7. Contatti e aggiornamenti
+        </h2>
+
         <p style={styles.p}>
           In caso di necessità puoi contattarci attraverso i riferimenti qui sotto.
           Fa fede la versione pubblicata in questa sezione del sito.
@@ -203,8 +253,8 @@ export default function CookiePage() {
       </section>
 
       <aside style={styles.note} aria-label="Nota informativa">
-        I contatti pubblici mostrati in questa pagina sono destinati a informazioni e
-        assistenza. Le funzioni di gestione del sito restano disponibili solo per gli
+        I contatti pubblici mostrati in questa pagina sono destinati a informazioni
+        e assistenza. Le funzioni di gestione del sito restano disponibili solo per
         account autenticati con ruolo e permessi adeguati.
       </aside>
     </main>
