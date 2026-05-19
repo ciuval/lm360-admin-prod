@@ -1,86 +1,135 @@
-// ✅ File: src/pages/LogViewerAdmin.jsx
-import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import React from "react";
+
+const rows = [
+  {
+    label: "Stato",
+    value: "lettura log disattivata dal client",
+  },
+  {
+    label: "Tabella",
+    value: "public.log_attivita",
+  },
+  {
+    label: "Accesso browser",
+    value: "append-only per utenti autenticati",
+  },
+  {
+    label: "Motivo",
+    value: "i log operativi non vengono letti o esportati dal frontend",
+  },
+];
 
 export default function LogViewerAdmin() {
-  const [logs, setLogs] = useState([]);
-  const [tipoFiltro, setTipoFiltro] = useState("");
-
-  useEffect(() => {
-    const fetchLogs = async () => {
-      const { data: user, error: authError } = await supabase.auth.getUser();
-      if (!user || authError) return;
-
-      const { data: profilo } = await supabase
-        .from("profili")
-        .select("ruolo")
-        .eq("id", user.user.id)
-        .single();
-
-      if (profilo?.ruolo !== "admin") {
-        setLogs([{ tipo_azione: "ACCESSO NEGATO", descrizione: "Non sei admin." }]);
-        return;
-      }
-
-      let query = supabase
-        .from("log_attività")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(200);
-
-      if (tipoFiltro) {
-        query = query.eq("tipo_azione", tipoFiltro);
-      }
-
-      const { data, error } = await query;
-      if (!error) setLogs(data);
-    };
-
-    fetchLogs();
-  }, [tipoFiltro]);
-
-  const esportaCSV = () => {
-    const righe = logs.map(log => {
-      return `"${log.created_at}","${log.tipo_azione}","${log.user_id}","${log.pagina}","${log.descrizione}"`;
-    });
-    const header = "Data,Tipo,Utente,Pagina,Descrizione";
-    const csvContent = [header, ...righe].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "log_attività.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const tipiDisponibili = [...new Set(logs.map(log => log.tipo_azione))];
-
   return (
-    <div style={{ padding: "2rem", fontFamily: "monospace", backgroundColor: "#121212", color: "#f0f0f0" }}>
-      <h2 style={{ color: "#f08fc0" }}>📜 Log attività (Admin)</h2>
+    <main style={pageStyle} aria-labelledby="admin-log-title">
+      <section style={cardStyle}>
+        <p style={eyebrowStyle}>LoveMatch360 admin</p>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <label>🔍 Filtro tipo_azione: </label>
-        <select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)} style={{ padding: "0.5rem", backgroundColor: "#1e1e1e", color: "#fff", border: "1px solid #444", borderRadius: "6px" }}>
-          <option value="">(Tutti)</option>
-          {tipiDisponibili.map((tipo) => (
-            <option key={tipo} value={tipo}>{tipo}</option>
+        <h1 id="admin-log-title" style={titleStyle}>
+          Log operativi non disponibili dal client
+        </h1>
+
+        <p style={textStyle}>
+          La tabella public.log_attivita e stata resa append-only lato browser.
+          Questa schermata non legge, non esporta e non visualizza log operativi
+          dal frontend.
+        </p>
+
+        <div style={gridStyle}>
+          {rows.map((row) => (
+            <div key={row.label} style={rowStyle}>
+              <span style={labelStyle}>{row.label}</span>
+              <strong style={valueStyle}>{row.value}</strong>
+            </div>
           ))}
-        </select>
-        <button onClick={esportaCSV} style={{ marginLeft: "1rem", padding: "0.5rem 1rem", borderRadius: "6px", backgroundColor: "#f08fc0", color: "black", fontWeight: "bold", border: "none", cursor: "pointer" }}>⬇️ Esporta CSV</button>
-      </div>
+        </div>
 
-      <pre style={{ background: "#1e1e1e", padding: "1rem", borderRadius: "8px", maxHeight: "70vh", overflowY: "auto" }}>
-        {logs.map((log) => (
-          <div key={log.id}>
-            <span>🕓 {new Date(log.created_at).toLocaleString()}</span> | <strong>{log.tipo_azione}</strong> | 👤 {log.user_id} | 📄 {log.pagina}<br />→ {log.descrizione}
-            <hr style={{ borderColor: "#333" }} />
-          </div>
-        ))}
-      </pre>
-    </div>
+        <p style={noteStyle}>
+          Eventuali consultazioni amministrative dei log devono passare da un
+          canale server-side verificato, con permessi dedicati e minimizzazione
+          del contenuto.
+        </p>
+      </section>
+    </main>
   );
 }
 
+const pageStyle = {
+  minHeight: "100vh",
+  padding: "32px 16px",
+  backgroundColor: "#121212",
+  color: "#f6f6f6",
+  fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+};
+
+const cardStyle = {
+  maxWidth: 860,
+  margin: "0 auto",
+  padding: 28,
+  borderRadius: 22,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.04)",
+};
+
+const eyebrowStyle = {
+  margin: 0,
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: "#f08fc0",
+};
+
+const titleStyle = {
+  margin: "12px 0 0",
+  fontSize: "clamp(2rem, 5vw, 3rem)",
+  lineHeight: 1.05,
+};
+
+const textStyle = {
+  margin: "18px 0 0",
+  maxWidth: 720,
+  fontSize: 16,
+  lineHeight: 1.7,
+  color: "rgba(255,255,255,0.82)",
+};
+
+const gridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 14,
+  marginTop: 24,
+};
+
+const rowStyle = {
+  padding: 16,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,0,0,0.24)",
+};
+
+const labelStyle = {
+  display: "block",
+  marginBottom: 8,
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: "rgba(255,255,255,0.58)",
+};
+
+const valueStyle = {
+  display: "block",
+  fontSize: 16,
+  lineHeight: 1.4,
+};
+
+const noteStyle = {
+  margin: "24px 0 0",
+  padding: 16,
+  borderRadius: 16,
+  border: "1px solid rgba(240,143,192,0.24)",
+  background: "rgba(240,143,192,0.08)",
+  color: "rgba(255,255,255,0.82)",
+  lineHeight: 1.7,
+};
