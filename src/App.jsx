@@ -51,6 +51,7 @@ import Privacy from "./pages/legal/Privacy.jsx";
 import Cookie from "./pages/legal/Cookie.jsx";
 import Terms from "./pages/legal/Terms.jsx";
 import Refunds from "./pages/legal/Refunds.jsx";
+import LibroDaZeroLoveMatch360 from "./pages/LibroDaZeroLoveMatch360.jsx";
 
 export default function App() {
   return (
@@ -169,6 +170,7 @@ export default function App() {
               <Route path="/cookie" element={<Cookie />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/refunds" element={<Refunds />} />
+              <Route path="/libro/da-zero-a-lovematch360" element={<LibroDaZeroLoveMatch360 />} />
 
               {/* ======================================================
                   FALLBACK
