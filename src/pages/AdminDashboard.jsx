@@ -1,124 +1,124 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import ReportEconomicoMensile from "../components/ReportEconomicoMensile";
+import React from "react";
+
+const items = [
+  {
+    title: "Area in revisione",
+    text: "Questa sezione e stata messa in pausa per proteggere ruoli, profili e funzioni interne.",
+  },
+  {
+    title: "Nessuna modifica utenti",
+    text: "Da questa pagina non e possibile cambiare ruoli, stati account o accessi.",
+  },
+  {
+    title: "Nessuna cancellazione",
+    text: "Le azioni delicate richiederanno un percorso separato, controllato e approvato.",
+  },
+];
 
 export default function AdminDashboard() {
-  const [utenti, setUtenti] = useState([]);
-  const [filtro, setFiltro] = useState("");
-
-  useEffect(() => {
-    fetchUtenti();
-  }, []);
-
-  const fetchUtenti = async () => {
-    const { data, error } = await supabase.from("profili").select("*");
-    if (!error && data) setUtenti(data);
-  };
-
-  const cambiaRuolo = async (id, nuovoRuolo) => {
-    await supabase.from("profili").update({ ruolo: nuovoRuolo }).eq("id", id);
-    fetchUtenti();
-  };
-
-  const cambiaPremium = async (id, nuovoValore) => {
-    await supabase.from("profili").update({ premium: nuovoValore }).eq("id", id);
-    fetchUtenti();
-  };
-
-  const eliminaUtente = async (id) => {
-    await supabase.from("profili").delete().eq("id", id);
-    fetchUtenti();
-  };
-
-  const utentiFiltrati = utenti.filter((u) =>
-    (u.username || "").toLowerCase().includes(filtro.toLowerCase())
-  );
-
   return (
-    <div style={containerStyle}>
-      <h2 style={titleStyle}>🛠️ Admin Dashboard</h2>
+    <main style={pageStyle} aria-labelledby="admin-dashboard-title">
+      <section style={cardStyle}>
+        <p style={eyebrowStyle}>LoveMatch360 admin</p>
 
-      <input
-        type="text"
-        placeholder="🔍 Cerca utente..."
-        value={filtro}
-        onChange={(e) => setFiltro(e.target.value)}
-        style={inputStyle}
-      />
+        <h1 id="admin-dashboard-title" style={titleStyle}>
+          Pannello amministrativo in revisione
+        </h1>
 
-      <ul style={listStyle}>
-        {utentiFiltrati.map((u) => (
-          <li key={u.id} style={itemStyle}>
-            <strong>{u.username || "Anonimo"}</strong> – <code>{u.ruolo}</code>
-            {u.premium && <span style={premiumBadge}> 🌟 Premium</span>}
-            <br />
-            <button onClick={() => cambiaRuolo(u.id, "admin")} style={btn}>🔑 Admin</button>
-            <button onClick={() => cambiaRuolo(u.id, "utente")} style={btn}>🙋‍♂️ Utente</button>
-            <button onClick={() => cambiaPremium(u.id, !u.premium)} style={{ ...btn, backgroundColor: u.premium ? "#888" : "#ffd700", color: u.premium ? "#fff" : "#000" }}>
-            <ReportEconomicoMensile />
-              {u.premium ? "💼 Rimuovi Premium" : "🌟 Rendi Premium"}
-            </button>
-            <button onClick={() => eliminaUtente(u.id)} style={{ ...btn, backgroundColor: "#ff4d4d" }}>🗑️ Elimina</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+        <p style={textStyle}>
+          Questa area e stata resa sicura mentre prepariamo una struttura
+          amministrativa piu ordinata, con ruoli separati e permessi chiari.
+        </p>
+
+        <div style={gridStyle}>
+          {items.map((item) => (
+            <article key={item.title} style={itemStyle}>
+              <h2 style={itemTitleStyle}>{item.title}</h2>
+              <p style={itemTextStyle}>{item.text}</p>
+            </article>
+          ))}
+        </div>
+
+        <p style={noteStyle}>
+          Le future funzioni amministrative saranno divise tra Supporto,
+          Operativo e Super Admin, una cosa alla volta e solo dopo verifiche.
+        </p>
+      </section>
+    </main>
   );
 }
 
-// STILI
-const containerStyle = {
-  backgroundColor: "#121212",
-  color: "#fff",
-  padding: "2rem",
-  fontFamily: "Segoe UI, sans-serif",
+const pageStyle = {
   minHeight: "100vh",
+  padding: "32px 16px",
+  backgroundColor: "#121212",
+  color: "#f6f6f6",
+  fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+};
+
+const cardStyle = {
+  maxWidth: 900,
+  margin: "0 auto",
+  padding: 28,
+  borderRadius: 22,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.04)",
+};
+
+const eyebrowStyle = {
+  margin: 0,
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: "#f08fc0",
 };
 
 const titleStyle = {
-  color: "#f08fc0",
-  textShadow: "0 0 10px #f08fc0",
-  marginBottom: "1rem",
+  margin: "12px 0 0",
+  fontSize: "clamp(2rem, 5vw, 3rem)",
+  lineHeight: 1.05,
 };
 
-const inputStyle = {
-  padding: "0.6rem",
-  marginBottom: "1rem",
-  width: "100%",
-  borderRadius: "6px",
-  backgroundColor: "#1e1e1e",
-  color: "#fff",
-  border: "none",
+const textStyle = {
+  margin: "18px 0 0",
+  maxWidth: 720,
+  fontSize: 16,
+  lineHeight: 1.7,
+  color: "rgba(255,255,255,0.82)",
 };
 
-const listStyle = {
-  listStyle: "none",
-  padding: 0,
+const gridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 14,
+  marginTop: 24,
 };
 
 const itemStyle = {
-  marginBottom: "1rem",
-  borderBottom: "1px solid #333",
-  paddingBottom: "1rem",
+  padding: 16,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,0,0,0.24)",
 };
 
-const btn = {
-  margin: "0.4rem 0.4rem 0 0",
-  padding: "0.4rem 0.8rem",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-  backgroundColor: "#333",
-  color: "#fff",
+const itemTitleStyle = {
+  margin: 0,
+  fontSize: 17,
 };
 
-const premiumBadge = {
-  backgroundColor: "#ffd700",
-  color: "#000",
-  padding: "0.2rem 0.5rem",
-  borderRadius: "4px",
-  fontSize: "0.75rem",
-  marginLeft: "0.5rem",
-  fontWeight: "bold",
+const itemTextStyle = {
+  margin: "10px 0 0",
+  lineHeight: 1.6,
+  color: "rgba(255,255,255,0.78)",
 };
 
+const noteStyle = {
+  margin: "24px 0 0",
+  padding: 16,
+  borderRadius: 16,
+  border: "1px solid rgba(240,143,192,0.24)",
+  background: "rgba(240,143,192,0.08)",
+  color: "rgba(255,255,255,0.82)",
+  lineHeight: 1.7,
+};

@@ -1,95 +1,105 @@
-// ✅ File: src/pages/PrezziStripeEditor.jsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-export default function PrezziStripeEditor() {
-  const [prezzi, setPrezzi] = useState([]);
-  const [caricamento, setCaricamento] = useState(true);
-  const [nickname, setNickname] = useState("");
-  const [importo, setImporto] = useState("");
-  const [valuta, setValuta] = useState("eur");
-  const [productId, setProductId] = useState("");
+const safeguards = [
+  "nessuna modifica commerciale da questa schermata",
+  "nessun collegamento di pagamento avviato",
+  "nessuna configurazione sensibile esposta",
+  "riattivazione solo con procedura controllata",
+];
 
-  useEffect(() => {
-    const fetchPrezzi = async () => {
-      try {
-        const res = await fetch("/api/get-prices");
-        const data = await res.json();
-        setPrezzi(data);
-      } catch (err) {
-        console.error("Errore nel caricamento prezzi:", err);
-      } finally {
-        setCaricamento(false);
-      }
-    };
-    fetchPrezzi();
-  }, []);
-
-  const handleCreatePrice = async () => {
-    if (!importo || !productId) return;
-    try {
-      const res = await fetch("/api/create-price", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nickname,
-          unit_amount: parseFloat(importo) * 100,
-          currency: valuta,
-          product: productId,
-        }),
-      });
-      const data = await res.json();
-      alert("✅ Prezzo creato: " + data.id);
-    } catch (err) {
-      alert("❌ Errore nella creazione del prezzo");
-    }
-  };
-
+export default function PricingAdminPlaceholder() {
   return (
-    <div style={{ padding: "2rem", color: "#fff" }}>
-      <h2 style={{ color: "#f08fc0" }}>🛠️ Editor Prezzi Stripe</h2>
+    <main style={pageStyle} aria-labelledby="pricing-admin-title">
+      <section style={cardStyle}>
+        <p style={eyebrowStyle}>LoveMatch360 admin</p>
 
-      <div style={{ marginBottom: "2rem" }}>
-        <h4>Crea un nuovo prezzo</h4>
-        <input type="text" placeholder="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} style={input} />
-        <input type="number" placeholder="Importo (€)" value={importo} onChange={e => setImporto(e.target.value)} style={input} />
-        <input type="text" placeholder="Valuta (es. eur)" value={valuta} onChange={e => setValuta(e.target.value)} style={input} />
-        <input type="text" placeholder="Product ID" value={productId} onChange={e => setProductId(e.target.value)} style={input} />
-        <button onClick={handleCreatePrice} style={button}>➕ Crea Prezzo</button>
-      </div>
+        <h1 id="pricing-admin-title" style={titleStyle}>
+          Configurazione commerciale in revisione
+        </h1>
 
-      <h4>Prezzi esistenti</h4>
-      {caricamento ? <p>Caricamento...</p> : (
-        <ul>
-          {prezzi.map((p, i) => (
-            <li key={i} style={{ marginBottom: "1rem" }}>
-              💶 <strong>{(p.unit_amount / 100).toFixed(2)} {p.currency.toUpperCase()}</strong> - {p.nickname || "(senza nome)"}<br />
-              🆔 <code>{p.id}</code> – 🛒 Product: {p.product}
-            </li>
+        <p style={textStyle}>
+          Questa area e temporaneamente informativa. Le modifiche commerciali
+          richiedono una procedura separata, verificata e approvata prima di
+          qualsiasi pubblicazione.
+        </p>
+
+        <div style={gridStyle}>
+          {safeguards.map((item) => (
+            <div key={item} style={itemStyle}>
+              {item}
+            </div>
           ))}
-        </ul>
-      )}
-    </div>
+        </div>
+
+        <p style={noteStyle}>
+          Per proteggere utenti, valore del progetto e continuita del servizio,
+          questa pagina non avvia azioni operative.
+        </p>
+      </section>
+    </main>
   );
 }
 
-const input = {
-  display: "block",
-  margin: "0.5rem 0",
-  padding: "0.6rem 1rem",
-  borderRadius: "6px",
-  width: "100%",
-  backgroundColor: "#1e1e1e",
-  color: "#fff",
-  border: "1px solid #555",
+const pageStyle = {
+  minHeight: "100vh",
+  padding: "32px 16px",
+  backgroundColor: "#121212",
+  color: "#f6f6f6",
+  fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
 };
 
-const button = {
-  marginTop: "0.5rem",
-  padding: "0.6rem 1.4rem",
-  backgroundColor: "#f08fc0",
-  color: "black",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontWeight: "bold"
+const cardStyle = {
+  maxWidth: 900,
+  margin: "0 auto",
+  padding: 28,
+  borderRadius: 22,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.04)",
+};
+
+const eyebrowStyle = {
+  margin: 0,
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: "#f08fc0",
+};
+
+const titleStyle = {
+  margin: "12px 0 0",
+  fontSize: "clamp(2rem, 5vw, 3rem)",
+  lineHeight: 1.05,
+};
+
+const textStyle = {
+  margin: "18px 0 0",
+  maxWidth: 720,
+  fontSize: 16,
+  lineHeight: 1.7,
+  color: "rgba(255,255,255,0.82)",
+};
+
+const gridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 14,
+  marginTop: 24,
+};
+
+const itemStyle = {
+  padding: 14,
+  borderRadius: 14,
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,0,0,0.24)",
+};
+
+const noteStyle = {
+  margin: "24px 0 0",
+  padding: 16,
+  borderRadius: 16,
+  border: "1px solid rgba(240,143,192,0.24)",
+  background: "rgba(240,143,192,0.08)",
+  color: "rgba(255,255,255,0.82)",
+  lineHeight: 1.7,
 };
