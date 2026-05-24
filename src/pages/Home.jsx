@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadCurrentAccountTier } from "../lib/accountTier";
 
-const FACEBOOK_VIDEO_URL = "https://www.facebook.com/";
+const HOME_SECONDARY_ROUTE = "/premium";
 
 function createClickSound() {
   try {
@@ -110,7 +110,7 @@ export default function Home() {
         description:
           "LoveMatch360 è uno spazio collaborativo e relazionale: scopri, entra in contatto, costruisci presenza e muoviti con più chiarezza.",
         primaryLabel: "Accedi",
-        secondaryLabel: "Guarda il video",
+        secondaryLabel: "Scopri Premium",
       };
     }
 
@@ -128,7 +128,7 @@ export default function Home() {
       return {
         title: `${displayName}, hai già il massimo accesso.`,
         description:
-          "Il tuo profilo è attivo al livello più alto del flusso commerciale. Ora conta usare bene visibilità, scoperta e qualità della presenza.",
+          "Il tuo accesso è già al livello più alto. Ora conta usare bene visibilità, scoperta e qualità della presenza.",
         primaryLabel: "Scopri i profili",
         secondaryLabel: "Vai al profilo",
       };
@@ -174,13 +174,7 @@ export default function Home() {
     playClick();
     navigate(path);
   };
-
-  const openExternal = (url) => {
-    playClick();
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
-  const handlePrimary = () => {
+const handlePrimary = () => {
     if (loading) return;
 
     if (!isAuthed) {
@@ -200,7 +194,7 @@ export default function Home() {
     if (loading) return;
 
     if (!isAuthed) {
-      openExternal(FACEBOOK_VIDEO_URL);
+      go(HOME_SECONDARY_ROUTE);
       return;
     }
 
@@ -287,7 +281,7 @@ export default function Home() {
               <span style={quickTextStyle}>Valore, accesso e percorso chiaro.</span>
             </button>
 
-            <button type="button" style={quickCardStyle} onClick={() => openExternal(FACEBOOK_VIDEO_URL)}>
+            <button type="button" style={quickCardStyle} onClick={() => go(HOME_SECONDARY_ROUTE)}>
               <span style={quickTitleStyle}>Video Facebook</span>
               <span style={quickTextStyle}>Apri il video esterno del progetto.</span>
             </button>
