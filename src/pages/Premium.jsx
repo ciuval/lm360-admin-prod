@@ -46,10 +46,10 @@ export default function PremiumPage() {
         badge: "Accesso ospite",
         title: "Premium quando serve davvero.",
         description:
-          "Più visibilità, filtri migliori e un’esperienza più fluida per chi vuole entrare nel cuore vivo di LoveMatch360.",
+          "Più visibilità, strumenti più chiari e un percorso più fluido per farti notare meglio dentro LoveMatch360.",
         primaryLabel: "Accedi per continuare",
         secondaryLabel: "Torna Home",
-        note: "Per attivare o gestire il piano è necessario accedere con un account valido.",
+        note: "Per valutare o gestire Premium devi accedere con un account valido. Nessun acquisto parte da questa schermata.",
       };
     }
 
@@ -58,10 +58,10 @@ export default function PremiumPage() {
         badge: "Admin",
         title: "Controllo admin attivo",
         description:
-          "Il tuo account ha privilegi amministrativi. Le funzioni premium commerciali non sono necessarie per accedere ai controlli di gestione.",
+          "Il tuo account ha privilegi amministrativi. Puoi accedere ai controlli di gestione senza aprire un nuovo percorso Premium.",
         primaryLabel: "Vai al profilo",
         secondaryLabel: "Apri Admin",
-        note: "Questo account non richiede una nuova attivazione commerciale.",
+        note: "Questo account ha già i permessi necessari: non serve alcuna nuova attivazione.",
       };
     }
 
@@ -70,7 +70,7 @@ export default function PremiumPage() {
         badge: "Super attivo",
         title: "Hai già il livello più alto.",
         description:
-          "Il tuo account ha già accesso esteso. Nessuna nuova attivazione premium è necessaria in questo flusso.",
+          "Il tuo account ha già accesso esteso. Puoi usare le aree disponibili senza aprire un nuovo percorso Premium.",
         primaryLabel: "Vai al profilo",
         secondaryLabel: "Apri Quantum",
         note: "Il piano Super risulta già attivo.",
@@ -96,7 +96,7 @@ export default function PremiumPage() {
         "Filtri pro, più qualità nella scoperta dei profili e un percorso più diretto verso connessioni che meritano davvero attenzione.",
       primaryLabel: "Attiva Premium",
       secondaryLabel: "Scopri i profili",
-      note: "Puoi attivare il piano in pochi passaggi dal flusso dedicato.",
+      note: "Puoi valutare Premium con calma e procedere solo quando il percorso è davvero adatto a te.",
     };
   }, [isAuthed, tier]);
 
