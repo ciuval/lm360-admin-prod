@@ -72,7 +72,7 @@ function getCurrentSection(pathname, isAuthed, tier) {
       label: "Home",
       helper: isAuthed
         ? "Questa è la tua base: da qui puoi orientarti e ripartire pulito."
-        : "Questa è la vetrina iniziale del prodotto.",
+        : "Questa è la porta d'ingresso: da qui inizi, capisci il percorso e scegli cosa fare.",
     };
   }
 
@@ -102,8 +102,8 @@ function getCurrentSection(pathname, isAuthed, tier) {
       label: "Premium",
       helper:
         tier === "premium" || tier === "super" || tier === "admin"
-          ? "Qui verifichi il valore del tuo livello attuale, senza attivazioni inutili."
-          : "Qui capisci se e quando ha senso sbloccare il livello premium.",
+          ? "Qui controlli il tuo accesso e usi il valore disponibile, senza passaggi inutili."
+          : "Qui scopri il valore Premium e decidi con calma se fa davvero per te.",
     };
   }
 
@@ -138,7 +138,7 @@ function getCurrentSection(pathname, isAuthed, tier) {
   if (pathname.startsWith("/checkout")) {
     return {
       label: "Checkout",
-      helper: "Qui si apre il passaggio tecnico di pagamento, solo se il flusso commerciale è attivo.",
+      helper: "Qui trovi il passaggio di pagamento solo quando il percorso Premium è davvero attivo.",
     };
   }
 
