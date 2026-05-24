@@ -1,4 +1,4 @@
-﻿const REQUIRED_ITEMS = [
+const REQUIRED_ITEMS = [
   {
     key: "name",
     label: "Nome",
