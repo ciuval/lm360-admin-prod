@@ -83,6 +83,13 @@ function getCurrentSection(pathname, isAuthed, tier) {
     };
   }
 
+  if (pathname.startsWith("/welcome")) {
+    return {
+      label: "Inizia",
+      helper:
+        "Qui trovi il percorso guidato: profilo, scoperta, match e Premium solo quando ha senso per te.",
+    };
+  }
   if (pathname.startsWith("/profilo")) {
     return {
       label: "Profilo",
@@ -290,6 +297,7 @@ export default function AppShell({ children }) {
           <div style={bottomRowStyle}>
             <nav aria-label="Navigazione principale" style={navStyle}>
               <ShellLink to="/">Home</ShellLink>
+          <ShellLink to="/welcome">Inizia</ShellLink>
               <ShellLink to="/premium">Premium</ShellLink>
 
               {isAuthed ? (

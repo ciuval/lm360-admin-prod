@@ -281,9 +281,9 @@ const handlePrimary = () => {
               <span style={quickTextStyle}>Valore, accesso e percorso chiaro.</span>
             </button>
 
-            <button type="button" style={quickCardStyle} onClick={() => go(HOME_SECONDARY_ROUTE)}>
-              <span style={quickTitleStyle}>Video Facebook</span>
-              <span style={quickTextStyle}>Apri il video esterno del progetto.</span>
+            <button type="button" style={quickCardStyle} onClick={() => go("/welcome")}>
+              <span style={quickTitleStyle}>Inizia</span>
+              <span style={quickTextStyle}>Percorso guidato: profilo, scoperta e Premium con calma.</span>
             </button>
           </div>
         </div>
@@ -301,7 +301,7 @@ const handlePrimary = () => {
         <article style={infoCardStyle}>
           <h2 style={cardTitleStyle}>Dove puoi andare</h2>
           <p style={cardTextStyle}>
-            Profilo, Scopri, Premium, Billing, Admin: solo percorsi vivi. Niente pulsanti fantasma,
+            Inizia, Profilo, Scopri, Premium, Billing, Admin: solo percorsi vivi. Niente pulsanti fantasma,
             niente strade senza uscita.
           </p>
         </article>
