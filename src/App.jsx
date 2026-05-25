@@ -13,6 +13,7 @@ import RequireAdmin from "./components/RequireAdmin.jsx";
    CORE PAGES
 ====================================================== */
 import Home from "./pages/Home.jsx";
+import WelcomePage from "./pages/WelcomePage.jsx";
 import Premium from "./pages/Premium.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import ProfilePublicCard from "./pages/ProfilePublicCard.jsx";
@@ -73,6 +74,7 @@ export default function App() {
                   PUBLIC
               ====================================================== */}
               <Route path="/" element={<Home />} />
+        <Route path="/welcome" element={<WelcomePage />} />
               <Route path="/premium" element={<Premium />} />
               <Route 
                 path="/profilo"
