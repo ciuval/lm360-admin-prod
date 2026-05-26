@@ -1,302 +1,165 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { loadCurrentAccountTier } from "../lib/accountTier";
+
+const cards = [
+  {
+    title: "Prima il valore",
+    text: "LoveMatch360 sta rafforzando profili, onboarding, scoperta e fiducia prima della monetizzazione reale.",
+  },
+  {
+    title: "Premium resta facoltativo",
+    text: "Chi vuole può valutare più valore in futuro. Chi non vuole può restare nel percorso base.",
+  },
+  {
+    title: "Nessun acquisto automatico",
+    text: "Da questa pagina non parte nessun checkout e non viene modificato lo stato account.",
+  },
+];
 
 export default function AttivaPremium() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [tier, setTier] = useState("free");
-  const [isAuthed, setIsAuthed] = useState(false);
-
-  useEffect(() => {
-    let alive = true;
-
-    async function run() {
-      try {
-        setLoading(true);
-        const result = await loadCurrentAccountTier();
-
-        if (!alive) return;
-
-        setTier(result?.tier || "free");
-        setIsAuthed(Boolean(result?.isAuthed));
-      } catch {
-        if (!alive) return;
-        setTier("free");
-        setIsAuthed(false);
-      } finally {
-        if (alive) setLoading(false);
-      }
-    }
-
-    run();
-
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const hasPremiumAccess = useMemo(() => {
-    return tier === "premium" || tier === "super" || tier === "admin";
-  }, [tier]);
-
-  const content = useMemo(() => {
-    if (!isAuthed) {
-      return {
-        badge: "Accesso ospite",
-        title: "Attiva Premium",
-        description:
-          "Per entrare nel flusso premium devi prima accedere con un account valido.",
-        primaryLabel: "Vai al login",
-        secondaryLabel: "Torna a Premium",
-        note: "Nessuna attivazione parte senza autenticazione.",
-      };
-    }
-
-    if (tier === "admin") {
-      return {
-        badge: "Admin",
-        title: "Controllo admin già attivo",
-        description:
-          "Il tuo account ha già privilegi amministrativi. Non serve alcuna attivazione premium commerciale.",
-        primaryLabel: "Vai al profilo",
-        secondaryLabel: "Apri Admin",
-        note: "Questo account non usa il flusso commerciale premium.",
-      };
-    }
-
-    if (tier === "super") {
-      return {
-        badge: "Super attivo",
-        title: "Hai già il livello più alto.",
-        description:
-          "Il tuo account ha già accesso al livello Super. Nessuna nuova attivazione è necessaria.",
-        primaryLabel: "Vai al profilo",
-        secondaryLabel: "Apri Quantum",
-        note: "Nessun checkout viene avviato per un account già abilitato.",
-      };
-    }
-
-    if (tier === "premium") {
-      return {
-        badge: "Premium attivo",
-        title: "Il tuo Premium è già acceso.",
-        description:
-          "Il tuo account premium è già attivo. Non devi attivare di nuovo nulla da questa pagina.",
-        primaryLabel: "Vai al profilo",
-        secondaryLabel: "Apri Billing",
-        note: "Il checkout non parte se il piano è già attivo.",
-      };
-    }
-
-    return {
-      badge: "Free",
-      title: "Attiva il tuo Premium",
-      description:
-        "Da qui entri nel checkout vero. Nessuna scrittura manuale in tabella: il flusso corretto passa da Stripe.",
-      primaryLabel: "Procedi al checkout",
-      secondaryLabel: "Torna a Premium",
-      note: "Il passaggio successivo apre il checkout del piano configurato.",
-    };
-  }, [isAuthed, tier]);
-
-  const handlePrimaryAction = () => {
-    if (!isAuthed) {
-      navigate("/login");
-      return;
-    }
-
-    if (tier === "admin" || tier === "premium" || tier === "super") {
-      navigate("/profilo");
-      return;
-    }
-
-    navigate("/checkout");
-  };
-
-  const handleSecondaryAction = () => {
-    if (!isAuthed) {
-      navigate("/premium");
-      return;
-    }
-
-    if (tier === "admin") {
-      navigate("/admin");
-      return;
-    }
-
-    if (tier === "super") {
-      navigate("/quantum");
-      return;
-    }
-
-    if (tier === "premium") {
-      navigate("/billing");
-      return;
-    }
-
-    navigate("/premium");
-  };
-
-  if (loading) {
-    return (
-      <section style={sectionStyle}>
-        <div style={cardStyle}>
-          <span style={badgeStyle("neutral")}>Premium</span>
-          <h1 style={titleStyle}>Verifica stato account...</h1>
-          <p style={textStyle}>
-            Stiamo controllando il tuo accesso per mostrarti il percorso giusto.
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   return (
-    <section style={sectionStyle}>
-      <div style={cardStyle}>
-        <span
-          style={badgeStyle(
-            tier === "admin"
-              ? "admin"
-              : tier === "super"
-                ? "super"
-                : tier === "premium"
-                  ? "premium"
-                  : "neutral"
-          )}
-        >
-          {content.badge}
-        </span>
+    <main style={pageStyle} aria-labelledby="attiva-premium-paused-title">
+      <section style={cardStyle}>
+        <p style={eyebrowStyle}>LoveMatch360 · Premium</p>
 
-        <h1 style={titleStyle}>{content.title}</h1>
-        <p style={textStyle}>{content.description}</p>
+        <h1 id="attiva-premium-paused-title" style={titleStyle}>
+          Premium in pausa controllata.
+        </h1>
 
-        <div style={actionsRowStyle}>
-          <button type="button" style={primaryButtonStyle} onClick={handlePrimaryAction}>
-            {content.primaryLabel}
+        <p style={textStyle}>
+          Costruire e mantenere un servizio richiede lavoro, tempo e risorse.
+          Per questo Premium resta un percorso futuro e facoltativo, ma in
+          questa fase non viene avviato alcun pagamento dal browser.
+        </p>
+
+        <div style={gridStyle}>
+          {cards.map((card) => (
+            <article key={card.title} style={itemStyle}>
+              <h2 style={itemTitleStyle}>{card.title}</h2>
+              <p style={itemTextStyle}>{card.text}</p>
+            </article>
+          ))}
+        </div>
+
+        <div style={actionsStyle}>
+          <button type="button" style={primaryButtonStyle} onClick={() => navigate("/welcome")}>
+            Vai a Inizia
           </button>
 
-          <button type="button" style={secondaryButtonStyle} onClick={handleSecondaryAction}>
-            {content.secondaryLabel}
+          <button type="button" style={secondaryButtonStyle} onClick={() => navigate("/premium")}>
+            Torna a Premium
           </button>
         </div>
 
-        <p style={noteStyle}>{content.note}</p>
-      </div>
-    </section>
+        <p style={noteStyle}>
+          Nessun checkout parte da questa pagina. Nessuna scrittura manuale
+          viene fatta su profili, piani o abbonamenti.
+        </p>
+      </section>
+    </main>
   );
 }
 
-const sectionStyle = {
-  minHeight: "60vh",
-  display: "grid",
-  placeItems: "center",
-  padding: "24px 16px",
+const pageStyle = {
+  minHeight: "100vh",
+  padding: "32px 16px",
+  backgroundColor: "#121212",
+  color: "#f6f6f6",
+  fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
 };
 
 const cardStyle = {
-  width: "100%",
-  maxWidth: "820px",
-  padding: "36px 24px",
-  borderRadius: "24px",
-  border: "1px solid rgba(255,255,255,0.08)",
-  background:
-    "linear-gradient(180deg, rgba(28,28,34,0.96) 0%, rgba(16,16,22,0.96) 100%)",
-  boxShadow: "0 20px 50px rgba(0,0,0,0.28)",
-  textAlign: "center",
+  maxWidth: 940,
+  margin: "0 auto",
+  padding: 28,
+  borderRadius: 24,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.045)",
+};
+
+const eyebrowStyle = {
+  margin: 0,
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: "#f08fc0",
 };
 
 const titleStyle = {
-  margin: "16px 0 0",
-  fontSize: "clamp(2rem, 4vw, 3.2rem)",
+  margin: "12px 0 0",
+  fontSize: "clamp(2rem, 6vw, 3.4rem)",
   lineHeight: 1.05,
-  color: "#ffffff",
 };
 
 const textStyle = {
-  marginTop: "18px",
-  marginBottom: 0,
-  fontSize: "1.12rem",
-  lineHeight: 1.8,
-  color: "rgba(255,255,255,0.88)",
-  maxWidth: "62ch",
-  marginInline: "auto",
+  margin: "18px 0 0",
+  maxWidth: 780,
+  fontSize: 16,
+  lineHeight: 1.75,
+  color: "rgba(255,255,255,0.82)",
 };
 
-const actionsRowStyle = {
-  marginTop: "30px",
+const gridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 14,
+  marginTop: 24,
+};
+
+const itemStyle = {
+  padding: 16,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,0,0,0.24)",
+};
+
+const itemTitleStyle = {
+  margin: 0,
+  fontSize: 18,
+};
+
+const itemTextStyle = {
+  margin: "10px 0 0",
+  lineHeight: 1.65,
+  color: "rgba(255,255,255,0.78)",
+};
+
+const actionsStyle = {
   display: "flex",
-  gap: "12px",
-  justifyContent: "center",
   flexWrap: "wrap",
+  gap: 12,
+  marginTop: 24,
 };
 
 const primaryButtonStyle = {
-  padding: "14px 24px",
-  minWidth: "220px",
   border: "none",
-  borderRadius: "14px",
-  backgroundColor: "#e48abb",
-  color: "#111111",
-  fontSize: "1rem",
-  fontWeight: 800,
+  borderRadius: 999,
+  padding: "12px 18px",
+  background: "#f08fc0",
+  color: "#121212",
+  fontWeight: 900,
   cursor: "pointer",
 };
 
 const secondaryButtonStyle = {
-  padding: "14px 24px",
-  minWidth: "220px",
-  borderRadius: "14px",
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(255,255,255,0.05)",
-  color: "#ffffff",
-  fontSize: "1rem",
-  fontWeight: 700,
+  border: "1px solid rgba(255,255,255,0.18)",
+  borderRadius: 999,
+  padding: "12px 18px",
+  background: "rgba(255,255,255,0.06)",
+  color: "#f6f6f6",
+  fontWeight: 800,
   cursor: "pointer",
 };
 
 const noteStyle = {
-  marginTop: "18px",
-  fontSize: "0.95rem",
-  lineHeight: 1.6,
-  color: "rgba(255,255,255,0.68)",
+  margin: "24px 0 0",
+  padding: 16,
+  borderRadius: 16,
+  border: "1px solid rgba(240,143,192,0.24)",
+  background: "rgba(240,143,192,0.08)",
+  color: "rgba(255,255,255,0.84)",
+  lineHeight: 1.7,
 };
-
-function badgeStyle(tone) {
-  const tones = {
-    premium: {
-      background: "rgba(240,143,192,0.16)",
-      border: "1px solid rgba(240,143,192,0.26)",
-      color: "#ffd9e8",
-    },
-    super: {
-      background: "rgba(125,211,252,0.16)",
-      border: "1px solid rgba(125,211,252,0.28)",
-      color: "#d8f1ff",
-    },
-    admin: {
-      background: "rgba(250,204,21,0.16)",
-      border: "1px solid rgba(250,204,21,0.28)",
-      color: "#ffe79a",
-    },
-    neutral: {
-      background: "rgba(255,255,255,0.06)",
-      border: "1px solid rgba(255,255,255,0.10)",
-      color: "#f3f4f6",
-    },
-  };
-
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 36,
-    padding: "0 14px",
-    borderRadius: 999,
-    fontSize: 13,
-    fontWeight: 800,
-    letterSpacing: "0.01em",
-    ...(tones[tone] || tones.neutral),
-  };
-}
