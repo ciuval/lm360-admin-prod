@@ -1,84 +1,152 @@
-// src/pages/Paywall.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 
 export default function Paywall() {
   const navigate = useNavigate();
 
-  const checkout = async () => {
-    alert("🔐 Simulazione: verrai reindirizzato a Stripe per il pagamento premium");
-    navigate("/profilo");
-  };
-
   return (
-    <motion.div
-      style={containerStyle}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-    >
-      <motion.h2 style={titleStyle} initial={{ y: -20 }} animate={{ y: 0 }}>🌟 Passa a LoveMatch360 Premium</motion.h2>
-      <motion.p style={descStyle} initial={{ y: -10 }} animate={{ y: 0 }} transition={{ delay: 0.2 }}>
-        Sblocca tutte le funzionalità esclusive:
-      </motion.p>
-      <motion.ul style={listStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-        <li>💘 Chatta senza limiti</li>
-        <li>🌐 Visibilità prioritaria nei risultati</li>
-        <li>👀 Scopri chi ha visitato il tuo profilo</li>
-        <li>🎯 Match consigliati in tempo reale</li>
-      </motion.ul>
-      <motion.button
-        style={ctaBtn}
-        onClick={checkout}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        💎 Attiva Premium a 9.99€/mese
-      </motion.button>
-    </motion.div>
+    <main style={pageStyle} aria-labelledby="paywall-paused-title">
+      <section style={cardStyle}>
+        <p style={eyebrowStyle}>LoveMatch360 · accesso</p>
+
+        <h1 id="paywall-paused-title" style={titleStyle}>
+          Paywall in pausa controllata.
+        </h1>
+
+        <p style={textStyle}>
+          In questa fase il sito sta dando priorità a profili, onboarding,
+          scoperta e sicurezza. L’accesso a funzioni avanzate verrà spiegato e
+          riattivato solo quando il percorso sarà pronto.
+        </p>
+
+        <div style={gridStyle}>
+          <article style={itemStyle}>
+            <h2 style={itemTitleStyle}>Nessun acquisto qui</h2>
+            <p style={itemTextStyle}>
+              Questa schermata non avvia pagamenti e non modifica lo stato
+              account.
+            </p>
+          </article>
+
+          <article style={itemStyle}>
+            <h2 style={itemTitleStyle}>Percorso base chiaro</h2>
+            <p style={itemTextStyle}>
+              Puoi continuare a usare il sito partendo da profilo, scoperta e
+              match.
+            </p>
+          </article>
+
+          <article style={itemStyle}>
+            <h2 style={itemTitleStyle}>Valore prima</h2>
+            <p style={itemTextStyle}>
+              Le funzioni avanzate devono essere utili, comprensibili e
+              verificabili.
+            </p>
+          </article>
+        </div>
+
+        <div style={actionsStyle}>
+          <button type="button" style={primaryButtonStyle} onClick={() => navigate("/welcome")}>
+            Vai a Inizia
+          </button>
+
+          <button type="button" style={secondaryButtonStyle} onClick={() => navigate("/premium")}>
+            Scopri Premium
+          </button>
+        </div>
+      </section>
+    </main>
   );
 }
 
-const containerStyle = {
-  padding: "2rem",
-  backgroundColor: "#121212",
-  color: "#fff",
-  textAlign: "center",
+const pageStyle = {
   minHeight: "100vh",
-  fontFamily: "'Segoe UI', sans-serif",
+  padding: "32px 16px",
+  backgroundColor: "#121212",
+  color: "#f6f6f6",
+  fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+};
+
+const cardStyle = {
+  maxWidth: 920,
+  margin: "0 auto",
+  padding: 28,
+  borderRadius: 24,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.045)",
+};
+
+const eyebrowStyle = {
+  margin: 0,
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: "#f08fc0",
 };
 
 const titleStyle = {
-  fontSize: "2rem",
-  color: "#f08fc0",
-  marginBottom: "1rem",
+  margin: "12px 0 0",
+  fontSize: "clamp(2rem, 6vw, 3.4rem)",
+  lineHeight: 1.05,
 };
 
-const descStyle = {
-  fontSize: "1.2rem",
-  marginBottom: "1rem",
+const textStyle = {
+  margin: "18px 0 0",
+  maxWidth: 760,
+  fontSize: 16,
+  lineHeight: 1.75,
+  color: "rgba(255,255,255,0.82)",
 };
 
-const listStyle = {
-  textAlign: "left",
-  maxWidth: "400px",
-  margin: "0 auto 2rem auto",
-  listStyle: "none",
-  padding: 0,
-  lineHeight: "1.8",
-  fontSize: "1.1rem",
+const gridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 14,
+  marginTop: 24,
 };
 
-const ctaBtn = {
-  padding: "1rem 2rem",
-  fontSize: "1.1rem",
-  backgroundColor: "#f08fc0",
-  color: "#fff",
+const itemStyle = {
+  padding: 16,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,0,0,0.24)",
+};
+
+const itemTitleStyle = {
+  margin: 0,
+  fontSize: 18,
+};
+
+const itemTextStyle = {
+  margin: "10px 0 0",
+  lineHeight: 1.65,
+  color: "rgba(255,255,255,0.78)",
+};
+
+const actionsStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 12,
+  marginTop: 24,
+};
+
+const primaryButtonStyle = {
   border: "none",
-  borderRadius: "8px",
+  borderRadius: 999,
+  padding: "12px 18px",
+  background: "#f08fc0",
+  color: "#121212",
+  fontWeight: 900,
   cursor: "pointer",
-  fontWeight: "bold",
-  boxShadow: "0 0 10px #f08fc0",
 };
 
+const secondaryButtonStyle = {
+  border: "1px solid rgba(255,255,255,0.18)",
+  borderRadius: 999,
+  padding: "12px 18px",
+  background: "rgba(255,255,255,0.06)",
+  color: "#f6f6f6",
+  fontWeight: 800,
+  cursor: "pointer",
+};

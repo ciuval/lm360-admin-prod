@@ -1,177 +1,124 @@
-// src/pages/TesterPage.jsx
-import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import toast, { Toaster } from "react-hot-toast";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function TesterPage() {
-  const [session, setSession] = useState({
-    user: {
-      id: "vale-test-id",
-      email: "vale-test@example.com",
-    },
-  });
-  const [profilo, setProfilo] = useState(null);
-  const [log, setLog] = useState([]);
-  const [messaggi, setMessaggi] = useState([]);
-  const [output, setOutput] = useState("");
-
-  useEffect(() => {
-    const userId = session.user.id;
-
-    supabase
-      .from("profili")
-      .select("*")
-      .eq("id", userId)
-      .single()
-      .then(({ data, error }) => {
-        if (!error) setProfilo(data);
-      });
-
-    supabase
-      .from("log_attivita")
-      .select("*")
-      .order("timestamp", { ascending: false })
-      .limit(5)
-      .then(({ data, error }) => {
-        if (!error) setLog(data || []);
-      });
-
-    supabase
-      .from("messaggi")
-      .select("*")
-      .or(`mittente_id.eq.${userId},destinatario_id.eq.${userId}`)
-      .then(({ data, error }) => {
-        if (!error) setMessaggi(data || []);
-      });
-  }, [session]);
-
-  const handleLogout = async () => {
-    toast("✅ Finto logout completato");
-    setSession(null);
-    setTimeout(() => window.location.reload(), 1000);
-  };
-
-  const generaMatch = async () => {
-    const fakeUserId = session.user.id;
-
-    const { data: me } = await supabase
-      .from("profili")
-      .select("*")
-      .eq("id", fakeUserId)
-      .single();
-
-    if (!me) return toast("⚠️ Profilo utente non trovato");
-
-    const { data: altri } = await supabase
-      .from("profili")
-      .select("*")
-      .neq("id", fakeUserId);
-
-    const risultati = (altri || []).map((altro) => {
-      const interessiA = (me.interessi || "").toLowerCase().split(",");
-      const interessiB = (altro.interessi || "").toLowerCase().split(",");
-      const match = interessiA.filter((i) => interessiB.includes(i.trim())).length;
-      const score = Math.round((match / Math.max(interessiA.length, 1)) * 100);
-      return {
-        user_id: me.id,
-        matched_user_id: altro.id,
-        score,
-      };
-    });
-
-    const { error } = await supabase.from("match_scores").upsert(risultati, {
-      onConflict: ["user_id", "matched_user_id"],
-    });
-
-    if (error) {
-      toast.error(`❌ Errore: ${error.message}`);
-      return;
-    }
-
-    toast.success("✅ Match generati!");
-    setOutput(JSON.stringify(risultati, null, 2));
-  };
+  const navigate = useNavigate();
 
   return (
-    <div style={containerStyle}>
-      <Toaster position="top-right" />
-      <h2 style={titleStyle}>🧬 Tester Supabase + RLS (Fake Login)</h2>
+    <main style={pageStyle} aria-labelledby="tester-paused-title">
+      <section style={cardStyle}>
+        <p style={eyebrowStyle}>LoveMatch360 · area test</p>
 
-      {!session && (
-        <p style={warningText}>⚠️ Nessuna sessione trovata. Fai login finto attivo.</p>
-      )}
+        <h1 id="tester-paused-title" style={titleStyle}>
+          Area tester sospesa.
+        </h1>
 
-      {session && (
-        <>
-          <h3>👤 Sessione finta attiva</h3>
-          <p><b>ID:</b> {session.user.id}</p>
-          <p><b>Email:</b> {session.user.email}</p>
+        <p style={textStyle}>
+          Questa pagina non usa account di prova, non genera match e non legge
+          dati dal browser. I test tecnici verranno spostati in procedure
+          separate, sicure e non pubbliche.
+        </p>
 
-          <div style={{ marginBottom: "1rem" }}>
-            <button onClick={generaMatch} style={buttonStyle}>🧠 Genera Match</button>
-            <button onClick={handleLogout} style={logoutBtn}>🔓 Logout</button>
-          </div>
+        <ul style={listStyle}>
+          <li style={itemStyle}>nessuna sessione di prova attiva</li>
+          <li style={itemStyle}>nessuna lettura di profili o messaggi</li>
+          <li style={itemStyle}>nessuna creazione di match dal browser</li>
+          <li style={itemStyle}>nessuna informazione personale mostrata</li>
+        </ul>
 
-          <pre style={outputBox}>{output}</pre>
+        <div style={actionsStyle}>
+          <button type="button" style={primaryButtonStyle} onClick={() => navigate("/")}>
+            Torna alla Home
+          </button>
 
-          <h3>📘 Profilo</h3>
-          <pre style={outputBox}>{JSON.stringify(profilo, null, 2)}</pre>
-
-          <h3>📝 Log attività</h3>
-          <pre style={outputBox}>{JSON.stringify(log, null, 2)}</pre>
-
-          <h3>💬 Messaggi</h3>
-          <pre style={outputBox}>{JSON.stringify(messaggi, null, 2)}</pre>
-        </>
-      )}
-    </div>
+          <button type="button" style={secondaryButtonStyle} onClick={() => navigate("/welcome")}>
+            Vai a Inizia
+          </button>
+        </div>
+      </section>
+    </main>
   );
 }
 
-// STILI
-const containerStyle = {
-  padding: "2rem",
-  backgroundColor: "#121212",
-  color: "#fff",
+const pageStyle = {
   minHeight: "100vh",
-  fontFamily: "'Segoe UI', sans-serif",
+  padding: "32px 16px",
+  backgroundColor: "#121212",
+  color: "#f6f6f6",
+  fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+};
+
+const cardStyle = {
+  maxWidth: 900,
+  margin: "0 auto",
+  padding: 28,
+  borderRadius: 24,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.045)",
+};
+
+const eyebrowStyle = {
+  margin: 0,
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: "#f08fc0",
 };
 
 const titleStyle = {
-  color: "#f08fc0",
-  fontSize: "1.5rem",
-  marginBottom: "1rem",
+  margin: "12px 0 0",
+  fontSize: "clamp(2rem, 6vw, 3.4rem)",
+  lineHeight: 1.05,
 };
 
-const warningText = {
-  backgroundColor: "#332222",
-  padding: "1rem",
-  borderRadius: "6px",
-  border: "1px solid #aa4444",
+const textStyle = {
+  margin: "18px 0 0",
+  maxWidth: 760,
+  fontSize: 16,
+  lineHeight: 1.75,
+  color: "rgba(255,255,255,0.82)",
 };
 
-const outputBox = {
-  whiteSpace: "pre-wrap",
-  backgroundColor: "#1e1e1e",
-  padding: "1rem",
-  borderRadius: "6px",
-  border: "1px solid #333",
-  fontSize: "0.9rem",
-  marginBottom: "1.5rem",
+const listStyle = {
+  margin: "24px 0 0",
+  padding: 0,
+  listStyle: "none",
+  display: "grid",
+  gap: 12,
 };
 
-const buttonStyle = {
-  marginRight: "1rem",
-  backgroundColor: "#2196f3",
-  color: "#fff",
-  padding: "0.5rem 1rem",
+const itemStyle = {
+  padding: 14,
+  borderRadius: 14,
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,0,0,0.24)",
+  lineHeight: 1.6,
+};
+
+const actionsStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 12,
+  marginTop: 24,
+};
+
+const primaryButtonStyle = {
   border: "none",
-  borderRadius: "5px",
+  borderRadius: 999,
+  padding: "12px 18px",
+  background: "#f08fc0",
+  color: "#121212",
+  fontWeight: 900,
   cursor: "pointer",
 };
 
-const logoutBtn = {
-  ...buttonStyle,
-  backgroundColor: "#f44336",
+const secondaryButtonStyle = {
+  border: "1px solid rgba(255,255,255,0.18)",
+  borderRadius: 999,
+  padding: "12px 18px",
+  background: "rgba(255,255,255,0.06)",
+  color: "#f6f6f6",
+  fontWeight: 800,
+  cursor: "pointer",
 };
-
