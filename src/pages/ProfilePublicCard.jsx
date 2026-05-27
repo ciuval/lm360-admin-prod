@@ -25,23 +25,17 @@ export default function ProfilePublicCard() {
       if (!error) setProfilo(data);
 
       if (myId && id) {
-        const { data: m1 } = await supabase
-          .from("match_scores")
-          .select("*")
-          .eq("user_id", myId)
-          .eq("matched_user_id", id)
-          .eq("score", 100)
-          .maybeSingle();
+        const pair = [myId, id].sort();
 
-        const { data: m2 } = await supabase
-          .from("match_scores")
-          .select("*")
-          .eq("user_id", id)
-          .eq("matched_user_id", myId)
-          .eq("score", 100)
-          .maybeSingle();
+      const { data: matchRow } = await supabase
+        .from("match_scores")
+        .select("user_a, user_b, score")
+        .eq("user_a", pair[0])
+        .eq("user_b", pair[1])
+        .eq("score", 100)
+        .maybeSingle();
 
-        if (m1 && m2) setIsMatch(true);
+      setIsMatch(Boolean(matchRow));
       }
 
       setLoading(false);

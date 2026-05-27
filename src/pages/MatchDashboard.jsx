@@ -27,8 +27,8 @@ export default function MatchDashboard() {
 
       const { data: matches, error: matchErr } = await supabase
         .from("match_scores")
-        .select("matched_user_id, score")
-        .eq("user_id", id)
+        .select("user_a, user_b, score")
+        .or(`user_a.eq.${id},user_b.eq.${id}`)
         .eq("score", 100)
         .order("score", { ascending: false });
 
@@ -44,7 +44,7 @@ export default function MatchDashboard() {
         return;
       }
 
-      const ids = matches.map((m) => m.matched_user_id);
+      const ids = [...new Set(matches.map((m) => (m.user_a === id ? m.user_b : m.user_a)).filter(Boolean))];
 
       const { data: profili, error: profiliErr } = await supabase
         .from("profili")
@@ -57,10 +57,15 @@ export default function MatchDashboard() {
         return;
       }
 
-      const uniti = matches.map((m) => ({
-        ...m,
-        profilo: profili.find((p) => p.id === m.matched_user_id)
-      }));
+      const uniti = matches
+        .map((m) => {
+          const otherId = m.user_a === id ? m.user_b : m.user_a;
+          return {
+            score: m.score,
+            profilo: profili.find((p) => p.id === otherId),
+          };
+        })
+        .filter((m) => m.profilo);
 
       setMatchList(uniti);
       setLoading(false);

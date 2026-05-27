@@ -25,11 +25,13 @@ export default function ChatBox() {
     if (!session?.user?.id || !destinatarioId) return;
     const checkMatchAndRead = async () => {
       const myId = session.user.id;
+      const pair = [myId, destinatarioId].sort();
+
       const { data: match } = await supabase
         .from("match_scores")
-        .select("*")
-        .eq("user_id", myId)
-        .eq("matched_user_id", destinatarioId)
+        .select("user_a, user_b, score")
+        .eq("user_a", pair[0])
+        .eq("user_b", pair[1])
         .eq("score", 100)
         .maybeSingle();
       setChatAbilitata(!!match);
@@ -89,7 +91,7 @@ export default function ChatBox() {
       .channel("typing-status")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "typing_status" }, (payload) => {
         const nuovo = payload.new;
-        if (nuovo.user_id === destinatarioId && nuovo.chat_with === session.user.id) {
+        if (nuovo.user_id === destinatarioId && nuovo.destinatario_id === session.user.id) {
           setAltraPersonaStaScrivendo(nuovo.typing);
         }
       })
@@ -117,7 +119,7 @@ export default function ChatBox() {
     if (!session?.user?.id || !destinatarioId) return;
     await supabase.from("typing_status").upsert({
       user_id: session.user.id,
-      chat_with: destinatarioId,
+      destinatario_id: destinatarioId,
       typing: isTyping,
       updated_at: new Date().toISOString(),
     });
