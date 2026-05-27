@@ -10,7 +10,13 @@ export default function MatchDashboard() {
   useEffect(() => {
     const fetchMatches = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
-      const id = session?.user?.id || "vale-test-id"; // ✅ fallback utente finto
+      if (!session?.user?.id) {
+        setMatchList([]);
+        setLoading(false);
+        return;
+      }
+
+      const id = session.user.id;
       setUserId(id);
 
       if (!id) {
