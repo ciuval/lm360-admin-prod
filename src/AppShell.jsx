@@ -103,6 +103,13 @@ function getCurrentSection(pathname, isAuthed, tier) {
       helper: "Qui esplori i profili disponibili nel flusso reale di discovery.",
     };
   }
+  if (pathname.startsWith("/match")) {
+    return {
+      label: "Match",
+      helper:
+        "Qui trovi i match reciproci. Se non ci sono ancora match, il percorso riparte da Scopri.",
+    };
+  }
 
   if (pathname.startsWith("/premium")) {
     return {

@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound.jsx";
    DISCOVERY / APP
 ====================================================== */
 import PublicProfilesPage from "./pages/PublicProfilesPage.jsx";
+import MatchDashboard from "./pages/MatchDashboard.jsx";
 import Admin from "./pages/Admin.jsx";
 import Billing from "./pages/Billing.jsx";
 
@@ -76,7 +77,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
         <Route path="/welcome" element={<WelcomePage />} />
               <Route path="/premium" element={<Premium />} />
-              <Route 
+              <Route
                 path="/profilo"
                 element={
                   <RequireAuth>
@@ -99,7 +100,16 @@ export default function App() {
                 }
               />
 
-              <Route
+
+        <Route
+          path="/match"
+          element={
+            <RequireAuth>
+              <MatchDashboard />
+            </RequireAuth>
+          }
+        />
+<Route
                 path="/admin"
                 element={
                   <RequireAdmin>
@@ -155,7 +165,7 @@ export default function App() {
                   </RequireAuth>
                 }
               />
-              
+
               <Route
                 path="/checkout-success"
                 element={
@@ -164,7 +174,7 @@ export default function App() {
                   </RequireAuth>
                 }
               />
-              
+
               {/* ======================================================
                   LEGAL
               ====================================================== */}
