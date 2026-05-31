@@ -81,7 +81,40 @@ export default function MatchDashboard() {
       {loading ? (
         <p>⏳ Caricamento...</p>
       ) : matchList.length === 0 ? (
-        <p>Nessun match trovato. Inizia a lasciare qualche 💗!</p>
+        <section
+        aria-label="Nessun match ancora"
+        style={{
+          maxWidth: 760,
+          marginTop: 18,
+          padding: "1.15rem",
+          borderRadius: 22,
+          border: "1px solid rgba(240, 143, 192, 0.28)",
+          background:
+            "linear-gradient(135deg, rgba(240, 143, 192, 0.12), rgba(255, 255, 255, 0.04))",
+          lineHeight: 1.7,
+        }}
+      >
+        <p style={{ margin: "0 0 0.5rem", fontWeight: 800 }}>
+          Nessun match ancora.
+        </p>
+        <p style={{ margin: 0, opacity: 0.82 }}>
+          I match compariranno qui solo quando ci sara interesse reciproco. Completa
+          il profilo, torna su Scopri e lascia like solo ai profili che senti davvero
+          vicini.
+        </p>
+        <a
+          href="#/scopri"
+          style={{
+            display: "inline-block",
+            marginTop: 12,
+            color: "#ffd7ea",
+            fontWeight: 800,
+            textDecoration: "none",
+          }}
+        >
+          Vai a Scopri
+        </a>
+      </section>
       ) : (
         <ul style={listStyle}>
           {matchList.map(({ score, profilo }) => (
@@ -171,5 +204,3 @@ const chatBtn = {
   fontWeight: "bold",
   textDecoration: "none",
 };
-
-

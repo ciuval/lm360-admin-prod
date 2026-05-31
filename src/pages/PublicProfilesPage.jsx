@@ -279,7 +279,39 @@ export default function PublicProfilesPage() {
       {loading ? (
         <p>Caricamento profili...</p>
       ) : profiliFiltrati.length === 0 ? (
-        <p>Nessun profilo corrisponde alla ricerca.</p>
+        <section
+            aria-label="Nessun profilo da scoprire"
+            style={{
+              marginTop: 18,
+              padding: "1.15rem",
+              borderRadius: 22,
+              border: "1px solid rgba(240, 143, 192, 0.24)",
+              background:
+                "linear-gradient(135deg, rgba(240, 143, 192, 0.10), rgba(255, 255, 255, 0.04))",
+              lineHeight: 1.7,
+            }}
+          >
+            <p style={{ margin: "0 0 0.5rem", fontWeight: 800 }}>
+              Nessun profilo da scoprire in questo momento.
+            </p>
+            <p style={{ margin: 0, opacity: 0.82 }}>
+              Il sito e ripartito da una base pulita. Quando arriveranno profili reali,
+              li vedrai qui. Intanto puoi completare il tuo profilo: rendera piu chiaro
+              chi sei quando la discovery iniziera a popolarsi.
+            </p>
+            <a
+              href="#/profilo"
+              style={{
+                display: "inline-block",
+                marginTop: 12,
+                color: "#ffd7ea",
+                fontWeight: 800,
+                textDecoration: "none",
+              }}
+            >
+              Completa il profilo
+            </a>
+          </section>
       ) : (
         <ul style={listStyle}>
           {profiliFiltrati.map((profilo, index) => {
