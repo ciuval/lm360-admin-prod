@@ -1,108 +1,186 @@
-const sections = [
+const statusCards = [
   {
-    title: "Stato operativo",
-    label: "Base pulita",
+    label: "Database",
+    title: "Base pulita",
+    value: "Reset sviluppo completato",
     text:
-      "Supabase e stato ripulito per lo sviluppo. L account admin e la base da cui continuare il lavoro.",
+      "Ultimo stato verificato: account test, profili test, storage e dati prova sono stati azzerati prima della ripartenza.",
+    tone: "ok",
   },
   {
-    title: "Persone e account",
-    label: "Gestione prudente",
+    label: "Account",
+    title: "Admin attivo",
+    value: "1 account pulito",
     text:
-      "Qui si preparano controlli su login, profili, ruoli e stati account. Ogni modifica reale deve passare da audit, conferma e postcheck.",
+      "L account corrente e stato ricreato dopo il reset e promosso ad admin. Premium resta non attivo.",
+    tone: "ok",
   },
   {
-    title: "Pagine del sito",
-    label: "Sviluppo ordinato",
+    label: "Percorsi",
+    title: "Pagine protette",
+    value: "Login richiesto",
     text:
-      "Home, Inizia, Profilo, Scopri, Match, Chat, Premium, Billing, Quantum, contenuti e pagine legali vanno migliorate una alla volta.",
+      "Profilo, Scopri, Match, Admin e Quantum sono percorsi protetti. Chi non entra viene rimandato al login.",
+    tone: "ok",
   },
   {
-    title: "Sicurezza",
-    label: "Niente scorciatoie",
+    label: "Pagamenti",
+    title: "Stripe dormiente",
+    value: "Checkout sospeso",
     text:
-      "Nessun dato operativo viene esportato da questa schermata. Le azioni delicate non partono dal browser senza procedura separata.",
+      "La parte commerciale resta ferma durante lo sviluppo. Nessun pagamento parte da questa dashboard.",
+    tone: "warn",
   },
 ];
 
-const paths = [
-  { label: "Profilo", href: "#/profilo", note: "Gestione profilo admin pulito" },
-  { label: "Inizia", href: "#/welcome", note: "Percorso guidato utente" },
-  { label: "Scopri", href: "#/scopri", note: "Discovery protetta" },
-  { label: "Match", href: "#/match", note: "Match e stato vuoto" },
-  { label: "Premium", href: "#/premium", note: "Valore Premium, non checkout" },
-  { label: "Billing", href: "#/billing", note: "Area futura, protetta" },
-  { label: "Quantum", href: "#/quantum", note: "Area speciale" },
-  { label: "Privacy", href: "#/privacy", note: "Trust e conformita" },
+const pageCards = [
+  {
+    title: "Home",
+    href: "#/",
+    state: "Viva",
+    text: "Ingresso pubblico e messaggio principale del sito.",
+  },
+  {
+    title: "Inizia",
+    href: "#/welcome",
+    state: "Prioritaria",
+    text: "Percorso guidato per far capire dove andare.",
+  },
+  {
+    title: "Profilo",
+    href: "#/profilo",
+    state: "Da completare",
+    text: "Centro identita utente: nome, bio, interessi e foto.",
+  },
+  {
+    title: "Scopri",
+    href: "#/scopri",
+    state: "Stato vuoto OK",
+    text: "Discovery pronta anche senza profili reali.",
+  },
+  {
+    title: "Match",
+    href: "#/match",
+    state: "Stato vuoto OK",
+    text: "Match protetto, con messaggio chiaro se non ci sono match.",
+  },
+  {
+    title: "Premium",
+    href: "#/premium",
+    state: "In pausa",
+    text: "Valore visibile, monetizzazione non ancora attiva.",
+  },
+  {
+    title: "Billing",
+    href: "#/billing",
+    state: "Protetta",
+    text: "Area futura, senza pagamento reale in questa fase.",
+  },
+  {
+    title: "Quantum",
+    href: "#/quantum",
+    state: "Admin OK",
+    text: "Area speciale accessibile all account autorizzato.",
+  },
 ];
 
-const futureActions = [
-  "Creare pannello stato sito con soli conteggi sicuri.",
-  "Preparare gestione pagine: bozza, pubblicata, da migliorare.",
-  "Preparare gestione profili con conferma esplicita prima di ogni modifica.",
-  "Preparare archivio decisioni: cosa e stato fatto, quando, perche.",
-  "Aggiungere strumenti admin solo server-side quando servono davvero.",
+const actionPlan = [
+  {
+    step: "01",
+    title: "Rendere Profilo piu guidato",
+    text:
+      "Aiutare il primo utente a completare nome, bio, interessi e foto senza confusione.",
+  },
+  {
+    step: "02",
+    title: "Preparare contenuti reali",
+    text:
+      "Scrivere testi e microcopy per stati vuoti, onboarding e pagine fiducia.",
+  },
+  {
+    step: "03",
+    title: "Gestione utenti futura",
+    text:
+      "Prima solo conteggi sicuri. Azioni su account e profili solo con conferma separata.",
+  },
+  {
+    step: "04",
+    title: "Premium dopo il valore",
+    text:
+      "Stripe resta dormiente finche il prodotto non e chiaro e testato con utenti veri.",
+  },
 ];
 
 const safetyRules = [
-  "Nessuna cancellazione diretta da questa pagina.",
-  "Nessun pagamento Stripe parte da questa pagina.",
-  "Nessuna lista email o dato sensibile viene mostrato qui.",
-  "Ogni azione irreversibile richiede backup, preflight, conferma e postcheck.",
+  "Questa dashboard non cancella dati dal browser.",
+  "Questa dashboard non esporta email, UUID o dati sensibili.",
+  "Questa dashboard non avvia checkout o pagamenti.",
+  "Ogni azione irreversibile richiede audit, backup, conferma e postcheck.",
+];
+
+const adminNotes = [
+  "Admin e una responsabilita operativa, non un piano commerciale.",
+  "Il sito e in sviluppo: molte sezioni sono vive, ma non ancora definitive.",
+  "Finche non ci sono clienti reali, gli stati vuoti devono essere chiari e intenzionali.",
+  "Il libro del progetto registra le decisioni importanti; il sito esegue il percorso.",
 ];
 
 export default function AdminPage() {
   return (
-    <main style={pageStyle} aria-labelledby="admin-title">
+    <main style={pageStyle} aria-labelledby="admin-dashboard-title">
       <section style={heroStyle}>
         <span style={eyebrowStyle}>LoveMatch360 admin nascosto</span>
 
-        <h1 id="admin-title" style={titleStyle}>
-          Cabina di regia del sito.
+        <h1 id="admin-dashboard-title" style={titleStyle}>
+          Dashboard operativa sicura.
         </h1>
 
         <p style={leadStyle}>
-          Admin non e un account da vendere: e la persona che governa il prodotto,
-          controlla le pagine, prepara interventi e protegge il percorso prima di
-          aprirlo agli utenti.
+          Questa e la cabina di regia del progetto: mostra lo stato verificato,
+          orienta i prossimi interventi e protegge le decisioni delicate. Non e un
+          pannello commerciale e non esegue azioni distruttive.
         </p>
 
-        <div style={statusGridStyle}>
-          <StatusPill label="Accesso" value="Admin attivo" tone="ok" />
-          <StatusPill label="Premium" value="Non commerciale" tone="neutral" />
-          <StatusPill label="Stripe" value="Dormiente" tone="warning" />
-          <StatusPill label="Azioni" value="Solo controllate" tone="ok" />
+        <div style={heroActionsStyle}>
+          <a href="#/profilo" style={primaryLinkStyle}>
+            Vai al profilo
+          </a>
+          <a href="#/welcome" style={secondaryLinkStyle}>
+            Rivedi onboarding
+          </a>
         </div>
       </section>
 
-      <section style={gridStyle} aria-label="Aree admin principali">
-        {sections.map((section) => (
-          <article key={section.title} style={cardStyle}>
-            <span style={cardLabelStyle}>{section.label}</span>
-            <h2 style={cardTitleStyle}>{section.title}</h2>
-            <p style={cardTextStyle}>{section.text}</p>
+      <section style={statusGridStyle} aria-label="Stato verificato del progetto">
+        {statusCards.map((card) => (
+          <article key={card.title} style={{ ...statusCardStyle, ...toneStyle[card.tone] }}>
+            <span style={cardLabelStyle}>{card.label}</span>
+            <h2 style={cardTitleStyle}>{card.title}</h2>
+            <strong style={cardValueStyle}>{card.value}</strong>
+            <p style={cardTextStyle}>{card.text}</p>
           </article>
         ))}
       </section>
 
-      <section style={panelStyle} aria-labelledby="admin-paths-title">
+      <section style={panelStyle} aria-labelledby="admin-pages-title">
         <div style={panelHeaderStyle}>
           <div>
-            <span style={eyebrowStyle}>Percorsi vivi</span>
-            <h2 id="admin-paths-title" style={sectionTitleStyle}>
-              Muoviti nel sito senza confusione.
+            <span style={eyebrowStyle}>Pagine vive</span>
+            <h2 id="admin-pages-title" style={sectionTitleStyle}>
+              Mappa rapida del sito.
             </h2>
           </div>
           <p style={smallTextStyle}>
-            Questi sono collegamenti di navigazione, non azioni distruttive.
+            Sono link di navigazione. Non modificano dati e non avviano procedure.
           </p>
         </div>
 
-        <div style={pathGridStyle}>
-          {paths.map((path) => (
-            <a key={path.href} href={path.href} style={pathCardStyle}>
-              <strong>{path.label}</strong>
-              <span>{path.note}</span>
+        <div style={pageGridStyle}>
+          {pageCards.map((page) => (
+            <a key={page.href} href={page.href} style={pageCardStyle}>
+              <span style={pageStateStyle}>{page.state}</span>
+              <strong>{page.title}</strong>
+              <small>{page.text}</small>
             </a>
           ))}
         </div>
@@ -110,21 +188,25 @@ export default function AdminPage() {
 
       <section style={twoColumnStyle}>
         <article style={panelStyle}>
-          <span style={eyebrowStyle}>Prossime funzioni</span>
-          <h2 style={sectionTitleStyle}>Cosa deve poter fare l admin.</h2>
+          <span style={eyebrowStyle}>Prossime azioni</span>
+          <h2 style={sectionTitleStyle}>Sviluppo ordinato.</h2>
 
-          <ul style={listStyle}>
-            {futureActions.map((item) => (
-              <li key={item} style={listItemStyle}>
-                {item}
-              </li>
+          <div style={actionListStyle}>
+            {actionPlan.map((item) => (
+              <div key={item.step} style={actionItemStyle}>
+                <span style={actionStepStyle}>{item.step}</span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <p>{item.text}</p>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </article>
 
         <article style={panelStyle}>
-          <span style={eyebrowStyle}>Regole anti rischio</span>
-          <h2 style={sectionTitleStyle}>Azioni delicate sempre controllate.</h2>
+          <span style={eyebrowStyle}>Regole sicurezza</span>
+          <h2 style={sectionTitleStyle}>Niente scorciatoie.</h2>
 
           <ul style={listStyle}>
             {safetyRules.map((item) => (
@@ -136,23 +218,30 @@ export default function AdminPage() {
         </article>
       </section>
 
-      <section style={warningStyle} aria-label="Nota sicurezza admin">
-        <strong>Nessuna cancellazione diretta.</strong>
+      <section style={panelStyle} aria-labelledby="admin-notes-title">
+        <span style={eyebrowStyle}>Note di governo</span>
+        <h2 id="admin-notes-title" style={sectionTitleStyle}>
+          Cosa significa essere admin.
+        </h2>
+
+        <div style={notesGridStyle}>
+          {adminNotes.map((note) => (
+            <p key={note} style={noteStyle}>
+              {note}
+            </p>
+          ))}
+        </div>
+      </section>
+
+      <section style={warningStyle} aria-label="Limite operativo dashboard">
+        <strong>Dashboard sicura, non distruttiva.</strong>
         <span>
-          Questa prima cabina di regia e intenzionalmente sicura: prepara il lavoro,
-          chiarisce le priorita e non modifica dati live dal browser.
+          I dati mostrati sono stati e indicazioni operative, non una lista live di
+          utenti. Le funzioni reali di gestione arriveranno solo a blocchi, con
+          controlli separati.
         </span>
       </section>
     </main>
-  );
-}
-
-function StatusPill({ label, value, tone }) {
-  return (
-    <div style={{ ...pillStyle, ...pillToneStyle[tone] }}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
   );
 }
 
@@ -187,49 +276,47 @@ const eyebrowStyle = {
 
 const titleStyle = {
   margin: 0,
-  maxWidth: "850px",
-  fontSize: "clamp(2.2rem, 7vw, 5rem)",
+  maxWidth: "900px",
+  fontSize: "clamp(2.2rem, 6vw, 4.8rem)",
   lineHeight: 0.95,
   letterSpacing: "-0.06em",
 };
 
 const leadStyle = {
-  maxWidth: "780px",
+  maxWidth: "840px",
   margin: "1.25rem 0 0",
   color: "rgba(247, 243, 248, 0.78)",
-  fontSize: "clamp(1rem, 2vw, 1.18rem)",
+  fontSize: "clamp(1rem, 2vw, 1.16rem)",
   lineHeight: 1.7,
 };
 
-const statusGridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+const heroActionsStyle = {
+  display: "flex",
+  flexWrap: "wrap",
   gap: "0.8rem",
-  marginTop: "1.5rem",
+  marginTop: "1.4rem",
 };
 
-const pillStyle = {
-  padding: "0.9rem 1rem",
-  borderRadius: "18px",
-  border: "1px solid rgba(255, 255, 255, 0.1)",
+const primaryLinkStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "0.85rem 1rem",
+  borderRadius: "999px",
+  color: "#170d13",
+  background: "#f08fc0",
+  fontWeight: 900,
+  textDecoration: "none",
 };
 
-const pillToneStyle = {
-  ok: {
-    background: "rgba(79, 209, 131, 0.12)",
-    color: "#d8ffe7",
-  },
-  neutral: {
-    background: "rgba(255, 255, 255, 0.08)",
-    color: "#f7f3f8",
-  },
-  warning: {
-    background: "rgba(255, 199, 102, 0.12)",
-    color: "#ffe5b4",
-  },
+const secondaryLinkStyle = {
+  ...primaryLinkStyle,
+  color: "#f7f3f8",
+  background: "rgba(255, 255, 255, 0.08)",
+  border: "1px solid rgba(255, 255, 255, 0.14)",
 };
 
-const gridStyle = {
+const statusGridStyle = {
   maxWidth: "1180px",
   margin: "0 auto 1.5rem",
   display: "grid",
@@ -237,32 +324,45 @@ const gridStyle = {
   gap: "1rem",
 };
 
-const cardStyle = {
-  padding: "1.2rem",
+const statusCardStyle = {
+  padding: "1.15rem",
   borderRadius: "22px",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
   background: "rgba(255, 255, 255, 0.055)",
-  border: "1px solid rgba(255, 255, 255, 0.09)",
+};
+
+const toneStyle = {
+  ok: {
+    boxShadow: "inset 0 0 0 1px rgba(79, 209, 131, 0.10)",
+  },
+  warn: {
+    boxShadow: "inset 0 0 0 1px rgba(255, 199, 102, 0.12)",
+  },
 };
 
 const cardLabelStyle = {
-  display: "inline-block",
-  marginBottom: "0.65rem",
   color: "#f08fc0",
   fontSize: "0.72rem",
-  fontWeight: 800,
-  letterSpacing: "0.1em",
+  fontWeight: 900,
+  letterSpacing: "0.11em",
   textTransform: "uppercase",
 };
 
 const cardTitleStyle = {
-  margin: "0 0 0.6rem",
-  fontSize: "1.25rem",
+  margin: "0.55rem 0 0.4rem",
+  fontSize: "1.18rem",
+};
+
+const cardValueStyle = {
+  display: "block",
+  marginBottom: "0.55rem",
+  color: "#ffffff",
 };
 
 const cardTextStyle = {
   margin: 0,
   color: "rgba(247, 243, 248, 0.72)",
-  lineHeight: 1.65,
+  lineHeight: 1.6,
 };
 
 const panelStyle = {
@@ -289,21 +389,22 @@ const sectionTitleStyle = {
 };
 
 const smallTextStyle = {
-  maxWidth: "360px",
+  maxWidth: "380px",
   margin: 0,
   color: "rgba(247, 243, 248, 0.62)",
   lineHeight: 1.55,
 };
 
-const pathGridStyle = {
+const pageGridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
   gap: "0.8rem",
 };
 
-const pathCardStyle = {
+const pageCardStyle = {
   display: "grid",
-  gap: "0.35rem",
+  gap: "0.4rem",
+  minHeight: "130px",
   padding: "1rem",
   borderRadius: "18px",
   color: "#f7f3f8",
@@ -312,12 +413,47 @@ const pathCardStyle = {
   border: "1px solid rgba(255, 255, 255, 0.1)",
 };
 
+const pageStateStyle = {
+  color: "#ffd7ea",
+  fontSize: "0.72rem",
+  fontWeight: 900,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+};
+
 const twoColumnStyle = {
   maxWidth: "1180px",
   margin: "0 auto",
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
   gap: "1rem",
+};
+
+const actionListStyle = {
+  display: "grid",
+  gap: "0.85rem",
+  marginTop: "1rem",
+};
+
+const actionItemStyle = {
+  display: "grid",
+  gridTemplateColumns: "42px 1fr",
+  gap: "0.85rem",
+  alignItems: "start",
+  padding: "0.95rem",
+  borderRadius: "18px",
+  background: "rgba(255, 255, 255, 0.05)",
+};
+
+const actionStepStyle = {
+  display: "inline-grid",
+  placeItems: "center",
+  width: 38,
+  height: 38,
+  borderRadius: "50%",
+  color: "#170d13",
+  background: "#f08fc0",
+  fontWeight: 900,
 };
 
 const listStyle = {
@@ -332,6 +468,22 @@ const listItemStyle = {
   padding: "0.85rem 0.95rem",
   borderRadius: "16px",
   color: "rgba(247, 243, 248, 0.78)",
+  background: "rgba(255, 255, 255, 0.05)",
+};
+
+const notesGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+  gap: "0.8rem",
+  marginTop: "1rem",
+};
+
+const noteStyle = {
+  margin: 0,
+  padding: "0.95rem",
+  borderRadius: "18px",
+  lineHeight: 1.6,
+  color: "rgba(247, 243, 248, 0.74)",
   background: "rgba(255, 255, 255, 0.05)",
 };
 
