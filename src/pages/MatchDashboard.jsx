@@ -95,7 +95,7 @@ export default function MatchDashboard() {
         }}
       >
         <p style={{ margin: "0 0 0.5rem", fontWeight: 800 }}>
-          Nessun match ancora.
+          Nessun match ancora, percorso pronto.
         </p>
         <p style={{ margin: 0, opacity: 0.82 }}>
           I match compariranno qui solo quando ci sara interesse reciproco. Completa

@@ -18,7 +18,7 @@ export default function ProfileCompletionCard({ completion, disabled = false, on
     ? "Hai le basi giuste per entrare in Scopri con più contesto."
     : "Nome, bio, interessi e foto aiutano le altre persone a capire chi sei davvero.";
 
-  const actionLabel = safeCompletion.isComplete ? "Vai a Scopri" : "Completa il prossimo passo";
+  const actionLabel = safeCompletion.isComplete ? "Vai a Scopri" : "Completa il prossimo passo del profilo";
 
   return (
     <section style={cardStyle} aria-labelledby="profile-completion-title">

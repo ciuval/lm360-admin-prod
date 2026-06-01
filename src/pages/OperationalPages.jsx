@@ -1,8 +1,8 @@
 const pageData = {
   impostazioni: {
     eyebrow: "Impostazioni",
-    title: "Centro impostazioni sicure.",
-    lead: "Qui si raccolgono le scelte operative dell account. Le impostazioni reali arriveranno a blocchi controllati: profilo, notifiche, privacy, sicurezza e accesso.",
+    title: "Impostazioni vive e sicure.",
+    lead: "Qui l utente trova percorsi chiari per profilo, privacy, notifiche e sicurezza. Le modifiche reali restano guidate e senza scorciatoie dal browser.",
     cards: [
       { label: "Account", title: "Stato account", text: "Controlla il percorso account senza modificare dati dal browser. Gli stati reali si cambiano solo con procedura, audit e postcheck.", actions: [{ label: "Vai al profilo", href: "#/profilo" }, { label: "Apri admin", href: "#/admin" }] },
       { label: "Notifiche", title: "Centro notifiche", text: "Le notifiche operative sono separate dalle email reali. Le code admin restano pending finche il sender server-side non viene attivato.", actions: [{ label: "Apri notifiche", href: "#/notifiche" }] },
@@ -12,8 +12,8 @@ const pageData = {
   },
   notifiche: {
     eyebrow: "Notifiche",
-    title: "Notifiche operative e coda admin.",
-    lead: "Questa pagina spiega il sistema notifiche: audit log, notification queue e sender server-side futuro. Non invia email reali dal browser.",
+    title: "Notifiche chiare, niente invii nascosti.",
+    lead: "Questa pagina spiega cosa succede alle notifiche: stato pending, email reali solo server-side e nessun segreto nel client.",
     cards: [
       { label: "Queue", title: "Notification queue", text: "Le notifiche admin vengono registrate in coda. Il browser non invia email e non contiene segreti.", actions: [{ label: "Manuale admin", href: "#/admin" }] },
       { label: "Email", title: "servizioclienti", text: "Le notifiche operative sono indirizzate a servizioclienti. L invio reale arrivera solo con funzione server-side e dry run completato.", actions: [{ label: "Contatti", href: "#/contatti" }] },

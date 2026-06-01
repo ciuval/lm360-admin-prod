@@ -292,10 +292,10 @@ export default function PublicProfilesPage() {
             }}
           >
             <p style={{ margin: "0 0 0.5rem", fontWeight: 800 }}>
-              Nessun profilo da scoprire in questo momento.
+              Scopri e pronto: nessun profilo reale disponibile ora.
             </p>
             <p style={{ margin: 0, opacity: 0.82 }}>
-              Il sito e ripartito da una base pulita. Quando arriveranno profili reali,
+              La base e pulita: non e un errore. Completa il profilo, torna qui e appena ci saranno profili reali
               li vedrai qui. Intanto puoi completare il tuo profilo: rendera piu chiaro
               chi sei quando la discovery iniziera a popolarsi.
             </p>
