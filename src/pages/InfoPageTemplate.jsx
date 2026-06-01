@@ -1,15 +1,31 @@
-export default function InfoPageTemplate({ eyebrow, title, lead, sections = [], cta }) {
+export default function InfoPageTemplate({
+  eyebrow,
+  title,
+  lead,
+  sections = [],
+  cta,
+  secondaryCta,
+  quickLinks = [],
+}) {
   return (
     <main style={pageStyle} aria-labelledby="info-page-title">
       <section style={heroStyle}>
         <span style={eyebrowStyle}>{eyebrow}</span>
         <h1 id="info-page-title" style={titleStyle}>{title}</h1>
         <p style={leadStyle}>{lead}</p>
-        {cta ? (
-          <a href={cta.href} style={primaryLinkStyle}>
-            {cta.label}
-          </a>
-        ) : null}
+
+        <div style={heroActionsStyle} aria-label="Azioni pagina">
+          {cta ? (
+            <a href={cta.href} style={primaryLinkStyle}>
+              {cta.label}
+            </a>
+          ) : null}
+          {secondaryCta ? (
+            <a href={secondaryCta.href} style={secondaryLinkStyle}>
+              {secondaryCta.label}
+            </a>
+          ) : null}
+        </div>
       </section>
 
       <section style={gridStyle} aria-label="Contenuti principali">
@@ -18,9 +34,37 @@ export default function InfoPageTemplate({ eyebrow, title, lead, sections = [], 
             <span style={cardLabelStyle}>{section.label}</span>
             <h2 style={cardTitleStyle}>{section.title}</h2>
             <p style={cardTextStyle}>{section.text}</p>
+            {section.actions && section.actions.length ? (
+              <div style={cardActionsStyle}>
+                {section.actions.map((action) => (
+                  <a key={action.href + action.label} href={action.href} style={cardActionStyle}>
+                    {action.label}
+                  </a>
+                ))}
+              </div>
+            ) : null}
           </article>
         ))}
       </section>
+
+      {quickLinks.length ? (
+        <section style={quickLinksStyle} aria-labelledby="quick-links-title">
+          <div>
+            <span style={eyebrowStyle}>Percorsi vivi</span>
+            <h2 id="quick-links-title" style={quickTitleStyle}>
+              Continua senza perderti.
+            </h2>
+          </div>
+          <div style={quickGridStyle}>
+            {quickLinks.map((link) => (
+              <a key={link.href + link.label} href={link.href} style={quickLinkStyle}>
+                <strong>{link.label}</strong>
+                <small>{link.text}</small>
+              </a>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }
@@ -69,15 +113,28 @@ const leadStyle = {
   lineHeight: 1.7,
 };
 
+const heroActionsStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "0.75rem",
+  marginTop: "1.25rem",
+};
+
 const primaryLinkStyle = {
   display: "inline-flex",
-  marginTop: "1.25rem",
   padding: "0.85rem 1rem",
   borderRadius: "999px",
   color: "#170d13",
   background: "#f08fc0",
   fontWeight: 900,
   textDecoration: "none",
+};
+
+const secondaryLinkStyle = {
+  ...primaryLinkStyle,
+  color: "#f7f3f8",
+  background: "rgba(255, 255, 255, 0.08)",
+  border: "1px solid rgba(255, 255, 255, 0.14)",
 };
 
 const gridStyle = {
@@ -89,6 +146,9 @@ const gridStyle = {
 };
 
 const cardStyle = {
+  display: "flex",
+  minHeight: "230px",
+  flexDirection: "column",
   padding: "1.1rem",
   borderRadius: "22px",
   border: "1px solid rgba(255, 255, 255, 0.09)",
@@ -111,7 +171,59 @@ const cardTitleStyle = {
 };
 
 const cardTextStyle = {
+  flex: 1,
   margin: 0,
   color: "rgba(247, 243, 248, 0.72)",
   lineHeight: 1.65,
+};
+
+const cardActionsStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "0.5rem",
+  marginTop: "1rem",
+};
+
+const cardActionStyle = {
+  display: "inline-flex",
+  padding: "0.58rem 0.68rem",
+  borderRadius: "999px",
+  color: "#f7f3f8",
+  background: "rgba(255, 255, 255, 0.08)",
+  border: "1px solid rgba(255, 255, 255, 0.12)",
+  fontSize: "0.88rem",
+  fontWeight: 800,
+  textDecoration: "none",
+};
+
+const quickLinksStyle = {
+  maxWidth: "1080px",
+  margin: "1rem auto 0",
+  padding: "1.1rem",
+  borderRadius: "24px",
+  border: "1px solid rgba(255, 255, 255, 0.09)",
+  background: "rgba(255, 255, 255, 0.045)",
+};
+
+const quickTitleStyle = {
+  margin: 0,
+  fontSize: "clamp(1.35rem, 3vw, 2rem)",
+};
+
+const quickGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+  gap: "0.75rem",
+  marginTop: "1rem",
+};
+
+const quickLinkStyle = {
+  display: "grid",
+  gap: "0.35rem",
+  padding: "0.9rem",
+  borderRadius: "18px",
+  color: "#f7f3f8",
+  background: "rgba(255, 255, 255, 0.06)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  textDecoration: "none",
 };

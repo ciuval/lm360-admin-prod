@@ -5,24 +5,33 @@ export default function Contatti() {
     <InfoPageTemplate
       eyebrow="Contatti"
       title="Parla con LoveMatch360."
-      lead="Questa pagina raccoglie i contatti pubblici del progetto. Per assistenza account, richieste amministrative e informazioni operative usa sempre i canali indicati."
+      lead="Pagina viva per assistenza, informazioni e segnalazioni. Qui trovi i percorsi corretti senza esporre password, token o dati non necessari."
       cta={{ label: "Scrivi a servizioclienti", href: "mailto:servizioclienti@lovematch360.com" }}
+      secondaryCta={{ label: "Leggi FAQ", href: "#/faq" }}
       sections={[
         {
           label: "Assistenza",
           title: "Supporto account e richieste utenti",
-          text: "Per account, accesso, richieste amministrative e informazioni sul servizio scrivi a servizioclienti@lovematch360.com.",
+          text: "Per account, accesso, stati e richieste operative usa servizioclienti@lovematch360.com. Descrivi il problema in modo chiaro e senza segreti.",
+          actions: [{ label: "Apri FAQ", href: "#/faq" }, { label: "Sicurezza", href: "#/sicurezza" }],
         },
         {
           label: "Informazioni",
           title: "Informazioni generali",
-          text: "Per comunicazioni generali puoi usare info@lovematch360.com. Non inviare password, token o dati sensibili non necessari.",
+          text: "Per comunicazioni generali puoi usare info@lovematch360.com. Per richieste operative resta preferibile servizioclienti.",
+          actions: [{ label: "Come funziona", href: "#/come-funziona" }, { label: "Chi siamo", href: "#/chi-siamo" }],
         },
         {
-          label: "Sicurezza",
-          title: "Segnalazioni e attenzione",
-          text: "Se noti comportamenti strani o problemi di accesso, descrivi il problema senza condividere password o chiavi private.",
+          label: "Percorso",
+          title: "Prima orientati, poi scrivi",
+          text: "Molti dubbi si risolvono passando da FAQ, sicurezza e funzioni. Se il problema resta, contatta il supporto con una nota precisa.",
+          actions: [{ label: "Funzioni", href: "#/funzioni" }, { label: "Profilo", href: "#/profilo" }],
         },
+      ]}
+      quickLinks={[
+        { label: "FAQ", href: "#/faq", text: "Risposte rapide e stato del servizio." },
+        { label: "Sicurezza", href: "#/sicurezza", text: "Regole per accesso e protezione." },
+        { label: "Privacy", href: "#/privacy", text: "Dati, consenso e fiducia." },
       ]}
     />
   );
