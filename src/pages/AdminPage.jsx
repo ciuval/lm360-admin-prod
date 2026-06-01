@@ -233,6 +233,90 @@ export default function AdminPage() {
         </div>
       </section>
 
+      <section style={panelStyle} aria-labelledby="owner-operations-title">
+        <div style={panelHeaderStyle}>
+          <div>
+            <span style={eyebrowStyle}>Manuale operativo</span>
+            <h2 id="owner-operations-title" style={sectionTitleStyle}>
+              Manuale operativo owner.
+            </h2>
+          </div>
+          <p style={smallTextStyle}>
+            L owner deve poter orientarsi ovunque nel sito. Le azioni reali restano
+            separate: prima audit, poi conferma, poi postcheck.
+          </p>
+        </div>
+
+        <div style={pageGridStyle}>
+          <article style={pageCardStyle}>
+            <span style={pageStateStyle}>Accesso owner</span>
+            <strong>Entrare in tutte le aree protette</strong>
+            <small>
+              Owner puo navigare Home, Inizia, Profilo, Scopri, Match, Premium,
+              Billing, Quantum e Admin. Il ruolo commerciale resta separato.
+            </small>
+          </article>
+
+          <article style={pageCardStyle}>
+            <span style={pageStateStyle}>Supabase</span>
+            <strong>Modifiche reali solo da procedura</strong>
+            <small>
+              Quando serve cambiare stati account o ruoli, si passa da Supabase SQL
+              Editor con blocco dedicato, preflight, conferma esplicita e postcheck.
+            </small>
+          </article>
+
+          <article style={pageCardStyle}>
+            <span style={pageStateStyle}>Stati account</span>
+            <strong>Attivo, sospeso, review</strong>
+            <small>
+              Lo stato dei visitatori non va cambiato con pulsanti rapidi. Prima si
+              controlla il profilo, poi si registra motivo, audit log e notifica.
+            </small>
+          </article>
+
+          <article style={pageCardStyle}>
+            <span style={pageStateStyle}>Premium manuale</span>
+            <strong>Premium non e admin</strong>
+            <small>
+              Premium e Super Premium sono stati commerciali. Non danno permessi
+              admin e non devono attivare Stripe durante lo sviluppo.
+            </small>
+          </article>
+
+          <article style={pageCardStyle}>
+            <span style={pageStateStyle}>Admin temporaneo</span>
+            <strong>Accesso con scadenza</strong>
+            <small>
+              Collaboratori o possibili acquirenti usano account proprio, ruolo
+              admin_temp, motivo scritto, scadenza e log. Mai condividere owner.
+            </small>
+          </article>
+
+          <article style={pageCardStyle}>
+            <span style={pageStateStyle}>Notifiche</span>
+            <strong>servizioclienti sempre in coda</strong>
+            <small>
+              Ogni cambio ruoli o permessi deve creare audit log e notification queue
+              verso servizioclienti. L email reale arrivera solo server-side.
+            </small>
+          </article>
+        </div>
+
+        <div
+          style={{
+            ...warningStyle,
+            margin: "1rem 0 0",
+          }}
+        >
+          <strong>Regola operativa.</strong>
+          <span>
+            La dashboard puo guidare, spiegare e collegare. Non deve eseguire
+            modifiche distruttive dal browser. I comandi live si preparano solo in blocchi separati e confermati.
+          </span>
+        </div>
+      </section>
+
       <section style={warningStyle} aria-label="Limite operativo dashboard">
         <strong>Dashboard sicura, non distruttiva.</strong>
         <span>
