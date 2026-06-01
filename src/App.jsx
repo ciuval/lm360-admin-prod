@@ -58,6 +58,15 @@ import FAQ from "./pages/FAQ.jsx";
 import Sicurezza from "./pages/Sicurezza.jsx";
 import ComeFunziona from "./pages/ComeFunziona.jsx";
 import ChiSiamo from "./pages/ChiSiamo.jsx";
+import {
+  Funzioni,
+  Impostazioni,
+  LogAdmin,
+  LogStats,
+  Notifiche,
+  ProfiliPubblici,
+  Visitatori,
+} from "./pages/OperationalPages.jsx";
 import LibroDaZeroLoveMatch360 from "./pages/LibroDaZeroLoveMatch360.jsx";
 
 export default function App() {
@@ -194,6 +203,13 @@ export default function App() {
 <Route path="/sicurezza" element={<Sicurezza />} />
 <Route path="/come-funziona" element={<ComeFunziona />} />
 <Route path="/chi-siamo" element={<ChiSiamo />} />
+<Route path="/funzioni" element={<Funzioni />} />
+<Route path="/profili-pubblici" element={<ProfiliPubblici />} />
+<Route path="/impostazioni" element={<RequireAuth><Impostazioni /></RequireAuth>} />
+<Route path="/notifiche" element={<RequireAuth><Notifiche /></RequireAuth>} />
+<Route path="/visitatori" element={<RequireAdmin><Visitatori /></RequireAdmin>} />
+<Route path="/log-admin" element={<RequireAdmin><LogAdmin /></RequireAdmin>} />
+<Route path="/log-stats" element={<RequireAdmin><LogStats /></RequireAdmin>} />
               <Route path="/libro/da-zero-a-lovematch360" element={<LibroDaZeroLoveMatch360 />} />
 
               {/* ======================================================

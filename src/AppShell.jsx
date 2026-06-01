@@ -167,7 +167,14 @@ function getCurrentSection(pathname, isAuthed, tier) {
     pathname.startsWith("/faq") ||
     pathname.startsWith("/sicurezza") ||
     pathname.startsWith("/come-funziona") ||
-    pathname.startsWith("/chi-siamo")
+    pathname.startsWith("/chi-siamo") ||
+    pathname.startsWith("/funzioni") ||
+    pathname.startsWith("/profili-pubblici") ||
+    pathname.startsWith("/impostazioni") ||
+    pathname.startsWith("/notifiche") ||
+    pathname.startsWith("/visitatori") ||
+    pathname.startsWith("/log-admin") ||
+    pathname.startsWith("/log-stats")
   ) {
     return {
       label: "Area legale",
