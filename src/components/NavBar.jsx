@@ -43,7 +43,7 @@ export default function NavBar({
          Visitatori
       </Item>
       <Item
-        to="/chat/placeholder"
+        to="/match"
         badgeCount={!inChat ? messaggiNonLetti : 0}
         badgeColor=""
         onClick={onClickChat}

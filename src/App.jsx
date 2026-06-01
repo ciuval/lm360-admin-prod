@@ -194,6 +194,7 @@ export default function App() {
               ====================================================== */}
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/cookie" element={<Cookie />} />
+<Route path="/cookies" element={<Cookie />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/refunds" element={<Refunds />} />
 <Route path="/termini" element={<Terms />} />
