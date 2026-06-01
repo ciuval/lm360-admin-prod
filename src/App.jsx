@@ -53,6 +53,11 @@ import Privacy from "./pages/legal/Privacy.jsx";
 import Cookie from "./pages/legal/Cookie.jsx";
 import Terms from "./pages/legal/Terms.jsx";
 import Refunds from "./pages/legal/Refunds.jsx";
+import Contatti from "./pages/Contatti.jsx";
+import FAQ from "./pages/FAQ.jsx";
+import Sicurezza from "./pages/Sicurezza.jsx";
+import ComeFunziona from "./pages/ComeFunziona.jsx";
+import ChiSiamo from "./pages/ChiSiamo.jsx";
 import LibroDaZeroLoveMatch360 from "./pages/LibroDaZeroLoveMatch360.jsx";
 
 export default function App() {
@@ -182,6 +187,13 @@ export default function App() {
               <Route path="/cookie" element={<Cookie />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/refunds" element={<Refunds />} />
+<Route path="/termini" element={<Terms />} />
+<Route path="/rimborsi" element={<Refunds />} />
+<Route path="/contatti" element={<Contatti />} />
+<Route path="/faq" element={<FAQ />} />
+<Route path="/sicurezza" element={<Sicurezza />} />
+<Route path="/come-funziona" element={<ComeFunziona />} />
+<Route path="/chi-siamo" element={<ChiSiamo />} />
               <Route path="/libro/da-zero-a-lovematch360" element={<LibroDaZeroLoveMatch360 />} />
 
               {/* ======================================================

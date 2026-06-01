@@ -160,7 +160,14 @@ function getCurrentSection(pathname, isAuthed, tier) {
     pathname.startsWith("/privacy") ||
     pathname.startsWith("/cookie") ||
     pathname.startsWith("/terms") ||
-    pathname.startsWith("/refunds")
+    pathname.startsWith("/refunds") ||
+    pathname.startsWith("/termini") ||
+    pathname.startsWith("/rimborsi") ||
+    pathname.startsWith("/contatti") ||
+    pathname.startsWith("/faq") ||
+    pathname.startsWith("/sicurezza") ||
+    pathname.startsWith("/come-funziona") ||
+    pathname.startsWith("/chi-siamo")
   ) {
     return {
       label: "Area legale",
