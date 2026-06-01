@@ -1,0 +1,6 @@
+
+
+# ADMIN_EMAIL_04B edge function local secrets
+**/.env
+**/.env.*
+!**/.env.example
