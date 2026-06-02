@@ -156,6 +156,60 @@ function getCurrentSection(pathname, isAuthed, tier) {
     };
   }
 
+  if (pathname.startsWith("/visitatori")) {
+    return {
+      label: "Visitatori",
+      helper: "Area admin per stati, supporto e procedure. Nessuna lettura live dal browser.",
+    };
+  }
+
+  if (pathname.startsWith("/log-admin")) {
+    return {
+      label: "Log admin",
+      helper: "Audit, decisioni e notifiche operative senza righe reali visibili dal browser.",
+    };
+  }
+
+  if (pathname.startsWith("/log-stats")) {
+    return {
+      label: "Log stats",
+      helper: "Segnali aggregati, smoke production e qualita sito senza dati sensibili.",
+    };
+  }
+
+  if (
+    pathname.startsWith("/impostazioni") ||
+    pathname.startsWith("/notifiche")
+  ) {
+    return {
+      label: "Account",
+      helper: "Qui gestisci orientamento, impostazioni e notifiche senza scorciatoie dal browser.",
+    };
+  }
+
+  if (
+    pathname.startsWith("/funzioni") ||
+    pathname.startsWith("/profili-pubblici") ||
+    pathname.startsWith("/come-funziona") ||
+    pathname.startsWith("/chi-siamo")
+  ) {
+    return {
+      label: "Progetto",
+      helper: "Qui trovi pagine vive che spiegano funzioni, valore e percorso del sito.",
+    };
+  }
+
+  if (
+    pathname.startsWith("/contatti") ||
+    pathname.startsWith("/faq") ||
+    pathname.startsWith("/sicurezza")
+  ) {
+    return {
+      label: "Trust",
+      helper: "Qui trovi supporto, domande frequenti e regole di sicurezza del servizio.",
+    };
+  }
+
   if (
     pathname.startsWith("/privacy") ||
     pathname.startsWith("/cookie") ||
@@ -163,19 +217,7 @@ function getCurrentSection(pathname, isAuthed, tier) {
     pathname.startsWith("/terms") ||
     pathname.startsWith("/refunds") ||
     pathname.startsWith("/termini") ||
-    pathname.startsWith("/rimborsi") ||
-    pathname.startsWith("/contatti") ||
-    pathname.startsWith("/faq") ||
-    pathname.startsWith("/sicurezza") ||
-    pathname.startsWith("/come-funziona") ||
-    pathname.startsWith("/chi-siamo") ||
-    pathname.startsWith("/funzioni") ||
-    pathname.startsWith("/profili-pubblici") ||
-    pathname.startsWith("/impostazioni") ||
-    pathname.startsWith("/notifiche") ||
-    pathname.startsWith("/visitatori") ||
-    pathname.startsWith("/log-admin") ||
-    pathname.startsWith("/log-stats")
+    pathname.startsWith("/rimborsi")
   ) {
     return {
       label: "Area legale",
