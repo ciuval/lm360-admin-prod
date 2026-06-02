@@ -233,6 +233,40 @@ export default function AdminPage() {
         </div>
       </section>
 
+      <section style={panelStyle} aria-labelledby="admin-live-map-title">
+        <div style={panelHeaderStyle}>
+          <div>
+            <span style={eyebrowStyle}>Mappa admin</span>
+            <h2 id="admin-live-map-title" style={sectionTitleStyle}>
+              Visitatori e log operativi.
+            </h2>
+          </div>
+          <p style={smallTextStyle}>
+            Questa area guida owner e admin verso le pagine operative senza eseguire letture live, modifiche account o invii email dal browser.
+          </p>
+        </div>
+
+        <div style={pageGridStyle}>
+          <a href="#/visitatori" style={pageCardStyle}>
+            <span style={pageStateStyle}>Admin</span>
+            <strong>Visitatori</strong>
+            <small>Stati account, supporto e procedure: solo guida, niente modifiche live.</small>
+          </a>
+
+          <a href="#/log-admin" style={pageCardStyle}>
+            <span style={pageStateStyle}>Audit</span>
+            <strong>Log admin</strong>
+            <small>Decisioni, audit log e notification queue senza esporre righe reali.</small>
+          </a>
+
+          <a href="#/log-stats" style={pageCardStyle}>
+            <span style={pageStateStyle}>Stats</span>
+            <strong>Log stats</strong>
+            <small>Metriche aggregate, smoke test e stato produzione senza dati sensibili.</small>
+          </a>
+        </div>
+      </section>
+
       <section style={panelStyle} aria-labelledby="owner-operations-title">
         <div style={panelHeaderStyle}>
           <div>
