@@ -188,6 +188,9 @@ function getCurrentSection(pathname, isAuthed, tier) {
   }
 
   if (
+    pathname.startsWith("/soluzioni") ||
+    pathname.startsWith("/sito-clienti-locali") ||
+    pathname.startsWith("/sito-prenotazioni") ||
     pathname.startsWith("/funzioni") ||
     pathname.startsWith("/profili-pubblici") ||
     pathname.startsWith("/come-funziona") ||

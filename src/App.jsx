@@ -58,6 +58,9 @@ import FAQ from "./pages/FAQ.jsx";
 import Sicurezza from "./pages/Sicurezza.jsx";
 import ComeFunziona from "./pages/ComeFunziona.jsx";
 import ChiSiamo from "./pages/ChiSiamo.jsx";
+import Soluzioni from "./pages/Soluzioni.jsx";
+import SitoClientiLocali from "./pages/SitoClientiLocali.jsx";
+import SitoPrenotazioni from "./pages/SitoPrenotazioni.jsx";
 import {
   Funzioni,
   Impostazioni,
@@ -204,6 +207,9 @@ export default function App() {
 <Route path="/sicurezza" element={<Sicurezza />} />
 <Route path="/come-funziona" element={<ComeFunziona />} />
 <Route path="/chi-siamo" element={<ChiSiamo />} />
+              <Route path="/soluzioni" element={<Soluzioni />} />
+              <Route path="/sito-clienti-locali" element={<SitoClientiLocali />} />
+              <Route path="/sito-prenotazioni" element={<SitoPrenotazioni />} />
 <Route path="/funzioni" element={<Funzioni />} />
 <Route path="/profili-pubblici" element={<ProfiliPubblici />} />
 <Route path="/impostazioni" element={<RequireAuth><Impostazioni /></RequireAuth>} />
