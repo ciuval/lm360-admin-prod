@@ -5,14 +5,15 @@ export default function SitoPrenotazioni() {
     <InfoPageTemplate
       eyebrow="Prenotazioni"
       title="Un sito per organizzare appuntamenti senza caos."
-      lead="Per chi lavora su appuntamento e vuole ridurre messaggi manuali, richieste sparse e confusione sugli orari."
-      cta={{ label: "Parla del progetto", href: "#/contatti" }}
-      secondaryCta={{ label: "Clienti locali", href: "#/sito-clienti-locali" }}
+      lead="Per chi lavora su appuntamento e vuole ridurre messaggi manuali, richieste sparse e confusione sugli orari, senza attivare pagamenti o automazioni non pronte."
+      cta={{ label: "Racconta il tuo flusso", href: "#/contatti" }}
+      secondaryCta={{ label: "Base clienti locali", href: "#/sito-clienti-locali" }}
       sections={[
         {
           label: "A chi serve",
           title: "Servizi su appuntamento",
           text: "Saloni, consulenti, studi, corsi, trattamenti, tecnici e professionisti che devono gestire tempi, disponibilita e richieste in modo piu chiaro.",
+          actions: [{ label: "Vedi clienti locali", href: "#/sito-clienti-locali" }],
         },
         {
           label: "Beneficio",
@@ -28,12 +29,13 @@ export default function SitoPrenotazioni() {
           label: "Pagamenti",
           title: "Acconto solo piu avanti",
           text: "Un eventuale acconto online richiede pagamenti configurati e testati. In questa fase nessun checkout parte da queste pagine.",
+          actions: [{ label: "Sicurezza", href: "#/sicurezza" }],
         },
       ]}
       quickLinks={[
-        { label: "Soluzioni", href: "#/soluzioni" },
-        { label: "Sicurezza", href: "#/sicurezza" },
-        { label: "Contatti", href: "#/contatti" },
+        { label: "Soluzioni", href: "#/soluzioni", text: "Torna alla mappa dei percorsi." },
+        { label: "Contatti", href: "#/contatti", text: "Racconta orari, servizi e regole." },
+        { label: "Sicurezza", href: "#/sicurezza", text: "Niente pagamenti non pronti." },
       ]}
     />
   );
