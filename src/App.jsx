@@ -94,6 +94,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
         <Route path="/welcome" element={<WelcomePage />} />
               <Route path="/premium" element={<Premium />} />
+              <Route path="/premium/libretti" element={<Premium />} />
               <Route
                 path="/profilo"
                 element={
