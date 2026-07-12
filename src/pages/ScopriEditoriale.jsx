@@ -2,17 +2,18 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const articleSlug = "/scopri/matematica-nu-este-o-opinie";
+const matematicaShareUrl = "https://www.lovematch360.com/links/matematica-nu-este-o-opinie.html";
 
 const messages = [
   {
-    lang: "Română",
+    lang: "RomÃƒÂ¢nÃ„Æ’",
     tag: "Economie reale",
     title: "Matematica nu este o opinie",
-    subtitle: "Despre nivelul de trai, muncă, producție și responsabilitate.",
+    subtitle: "Despre nivelul de trai, muncÃ„Æ’, producÃˆâ€ºie Ãˆâ„¢i responsabilitate.",
     text:
-      "Când vorbim despre ridicarea nivelului de trai, trebuie să vorbim serios: nu cu strigăte, nu cu promisiuni goale, ci cu cifre, muncă, producție și reguli corecte.",
+      "CÃƒÂ¢nd vorbim despre ridicarea nivelului de trai, trebuie sÃ„Æ’ vorbim serios: nu cu strigÃ„Æ’te, nu cu promisiuni goale, ci cu cifre, muncÃ„Æ’, producÃˆâ€ºie Ãˆâ„¢i reguli corecte.",
     href: articleSlug,
-    cta: "Deschide pagina completă",
+    cta: "Deschide pagina completÃ„Æ’",
   },
   {
     lang: "Italiano",
@@ -28,15 +29,15 @@ const messages = [
     title: "La tecnologia aiuta. Il controllo resta umano.",
     subtitle: "AI come assistente, non come pilota automatico.",
     text:
-      "LoveMatch360 usa strumenti moderni per ragionare, scrivere e organizzare, ma la responsabilità finale resta nella persona che decide.",
+      "LoveMatch360 usa strumenti moderni per ragionare, scrivere e organizzare, ma la responsabilitÃƒÂ  finale resta nella persona che decide.",
   },
 ];
 
 const frequent = [
   "Libro e progetto: sito, libro, AI, controlli, errori corretti e pubblicazione reale.",
-  "Premium senza fuffa: risorse, ordine e continuità solo quando il valore è reale.",
+  "Premium senza fuffa: risorse, ordine e continuitÃƒÂ  solo quando il valore ÃƒÂ¨ reale.",
   "Cambiamento possibile: metodo, esempi, strumenti e passaggi chiari.",
-  "Moldova e lavoro: più produzione, concorrenza, meno corruzione e rispetto per chi lavora.",
+  "Moldova e lavoro: piÃƒÂ¹ produzione, concorrenza, meno corruzione e rispetto per chi lavora.",
 ];
 
 const rules = [
@@ -48,14 +49,14 @@ const rules = [
 ];
 
 const matematicaParagraphs = [
-  "Când vorbim despre ridicarea nivelului de trai, trebuie să vorbim serios: nu cu strigăte, nu cu hămăială, nu cu promisiuni goale, ci cu cifre, muncă, producție și reguli corecte.",
-  "Ridicarea nivelului de trai înseamnă ca omul să poată cumpăra mai mult din salariul lui. Înseamnă salarii reale mai mari, locuri de muncă stabile, pensii decente, prețuri corecte prin concurență și servicii publice care funcționează.",
-  "Prețul nu trebuie stabilit din birou politic. Prețul trebuie să arate realitatea pieței: cât se produce, cât se cere, cât costă transportul, energia, munca și materia primă. Când statul se amestecă brutal în prețuri, piața se blochează, marfa dispare, investițiile fug și omul simplu plătește nota.",
-  "Rolul statului este altul: să apere concurența, să lupte cu monopolurile, corupția, schemele și abuzurile. Statul trebuie să creeze reguli clare, drumuri bune, justiție corectă, educație profesională și condiții pentru producție.",
-  "De ce în Germania nivelul de trai este considerat mai înalt? Pentru că acolo matematica economiei este respectată: productivitate mare, muncă calificată, industrie puternică, exporturi, disciplină, reguli clare și respect pentru contribuabil.",
-  "Acolo nu se trăiește mai bine din vorbe, ci din organizare, producție și responsabilitate. O țară nu devine bogată pentru că promite mai mult, ci pentru că produce mai mult, muncește mai bine și își respectă regulile.",
-  "Și Moldova poate merge înainte. Dar nu prin populism. Nu prin zgomot. Nu prin legi făcute împotriva pieței. Avem nevoie de mai multă producție, mai multă concurență, mai puțină corupție, mai puțină birocrație și mai mult respect pentru omul care muncește.",
-  "Nu este vorba despre ură. Este vorba despre ordine, responsabilitate și adevăr economic.",
+  "CÃƒÂ¢nd vorbim despre ridicarea nivelului de trai, trebuie sÃ„Æ’ vorbim serios: nu cu strigÃ„Æ’te, nu cu hÃ„Æ’mÃ„Æ’ialÃ„Æ’, nu cu promisiuni goale, ci cu cifre, muncÃ„Æ’, producÃˆâ€ºie Ãˆâ„¢i reguli corecte.",
+  "Ridicarea nivelului de trai ÃƒÂ®nseamnÃ„Æ’ ca omul sÃ„Æ’ poatÃ„Æ’ cumpÃ„Æ’ra mai mult din salariul lui. ÃƒÅ½nseamnÃ„Æ’ salarii reale mai mari, locuri de muncÃ„Æ’ stabile, pensii decente, preÃˆâ€ºuri corecte prin concurenÃˆâ€ºÃ„Æ’ Ãˆâ„¢i servicii publice care funcÃˆâ€ºioneazÃ„Æ’.",
+  "PreÃˆâ€ºul nu trebuie stabilit din birou politic. PreÃˆâ€ºul trebuie sÃ„Æ’ arate realitatea pieÃˆâ€ºei: cÃƒÂ¢t se produce, cÃƒÂ¢t se cere, cÃƒÂ¢t costÃ„Æ’ transportul, energia, munca Ãˆâ„¢i materia primÃ„Æ’. CÃƒÂ¢nd statul se amestecÃ„Æ’ brutal ÃƒÂ®n preÃˆâ€ºuri, piaÃˆâ€ºa se blocheazÃ„Æ’, marfa dispare, investiÃˆâ€ºiile fug Ãˆâ„¢i omul simplu plÃ„Æ’teÃˆâ„¢te nota.",
+  "Rolul statului este altul: sÃ„Æ’ apere concurenÃˆâ€ºa, sÃ„Æ’ lupte cu monopolurile, corupÃˆâ€ºia, schemele Ãˆâ„¢i abuzurile. Statul trebuie sÃ„Æ’ creeze reguli clare, drumuri bune, justiÃˆâ€ºie corectÃ„Æ’, educaÃˆâ€ºie profesionalÃ„Æ’ Ãˆâ„¢i condiÃˆâ€ºii pentru producÃˆâ€ºie.",
+  "De ce ÃƒÂ®n Germania nivelul de trai este considerat mai ÃƒÂ®nalt? Pentru cÃ„Æ’ acolo matematica economiei este respectatÃ„Æ’: productivitate mare, muncÃ„Æ’ calificatÃ„Æ’, industrie puternicÃ„Æ’, exporturi, disciplinÃ„Æ’, reguli clare Ãˆâ„¢i respect pentru contribuabil.",
+  "Acolo nu se trÃ„Æ’ieÃˆâ„¢te mai bine din vorbe, ci din organizare, producÃˆâ€ºie Ãˆâ„¢i responsabilitate. O Ãˆâ€ºarÃ„Æ’ nu devine bogatÃ„Æ’ pentru cÃ„Æ’ promite mai mult, ci pentru cÃ„Æ’ produce mai mult, munceÃˆâ„¢te mai bine Ãˆâ„¢i ÃƒÂ®Ãˆâ„¢i respectÃ„Æ’ regulile.",
+  "ÃˆËœi Moldova poate merge ÃƒÂ®nainte. Dar nu prin populism. Nu prin zgomot. Nu prin legi fÃ„Æ’cute ÃƒÂ®mpotriva pieÃˆâ€ºei. Avem nevoie de mai multÃ„Æ’ producÃˆâ€ºie, mai multÃ„Æ’ concurenÃˆâ€ºÃ„Æ’, mai puÃˆâ€ºinÃ„Æ’ corupÃˆâ€ºie, mai puÃˆâ€ºinÃ„Æ’ birocraÃˆâ€ºie Ãˆâ„¢i mai mult respect pentru omul care munceÃˆâ„¢te.",
+  "Nu este vorba despre urÃ„Æ’. Este vorba despre ordine, responsabilitate Ãˆâ„¢i adevÃ„Æ’r economic.",
 ];
 
 export function MatematicaNuEsteOpiniePage() {
@@ -66,13 +67,13 @@ export function MatematicaNuEsteOpiniePage() {
       <article className="article-shell">
         <div className="article-top">
           <Link to="/scopri" className="back-link">
-            ← Înapoi la Scopri
+            Ã¢â€ Â ÃƒÅ½napoi la Scopri
           </Link>
 
           <div className="meta">
-            <span>Română</span>
+            <span>RomÃƒÂ¢nÃ„Æ’</span>
             <span>Economie reale</span>
-            <span>Valerius · LoveMatch360</span>
+            <span>Valerius Ã‚Â· LoveMatch360</span>
           </div>
         </div>
 
@@ -80,9 +81,9 @@ export function MatematicaNuEsteOpiniePage() {
           <p className="eyebrow">Mesaj public</p>
           <h1 id="article-title">Matematica nu este o opinie.</h1>
           <p className="lead">
-            Despre nivelul de trai, muncă, producție, prețuri, concurență și
+            Despre nivelul de trai, muncÃ„Æ’, producÃˆâ€ºie, preÃˆâ€ºuri, concurenÃˆâ€ºÃ„Æ’ Ãˆâ„¢i
             responsabilitate. Un text pentru oameni care vor schimbare, dar vor
-            să înțeleagă cum se construiește schimbarea reală.
+            sÃ„Æ’ ÃƒÂ®nÃˆâ€ºeleagÃ„Æ’ cum se construieÃˆâ„¢te schimbarea realÃ„Æ’.
           </p>
         </header>
 
@@ -92,23 +93,34 @@ export function MatematicaNuEsteOpiniePage() {
           ))}
 
           <div className="signature">
-            <strong>— Valerius</strong>
+            <strong>Ã¢â‚¬â€ Valerius</strong>
             <span>LoveMatch360</span>
           </div>
         </section>
 
         <section className="article-box">
-          <h2>Ideea centrală</h2>
+          <h2>Ideea centralÃ„Æ’</h2>
           <p>
-            Nivelul de trai nu crește din scandal, ci din producție, reguli
-            clare, concurență, muncă calificată și respect pentru omul care
-            muncește.
+            Nivelul de trai nu creÃˆâ„¢te din scandal, ci din producÃˆâ€ºie, reguli
+            clare, concurenÃˆâ€ºÃ„Æ’, muncÃ„Æ’ calificatÃ„Æ’ Ãˆâ„¢i respect pentru omul care
+            munceÃˆâ„¢te.
           </p>
         </section>
 
-        <div className="actions">
+                <section className="article-box share-box">
+          <h2>Link util de distribuit</h2>
+          <p>
+            Pentru WhatsApp, Facebook, LinkedIn sau mesaje directe, folosește
+            linkul public de mai jos. Deschide o pagină simplă, ușor de
+            distribuit, apoi trimite cititorul la textul complet.
+          </p>
+          <a className="btn primary" href={matematicaShareUrl}>
+            Deschide linkul public
+          </a>
+        </section>
+<div className="actions">
           <Link to="/scopri" className="btn secondary">
-            Înapoi la mesaje
+            ÃƒÅ½napoi la mesaje
           </Link>
           <Link to="/libro/da-zero-a-lovematch360" className="btn ghost">
             Vezi cartea
@@ -125,7 +137,7 @@ export default function ScopriEditoriale() {
       <style>{css}</style>
 
       <section className="hero">
-        <p className="eyebrow">LoveMatch360 · Scopri</p>
+        <p className="eyebrow">LoveMatch360 Ã‚Â· Scopri</p>
         <h1 id="scopri-title">
           Idee per chi vuole cambiare, ma non sa da dove iniziare.
         </h1>
@@ -133,7 +145,7 @@ export default function ScopriEditoriale() {
         <p className="lead">
           Qui non trovi solo funzioni tecniche. Trovi messaggi, percorsi e idee
           pratiche per trasformare confusione in ordine: lavoro, metodo, AI,
-          responsabilità, libro e comunicazioni pubbliche.
+          responsabilitÃƒÂ , libro e comunicazioni pubbliche.
         </p>
 
         <div className="actions">
@@ -158,7 +170,7 @@ export default function ScopriEditoriale() {
         <p className="eyebrow">Messaggi pubblici</p>
         <h2>Parole forti, ma pulite.</h2>
         <p className="section-lead">
-          Ogni card è solo l’inizio. I messaggi importanti devono aprirsi in una
+          Ogni card ÃƒÂ¨ solo lÃ¢â‚¬â„¢inizio. I messaggi importanti devono aprirsi in una
           pagina completa, leggibile e condivisibile.
         </p>
 
@@ -173,7 +185,7 @@ export default function ScopriEditoriale() {
                 <h3>{item.title}</h3>
                 <p className="subtitle">{item.subtitle}</p>
                 <p>{item.text}</p>
-                <strong>— Valerius · LoveMatch360</strong>
+                <strong>Ã¢â‚¬â€ Valerius Ã‚Â· LoveMatch360</strong>
                 {item.cta ? <em>{item.cta}</em> : null}
               </>
             );
@@ -199,7 +211,7 @@ export default function ScopriEditoriale() {
         <p className="eyebrow">Messaggi frequenti</p>
         <h2>Testi pronti da trasformare in comunicazioni.</h2>
         <p className="section-lead">
-          Questa è la prima libreria editoriale pubblica. In seguito potrà
+          Questa ÃƒÂ¨ la prima libreria editoriale pubblica. In seguito potrÃƒÂ 
           diventare una vera area admin per salvare bozze, pubblicare messaggi
           e copiare testi per WhatsApp, social o aggiornamenti.
         </p>
@@ -220,13 +232,13 @@ export default function ScopriEditoriale() {
           <h2>Il pubblico non ha bisogno di una pagina fredda.</h2>
           <p className="section-lead">
             Le pagine semitecniche devono diventare percorsi leggibili: prima il
-            messaggio, poi il metodo, poi l’azione possibile. La tecnologia resta
-            dietro. Davanti c’è una persona che capisce dove andare.
+            messaggio, poi il metodo, poi lÃ¢â‚¬â„¢azione possibile. La tecnologia resta
+            dietro. Davanti cÃ¢â‚¬â„¢ÃƒÂ¨ una persona che capisce dove andare.
           </p>
         </div>
 
         <div className="quote">
-          <p>“Non serve partire perfetti. Serve partire con ordine.”</p>
+          <p>Ã¢â‚¬Å“Non serve partire perfetti. Serve partire con ordine.Ã¢â‚¬Â</p>
           <span>Regola LoveMatch360: una cosa alla volta.</span>
         </div>
       </section>
