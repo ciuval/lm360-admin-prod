@@ -71,8 +71,8 @@ function getCurrentSection(pathname, isAuthed, tier) {
     return {
       label: "Home",
       helper: isAuthed
-        ? "Questa è la tua base: da qui puoi orientarti e ripartire pulito."
-        : "Questa è la porta d'ingresso: da qui inizi, capisci il percorso e scegli cosa fare.",
+        ? "Questa Ã¨ la tua base: da qui puoi orientarti e ripartire pulito."
+        : "Questa Ã¨ la porta d'ingresso: da qui inizi, capisci il percorso e scegli cosa fare.",
     };
   }
 
@@ -96,11 +96,17 @@ function getCurrentSection(pathname, isAuthed, tier) {
       helper: "Qui gestisci presenza, dati e stato del tuo account.",
     };
   }
+  if (pathname.startsWith("/scopri-profili")) {
+    return {
+      label: "Profili",
+      helper: "Qui esplori i profili disponibili nel flusso reale di discovery.",
+    };
+  }
 
   if (pathname.startsWith("/scopri")) {
     return {
       label: "Scopri",
-      helper: "Qui esplori i profili disponibili nel flusso reale di discovery.",
+      helper: "Qui trovi messaggi, percorsi e idee chiare per cambiare con ordine.",
     };
   }
   if (pathname.startsWith("/match")) {
@@ -131,7 +137,7 @@ function getCurrentSection(pathname, isAuthed, tier) {
   if (pathname.startsWith("/quantum")) {
     return {
       label: "Quantum",
-      helper: "Qui vivi l’area avanzata disponibile solo per i livelli abilitati.",
+      helper: "Qui vivi lâ€™area avanzata disponibile solo per i livelli abilitati.",
     };
   }
 
@@ -152,7 +158,7 @@ function getCurrentSection(pathname, isAuthed, tier) {
   if (pathname.startsWith("/checkout")) {
     return {
       label: "Checkout",
-      helper: "Qui trovi il passaggio di pagamento solo quando il percorso Premium è davvero attivo.",
+      helper: "Qui trovi il passaggio di pagamento solo quando il percorso Premium Ã¨ davvero attivo.",
     };
   }
 
@@ -365,13 +371,13 @@ export default function AppShell({ children }) {
             <nav aria-label="Navigazione principale" style={navStyle}>
               <ShellLink to="/">Home</ShellLink>
           <ShellLink to="/welcome">Inizia</ShellLink>
+              <ShellLink to="/scopri">Scopri</ShellLink>
               <ShellLink to="/premium">Premium</ShellLink>
 
               {isAuthed ? (
                 <>
                   <ShellLink to="/billing">Billing</ShellLink>
                   <ShellLink to="/quantum">Quantum</ShellLink>
-                  <ShellLink to="/scopri">Scopri</ShellLink>
                   <ShellLink to="/profilo">Profilo</ShellLink>
                   {showAdminLink ? <ShellLink to="/admin">Admin</ShellLink> : null}
                 </>

@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound.jsx";
    DISCOVERY / APP
 ====================================================== */
 import PublicProfilesPage from "./pages/PublicProfilesPage.jsx";
+import ScopriEditoriale from "./pages/ScopriEditoriale.jsx";
 import MatchDashboard from "./pages/MatchDashboard.jsx";
 import Admin from "./pages/Admin.jsx";
 import Billing from "./pages/Billing.jsx";
@@ -109,8 +110,9 @@ export default function App() {
               {/* ======================================================
                   AUTH REQUIRED
               ====================================================== */}
+                            <Route path="/scopri" element={<ScopriEditoriale />} />
               <Route
-                path="/scopri"
+                path="/scopri-profili"
                 element={
                   <RequireAuth>
                     <PublicProfilesPage />
