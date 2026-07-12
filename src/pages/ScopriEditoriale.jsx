@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+const articleSlug = "/scopri/matematica-nu-este-o-opinie";
+
 const messages = [
   {
     lang: "Română",
@@ -9,6 +11,8 @@ const messages = [
     subtitle: "Despre nivelul de trai, muncă, producție și responsabilitate.",
     text:
       "Când vorbim despre ridicarea nivelului de trai, trebuie să vorbim serios: nu cu strigăte, nu cu promisiuni goale, ci cu cifre, muncă, producție și reguli corecte.",
+    href: articleSlug,
+    cta: "Deschide pagina completă",
   },
   {
     lang: "Italiano",
@@ -43,6 +47,78 @@ const rules = [
   "Autore chiaro: Valerius / LoveMatch360",
 ];
 
+const matematicaParagraphs = [
+  "Când vorbim despre ridicarea nivelului de trai, trebuie să vorbim serios: nu cu strigăte, nu cu hămăială, nu cu promisiuni goale, ci cu cifre, muncă, producție și reguli corecte.",
+  "Ridicarea nivelului de trai înseamnă ca omul să poată cumpăra mai mult din salariul lui. Înseamnă salarii reale mai mari, locuri de muncă stabile, pensii decente, prețuri corecte prin concurență și servicii publice care funcționează.",
+  "Prețul nu trebuie stabilit din birou politic. Prețul trebuie să arate realitatea pieței: cât se produce, cât se cere, cât costă transportul, energia, munca și materia primă. Când statul se amestecă brutal în prețuri, piața se blochează, marfa dispare, investițiile fug și omul simplu plătește nota.",
+  "Rolul statului este altul: să apere concurența, să lupte cu monopolurile, corupția, schemele și abuzurile. Statul trebuie să creeze reguli clare, drumuri bune, justiție corectă, educație profesională și condiții pentru producție.",
+  "De ce în Germania nivelul de trai este considerat mai înalt? Pentru că acolo matematica economiei este respectată: productivitate mare, muncă calificată, industrie puternică, exporturi, disciplină, reguli clare și respect pentru contribuabil.",
+  "Acolo nu se trăiește mai bine din vorbe, ci din organizare, producție și responsabilitate. O țară nu devine bogată pentru că promite mai mult, ci pentru că produce mai mult, muncește mai bine și își respectă regulile.",
+  "Și Moldova poate merge înainte. Dar nu prin populism. Nu prin zgomot. Nu prin legi făcute împotriva pieței. Avem nevoie de mai multă producție, mai multă concurență, mai puțină corupție, mai puțină birocrație și mai mult respect pentru omul care muncește.",
+  "Nu este vorba despre ură. Este vorba despre ordine, responsabilitate și adevăr economic.",
+];
+
+export function MatematicaNuEsteOpiniePage() {
+  return (
+    <main className="scopri-page article-page" aria-labelledby="article-title">
+      <style>{css}</style>
+
+      <article className="article-shell">
+        <div className="article-top">
+          <Link to="/scopri" className="back-link">
+            ← Înapoi la Scopri
+          </Link>
+
+          <div className="meta">
+            <span>Română</span>
+            <span>Economie reale</span>
+            <span>Valerius · LoveMatch360</span>
+          </div>
+        </div>
+
+        <header className="article-hero">
+          <p className="eyebrow">Mesaj public</p>
+          <h1 id="article-title">Matematica nu este o opinie.</h1>
+          <p className="lead">
+            Despre nivelul de trai, muncă, producție, prețuri, concurență și
+            responsabilitate. Un text pentru oameni care vor schimbare, dar vor
+            să înțeleagă cum se construiește schimbarea reală.
+          </p>
+        </header>
+
+        <section className="article-body">
+          {matematicaParagraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+
+          <div className="signature">
+            <strong>— Valerius</strong>
+            <span>LoveMatch360</span>
+          </div>
+        </section>
+
+        <section className="article-box">
+          <h2>Ideea centrală</h2>
+          <p>
+            Nivelul de trai nu crește din scandal, ci din producție, reguli
+            clare, concurență, muncă calificată și respect pentru omul care
+            muncește.
+          </p>
+        </section>
+
+        <div className="actions">
+          <Link to="/scopri" className="btn secondary">
+            Înapoi la mesaje
+          </Link>
+          <Link to="/libro/da-zero-a-lovematch360" className="btn ghost">
+            Vezi cartea
+          </Link>
+        </div>
+      </article>
+    </main>
+  );
+}
+
 export default function ScopriEditoriale() {
   return (
     <main className="scopri-page" aria-labelledby="scopri-title">
@@ -61,7 +137,9 @@ export default function ScopriEditoriale() {
         </p>
 
         <div className="actions">
-          <a href="#messaggi" className="btn primary">Leggi i messaggi</a>
+          <Link to={articleSlug} className="btn primary">
+            Apri il primo messaggio
+          </Link>
           <Link to="/libro/da-zero-a-lovematch360" className="btn secondary">
             Vai al libro
           </Link>
@@ -80,24 +158,40 @@ export default function ScopriEditoriale() {
         <p className="eyebrow">Messaggi pubblici</p>
         <h2>Parole forti, ma pulite.</h2>
         <p className="section-lead">
-          Messaggi pensati per un pubblico che sente il bisogno di cambiamento,
-          ma vuole capire come si costruisce davvero: senza odio, senza fuffa,
-          senza scorciatoie.
+          Ogni card è solo l’inizio. I messaggi importanti devono aprirsi in una
+          pagina completa, leggibile e condivisibile.
         </p>
 
         <div className="grid">
-          {messages.map((item) => (
-            <article className="card message" key={item.title}>
-              <div className="meta">
-                <span>{item.lang}</span>
-                <span>{item.tag}</span>
-              </div>
-              <h3>{item.title}</h3>
-              <p className="subtitle">{item.subtitle}</p>
-              <p>{item.text}</p>
-              <strong>— Valerius · LoveMatch360</strong>
-            </article>
-          ))}
+          {messages.map((item) => {
+            const content = (
+              <>
+                <div className="meta">
+                  <span>{item.lang}</span>
+                  <span>{item.tag}</span>
+                </div>
+                <h3>{item.title}</h3>
+                <p className="subtitle">{item.subtitle}</p>
+                <p>{item.text}</p>
+                <strong>— Valerius · LoveMatch360</strong>
+                {item.cta ? <em>{item.cta}</em> : null}
+              </>
+            );
+
+            if (item.href) {
+              return (
+                <Link className="card message clickable-card" key={item.title} to={item.href}>
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <article className="card message" key={item.title}>
+                {content}
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -165,7 +259,7 @@ const css = `
     #07080c;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
-.hero,.panel{
+.hero,.panel,.article-shell{
   max-width:1180px;
   margin:0 auto 24px;
   border:1px solid rgba(255,255,255,.09);
@@ -250,6 +344,28 @@ h3{
 }
 .message:first-child{background:rgba(240,143,192,.11)}
 .message:nth-child(3){background:rgba(86,148,255,.09)}
+.clickable-card{
+  color:#fff;
+  text-decoration:none;
+  display:block;
+  transition:transform .16s ease, border-color .16s ease, background .16s ease;
+}
+.clickable-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(240,143,192,.45);
+  background:rgba(240,143,192,.16);
+  text-decoration:none;
+}
+.clickable-card em{
+  display:inline-flex;
+  margin-top:18px;
+  color:#111;
+  background:#f08fc0;
+  padding:9px 12px;
+  border-radius:999px;
+  font-style:normal;
+  font-weight:900;
+}
 .meta{
   display:flex;
   gap:8px;
@@ -305,8 +421,61 @@ h3{
   background:rgba(74,222,128,.14);
   color:#baf7c8;
 }
+.article-page{
+  padding-top:34px;
+}
+.article-shell{
+  padding:28px;
+  max-width:980px;
+}
+.article-top{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+  justify-content:space-between;
+  align-items:center;
+}
+.back-link{
+  color:#ffd7ea;
+  text-decoration:none;
+  font-weight:900;
+}
+.article-hero{
+  margin-top:34px;
+  padding-bottom:26px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.article-body{
+  max-width:780px;
+  margin:28px auto 0;
+}
+.article-body p{
+  color:rgba(255,255,255,.86);
+  font-size:clamp(1.08rem,2.1vw,1.32rem);
+  line-height:1.82;
+  margin:0 0 22px;
+}
+.signature{
+  margin-top:34px;
+  display:grid;
+  gap:4px;
+  color:#ffd7ea;
+  font-size:18px;
+}
+.article-box{
+  max-width:780px;
+  margin:34px auto 0;
+  padding:22px;
+  border-radius:24px;
+  background:rgba(240,143,192,.10);
+  border:1px solid rgba(240,143,192,.28);
+}
+.article-box p{
+  color:rgba(255,255,255,.82);
+  line-height:1.7;
+}
 @media(max-width:760px){
-  .hero,.panel{padding:22px}
+  .hero,.panel,.article-shell{padding:22px}
   .split{grid-template-columns:1fr}
 }
 `;
