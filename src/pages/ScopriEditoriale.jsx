@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const articleSlug = "/scopri/matematica-nu-este-o-opinie";
-const matematicaShareUrl = "https://www.lovematch360.com/links/matematica-nu-este-o-opinie.html";
+const matematicaShareUrl = "https://www.lovematch360.com/matematica-nu-este-o-opinie/";
 
 const messages = [
   {
