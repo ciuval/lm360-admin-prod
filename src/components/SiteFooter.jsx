@@ -1,7 +1,7 @@
 const linkGroups = [
   {
-    title: "Pubblico",
-    note: "Pagine aperte per capire il progetto.",
+    title: "Da scoprire",
+    note: "Pagine leggere per entrare nel progetto.",
     links: [
       { label: "Home", href: "#/" },
       { label: "Inizia", href: "#/welcome" },
@@ -15,8 +15,8 @@ const linkGroups = [
     ],
   },
   {
-    title: "Percorso utente",
-    note: "Aree protette o collegate al percorso personale.",
+    title: "Per entrare",
+    note: "Passi semplici per vivere meglio il sito.",
     links: [
       { label: "Profilo", href: "#/profilo" },
       { label: "Scopri", href: "#/scopri" },
@@ -28,8 +28,8 @@ const linkGroups = [
     ],
   },
   {
-    title: "Owner e controllo",
-    note: "Mappa operativa. Nessuna azione distruttiva dal footer.",
+    title: "Dietro le quinte",
+    note: "Uno spazio ordinato per far crescere il progetto.",
     links: [
       { label: "Admin", href: "#/admin" },
       { label: "Visitatori", href: "#/visitatori" },
@@ -39,8 +39,8 @@ const linkGroups = [
     ],
   },
   {
-    title: "Trust e legale",
-    note: "Supporto, sicurezza e regole pubbliche.",
+    title: "Fiducia",
+    note: "Regole chiare, rispetto e trasparenza.",
     links: [
       { label: "Contatti", href: "#/contatti" },
       { label: "FAQ", href: "#/faq" },
@@ -56,9 +56,10 @@ const linkGroups = [
 ];
 
 const statusItems = [
-  "Piattaforma attiva",
-  "Pagamenti in pausa controllata",
-  "Nessuna lettura live dal footer",
+  "Sito vivo",
+  "Crescita con calma",
+  "Privacy rispettata",
+  "Contatti puliti",
   "Nessun invio email dal browser",
 ];
 
@@ -69,16 +70,14 @@ export default function SiteFooter() {
         <section style={brandStyle} aria-labelledby="footer-brand-title">
           <p style={eyebrowStyle}>LoveMatch360</p>
           <h2 id="footer-brand-title" style={brandTitleStyle}>
-            Percorsi vivi, meno caos.
+            Resta, scopri, continua.
           </h2>
           <p style={brandTextStyle}>
-            Una mappa ordinata per muoversi tra pagine pubbliche, percorso utente,
-            area owner e contenuti di fiducia. Il footer orienta: non modifica account,
-            non legge dati live e non avvia pagamenti.
+            Una porta semplice per continuare il viaggio: pagine utili, messaggi, libro, profili e spazi di fiducia, senza fretta e senza confusione.
           </p>
 
           <div style={contactBoxStyle}>
-            <span style={contactLabelStyle}>Supporto ufficiale</span>
+            <span style={contactLabelStyle}>Contatto umano</span>
             <a href="mailto:servizioclienti@lovematch360.com" style={contactLinkStyle}>
               servizioclienti@lovematch360.com
             </a>
@@ -103,10 +102,10 @@ export default function SiteFooter() {
           ))}
         </nav>
 
-        <section style={statusStyle} aria-label="Stato del servizio">
+        <section style={statusStyle} aria-label="Presenza del servizio">
           <div>
-            <span style={statusLabelStyle}>Stato</span>
-            <strong style={statusTitleStyle}>Footer sicuro e non distruttivo.</strong>
+            <span style={statusLabelStyle}>Presenza</span>
+            <strong style={statusTitleStyle}>Percorsi sereni, senza sorprese.</strong>
           </div>
           <div style={statusItemsStyle}>
             {statusItems.map((item) => (

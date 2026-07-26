@@ -13,21 +13,21 @@ const whatsappHref = `https://wa.me/?text=${whatsappText}`;
 const highlights = [
   {
     label: "Messaggi vivi",
-    title: "Non rumore. Direzione.",
+    title: "Ti prendono con dolcezza.",
     text:
-      "Testi pubblici, leggibili e condivisibili: economia reale, metodo, AI responsabile, libro, lavoro e fiducia.",
+      "Messaggi brevi, curati e piacevoli da leggere. Parlano chiaro, fanno buona impressione e restano in mente.",
   },
   {
-    label: "WhatsApp a fianco",
-    title: "Condividi senza confusione.",
+    label: "Pronti da inviare",
+    title: "Si inviano in un attimo.",
     text:
-      "Ogni messaggio importante deve poter uscire dal sito e viaggiare bene: link pulito, anteprima chiara, testo umano.",
+      "Ogni messaggio è pensato per viaggiare bene tra WhatsApp, Facebook e link diretti, senza perdere fascino.",
   },
   {
     label: "Presenza umana",
-    title: "Pagine che accolgono.",
+    title: "Fanno sentire a casa.",
     text:
-      "Non una schermata fredda. Una stanza ordinata dove il visitatore capisce, respira e decide il prossimo passo.",
+      "Chi apre una pagina trova un tono caldo, uno spazio chiaro e il desiderio di fare il passo successivo.",
   },
 ];
 
@@ -59,11 +59,11 @@ const messageCards = [
 ];
 
 const principles = [
-  "Non copiare il rumore.",
-  "Non promettere risultati automatici.",
-  "Non usare parole aggressive per attirare attenzione.",
-  "Costruire fiducia prima di monetizzare.",
-  "Rendere ogni pagina utile, umana e condivisibile.",
+  "Più calore, meno confusione.",
+  "Più verità, meno frasi vuote.",
+  "Più eleganza, meno pressione.",
+  "Più fiducia, meno fretta.",
+  "Più bellezza, più desiderio di tornare.",
 ];
 
 export default function MessaggiPage() {
@@ -76,12 +76,10 @@ export default function MessaggiPage() {
         <div className="hero-card">
           <p className="eyebrow">LoveMatch360 · Messaggi</p>
           <h1 id="messaggi-title">
-            Messaggi che si aprono come porte, non come rumore.
+            Parole che accendono curiosità e fanno restare.
           </h1>
           <p className="lead">
-            Una pagina pubblica per testi forti, puliti e condivisibili. Qui il
-            visitatore non trova confusione: trova una strada, un tono umano e
-            un motivo per tornare.
+            Qui ogni messaggio nasce per attirare con eleganza, farsi leggere con piacere e lasciare una sensazione bella. Si entra per curiosità e si resta perché tutto parla con calore, chiarezza e stile.
           </p>
 
           <div className="hero-actions">
@@ -105,12 +103,10 @@ export default function MessaggiPage() {
       </section>
 
       <section className="soft-panel">
-        <p className="eyebrow">Effetto nuovo</p>
-        <h2>Pagine coccolanti: leggere, capire, condividere.</h2>
+        <p className="eyebrow">ATMOSFERA NUOVA</p>
+        <h2>Pagine che fanno sentire bene al primo sguardo.</h2>
         <p className="section-lead">
-          Il sito non deve sembrare un pannello tecnico. Deve sembrare una
-          presenza viva: chi entra deve capire cosa fare, sentirsi rispettato e
-          trovare subito un contenuto utile.
+          Chi arriva qui non deve incontrare parole fredde o pesanti. Deve sentire ordine, calore e il desiderio di scoprire qualcosa di bello.
         </p>
 
         <div className="highlight-grid">
@@ -127,11 +123,11 @@ export default function MessaggiPage() {
       <section className="soft-panel message-panel">
         <div className="panel-head">
           <div>
-            <p className="eyebrow">Biblioteca pubblica</p>
-            <h2>Testi pronti da far viaggiare.</h2>
+            <p className="eyebrow">DA LEGGERE SUBITO</p>
+            <h2>Messaggi da leggere e condividere con piacere.</h2>
           </div>
           <a className="mini-share" href={whatsappHref} target="_blank" rel="noreferrer">
-            WhatsApp a fianco
+            Pronti da inviare
           </a>
         </div>
 
@@ -149,12 +145,10 @@ export default function MessaggiPage() {
 
       <section className="soft-panel split">
         <div>
-          <p className="eyebrow">Regola pubblica</p>
-          <h2>La qualità lascia indietro il caos.</h2>
+          <p className="eyebrow">SENSAZIONE GIUSTA</p>
+          <h2>Qui si respira meglio.</h2>
           <p className="section-lead">
-            Non serve scrivere contro altri siti o altre app. Basta costruire un
-            posto più chiaro, più umano e più utile. Il confronto lo
-            farà il visitatore, non una frase aggressiva.
+            Non serve alzare la voce per farsi ricordare. Bastano pagine belle, parole sincere e una presenza che fa stare bene. Quando il tono è giusto, la differenza si sente subito.
           </p>
         </div>
 
@@ -169,19 +163,17 @@ export default function MessaggiPage() {
       </section>
 
       <section className="final-card">
-        <p className="eyebrow">Prossima evoluzione</p>
-        <h2>Prima messaggi, poi membri, poi pagamenti.</h2>
+        <p className="eyebrow">IL PASSO CHE INVITA</p>
+        <h2>Prima l’attenzione, poi la fiducia, poi l’incontro.</h2>
         <p>
-          La strada corretta è questa: creare pubblico e fiducia, aprire una
-          futura area membri, poi costruire pagamenti solo quando l'offerta sarà
-          chiara, protetta e veramente utile.
+          La strada più bella parte da qui: conquistare interesse, creare un legame e accompagnare il visitatore verso qualcosa di sempre più ricco, esclusivo e desiderabile.
         </p>
         <div className="hero-actions">
           <Link className="btn primary" to="/scopri">
             Torna a Scopri
           </Link>
           <Link className="btn ghost" to="/premium">
-            Premium con calma
+            Scopri l’area premium
           </Link>
         </div>
       </section>

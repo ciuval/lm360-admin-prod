@@ -71,8 +71,8 @@ function getCurrentSection(pathname, isAuthed, tier) {
     return {
       label: "Home",
       helper: isAuthed
-        ? "Questa ÃƒÂ¨ la tua base: da qui puoi orientarti e ripartire pulito."
-        : "Questa ÃƒÂ¨ la porta d'ingresso: da qui inizi, capisci il percorso e scegli cosa fare.",
+        ? "Questa è la tua base: da qui puoi orientarti e ripartire pulito."
+        : "Questa è la porta d'ingresso: da qui inizi, capisci il percorso e scegli cosa fare.",
     };
   }
 
@@ -106,7 +106,7 @@ function getCurrentSection(pathname, isAuthed, tier) {
   if (pathname.startsWith("/messaggi")) {
     return {
       label: "Messaggi",
-      helper: "Qui trovi testi pubblici, idee condivisibili e percorsi umani.",
+      helper: "Qui trovi parole che emozionano, incuriosiscono e invitano a tornare.",
     };
   }
   if (pathname.startsWith("/scopri")) {
@@ -143,7 +143,7 @@ function getCurrentSection(pathname, isAuthed, tier) {
   if (pathname.startsWith("/quantum")) {
     return {
       label: "Quantum",
-      helper: "Qui vivi lÃ¢â‚¬â„¢area avanzata disponibile solo per i livelli abilitati.",
+      helper: "Qui vivi lââ‚¬â„¢area avanzata disponibile solo per i livelli abilitati.",
     };
   }
 
@@ -164,7 +164,7 @@ function getCurrentSection(pathname, isAuthed, tier) {
   if (pathname.startsWith("/checkout")) {
     return {
       label: "Checkout",
-      helper: "Qui trovi il passaggio di pagamento solo quando il percorso Premium ÃƒÂ¨ davvero attivo.",
+      helper: "Qui trovi il passaggio di pagamento solo quando il percorso Premium è davvero attivo.",
     };
   }
 
