@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const shareUrl = "https://www.lovematch360.com/matematica-nu-este-o-opinie/";
 
 const whatsappText = encodeURIComponent(
-  "Matematica nu este o opinie.\n\nC\u00e2nd vorbim despre nivelul de trai, trebuie s\u0103 vorbim serios: cu munc\u0103, produc\u021bie, concuren\u021b\u0103, reguli clare \u0219i responsabilitate.\n\nText complet:\n" +
+  "Matematica nu este o opinie.\n\nCând vorbim despre nivelul de trai, trebuie să vorbim serios: cu muncă, producție, concurență, reguli clare și responsabilitate.\n\nText complet:\n" +
     shareUrl
 );
 
@@ -33,10 +33,10 @@ const highlights = [
 
 const messageCards = [
   {
-    tag: "Rom\u00e2n\u0103",
+    tag: "Română",
     title: "Matematica nu este o opinie",
     text:
-      "Nivel de trai, munc\u0103, produc\u021bie, concuren\u021b\u0103 \u0219i responsabilitate. Un messaggio pubblico gi\u00e0 pronto per essere letto e condiviso.",
+      "Nivel de trai, muncă, producție, concurență și responsabilitate. Un messaggio pubblico già pronto per essere letto e condiviso.",
     to: "/scopri/matematica-nu-este-o-opinie",
     cta: "Apri il testo completo",
   },
@@ -44,7 +44,7 @@ const messageCards = [
     tag: "Metodo",
     title: "Non serve urlare. Serve costruire.",
     text:
-      "Il cambiamento vero nasce da ordine, lavoro, verifiche, correzioni e responsabilit\u00e0. Una cosa alla volta.",
+      "Il cambiamento vero nasce da ordine, lavoro, verifiche, correzioni e responsabilità. Una cosa alla volta.",
     to: "/scopri",
     cta: "Vai a Scopri",
   },
@@ -150,11 +150,11 @@ export default function MessaggiPage() {
       <section className="soft-panel split">
         <div>
           <p className="eyebrow">Regola pubblica</p>
-          <h2>La qualit\u00e0 lascia indietro il caos.</h2>
+          <h2>La qualità lascia indietro il caos.</h2>
           <p className="section-lead">
             Non serve scrivere contro altri siti o altre app. Basta costruire un
-            posto pi\u00f9 chiaro, pi\u00f9 umano e pi\u00f9 utile. Il confronto lo
-            far\u00e0 il visitatore, non una frase aggressiva.
+            posto più chiaro, più umano e più utile. Il confronto lo
+            farà il visitatore, non una frase aggressiva.
           </p>
         </div>
 
@@ -172,8 +172,8 @@ export default function MessaggiPage() {
         <p className="eyebrow">Prossima evoluzione</p>
         <h2>Prima messaggi, poi membri, poi pagamenti.</h2>
         <p>
-          La strada corretta \u00e8 questa: creare pubblico e fiducia, aprire una
-          futura area membri, poi costruire pagamenti solo quando l'offerta sar\u00e0
+          La strada corretta è questa: creare pubblico e fiducia, aprire una
+          futura area membri, poi costruire pagamenti solo quando l'offerta sarà
           chiara, protetta e veramente utile.
         </p>
         <div className="hero-actions">
