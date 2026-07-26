@@ -37,7 +37,7 @@ function getAccountState(profile) {
 function getTierMeta(tier) {
   if (tier === "admin") {
     return {
-      label: "ADMIN",
+      label: "REGIA",
       tone: "admin",
       accessLabel: "Controllo admin attivo",
     };
@@ -135,21 +135,21 @@ function getCurrentSection(pathname, isAuthed, tier) {
 
   if (pathname.startsWith("/billing")) {
     return {
-      label: "Billing",
+      label: "Abbonamento",
       helper: "Qui verifichi lo stato del piano e il percorso corretto per il tuo account.",
     };
   }
 
   if (pathname.startsWith("/quantum")) {
     return {
-      label: "Quantum",
+      label: "Spazio speciale",
       helper: "Qui vivi lââ‚¬â„¢area avanzata disponibile solo per i livelli abilitati.",
     };
   }
 
   if (pathname.startsWith("/admin")) {
     return {
-      label: "Admin",
+      label: "Regia",
       helper: "Qui sono disponibili i controlli di gestione riservati agli account autorizzati.",
     };
   }
@@ -170,21 +170,21 @@ function getCurrentSection(pathname, isAuthed, tier) {
 
   if (pathname.startsWith("/visitatori")) {
     return {
-      label: "Visitatori",
+      label: "Presenze",
       helper: "Area admin per stati, supporto e procedure. Nessuna lettura live dal browser.",
     };
   }
 
   if (pathname.startsWith("/log-admin")) {
     return {
-      label: "Log admin",
+      label: "Diario interno",
       helper: "Audit, decisioni e notifiche operative senza righe reali visibili dal browser.",
     };
   }
 
   if (pathname.startsWith("/log-stats")) {
     return {
-      label: "Log stats",
+      label: "Statistiche",
       helper: "Segnali aggregati, smoke production e qualita sito senza dati sensibili.",
     };
   }
@@ -383,10 +383,10 @@ export default function AppShell({ children }) {
 
               {isAuthed ? (
                 <>
-                  <ShellLink to="/billing">Billing</ShellLink>
-                  <ShellLink to="/quantum">Quantum</ShellLink>
+                  <ShellLink to="/billing">Abbonamento</ShellLink>
+                  <ShellLink to="/quantum">Spazio speciale</ShellLink>
                   <ShellLink to="/profilo">Profilo</ShellLink>
-                  {showAdminLink ? <ShellLink to="/admin">Admin</ShellLink> : null}
+                  {showAdminLink ? <ShellLink to="/admin">Regia</ShellLink> : null}
                 </>
               ) : (
                 <ShellLink to="/login">Accedi</ShellLink>
