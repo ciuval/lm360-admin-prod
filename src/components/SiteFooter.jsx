@@ -20,6 +20,7 @@ const linkGroups = [
     links: [
       { label: "Profilo", href: "#/profilo" },
       { label: "Scopri", href: "#/scopri" },
+  { label: "Membri", href: "#/membri" },
       { label: "Match", href: "#/match" },
       { label: "Impostazioni", href: "#/impostazioni" },
       { label: "Notifiche", href: "#/notifiche" },

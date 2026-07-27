@@ -123,6 +123,13 @@ function getCurrentSection(pathname, isAuthed, tier) {
     };
   }
 
+  if (pathname.startsWith("/membri")) {
+    return {
+      label: "Membri",
+      helper: "Qui nasce il cerchio più vicino: prima interesse, poi fiducia, poi decisione.",
+    };
+  }
+
   if (pathname.startsWith("/premium")) {
     return {
       label: "Premium",
@@ -378,6 +385,7 @@ export default function AppShell({ children }) {
               <ShellLink to="/">Home</ShellLink>
           <ShellLink to="/welcome">Inizia</ShellLink>
               <ShellLink to="/messaggi">Messaggi</ShellLink>
+              <ShellLink to="/membri">Membri</ShellLink>
               <ShellLink to="/scopri">Scopri</ShellLink>
               <ShellLink to="/premium">Premium</ShellLink>
 
