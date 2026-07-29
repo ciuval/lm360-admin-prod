@@ -123,6 +123,13 @@ function getCurrentSection(pathname, isAuthed, tier) {
     };
   }
 
+  if (pathname.startsWith("/youtube-news")) {
+    return {
+      label: "YouTube News",
+      helper: "Dati, contenuti e decisioni operative senza promesse di guadagno.",
+    };
+  }
+
   if (pathname.startsWith("/membri")) {
     return {
       label: "Membri",
@@ -386,6 +393,7 @@ export default function AppShell({ children }) {
           <ShellLink to="/welcome">Inizia</ShellLink>
               <ShellLink to="/messaggi">Messaggi</ShellLink>
               <ShellLink to="/membri">Membri</ShellLink>
+              <ShellLink to="/youtube-news">YouTube News</ShellLink>
               <ShellLink to="/scopri">Scopri</ShellLink>
               <ShellLink to="/premium">Premium</ShellLink>
 

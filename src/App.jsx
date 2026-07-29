@@ -26,6 +26,7 @@ import PublicProfilesPage from "./pages/PublicProfilesPage.jsx";
 import ScopriEditoriale, { MatematicaNuEsteOpiniePage } from "./pages/ScopriEditoriale.jsx";
 import MessaggiPage from "./pages/MessaggiPage.jsx";
 import MembriPage from "./pages/MembriPage.jsx";
+import YoutubeNewsPage from "./pages/YoutubeNewsPage.jsx";
 import MatchDashboard from "./pages/MatchDashboard.jsx";
 import Admin from "./pages/Admin.jsx";
 import Billing from "./pages/Billing.jsx";
@@ -115,6 +116,7 @@ export default function App() {
                             <Route path="/scopri/matematica-nu-este-o-opinie" element={<MatematicaNuEsteOpiniePage />} />
               <Route path="/messaggi" element={<MessaggiPage />} />
               <Route path="/membri" element={<MembriPage />} />
+              <Route path="/youtube-news" element={<YoutubeNewsPage />} />
               <Route path="/scopri" element={<ScopriEditoriale />} />
               <Route
                 path="/scopri-profili"

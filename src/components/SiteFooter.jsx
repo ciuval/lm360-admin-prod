@@ -21,6 +21,7 @@ const linkGroups = [
       { label: "Profilo", href: "#/profilo" },
       { label: "Scopri", href: "#/scopri" },
   { label: "Membri", href: "#/membri" },
+  { label: "YouTube News", href: "#/youtube-news" },
       { label: "Match", href: "#/match" },
       { label: "Impostazioni", href: "#/impostazioni" },
       { label: "Notifiche", href: "#/notifiche" },
