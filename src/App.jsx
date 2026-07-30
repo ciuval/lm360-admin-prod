@@ -27,6 +27,7 @@ import ScopriEditoriale, { MatematicaNuEsteOpiniePage } from "./pages/ScopriEdit
 import MessaggiPage from "./pages/MessaggiPage.jsx";
 import MembriPage from "./pages/MembriPage.jsx";
 import YoutubeNewsPage from "./pages/YoutubeNewsPage.jsx";
+import { YouTubeMetricsPage, YouTubePlaybookPage } from "./features/youtube-metrics/index.js";
 import MatchDashboard from "./pages/MatchDashboard.jsx";
 import Admin from "./pages/Admin.jsx";
 import Billing from "./pages/Billing.jsx";
@@ -117,6 +118,12 @@ export default function App() {
               <Route path="/messaggi" element={<MessaggiPage />} />
               <Route path="/membri" element={<MembriPage />} />
               <Route path="/youtube-news" element={<YoutubeNewsPage />} />
+              <Route path="/metrics" element={<YouTubeMetricsPage />} />
+              <Route path="/playbook" element={<YouTubePlaybookPage />} />
+              <Route path="/metrics-preview" element={<YouTubeMetricsPage />} />
+              <Route path="/metrics.html" element={<YouTubeMetricsPage />} />
+              <Route path="/playbook-preview" element={<YouTubePlaybookPage />} />
+              <Route path="/playbook.html" element={<YouTubePlaybookPage />} />
               <Route path="/scopri" element={<ScopriEditoriale />} />
               <Route
                 path="/scopri-profili"
