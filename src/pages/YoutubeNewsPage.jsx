@@ -1,55 +1,51 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { track } from "../lib/analytics.js";
 
-const topVideos = [
+const realVideos = [
   {
+    id: "sXtbY973PT8",
     rank: "01",
-    badge: "Top visualizzazioni",
-    title: "Red flags nelle relazioni: segnali da non ignorare",
-    category: "Relazioni",
-    views: "18.400",
-    points: 92,
-    growth: "+126/h",
-    format: "Short",
-    why: "Tema forte, immediato e utile per chi vuole capire prima di fidarsi.",
-    hook: "Non tutte le attenzioni sono interesse vero.",
+    source: "YouTube reale",
+    title: "Red Flag nelle relazioni: come riconoscere i segnali di allarme",
+    theme: "Relazioni",
+    url: "https://www.youtube.com/watch?v=sXtbY973PT8",
+    score: 94,
+    why: "Tema forte per LoveMatch360: fiducia, segnali, attenzione e relazioni piu consapevoli.",
+    transform: "Short: 3 segnali da osservare prima di fidarsi.",
   },
   {
+    id: "Ay1QY64Y16A",
     rank: "02",
-    badge: "Molto richiesto",
-    title: "Usare ChatGPT senza copiare: metodo semplice",
-    category: "AI utile",
-    views: "13.100",
-    points: 84,
-    growth: "+88/h",
-    format: "Video breve",
-    why: "Aiuta chi crea contenuti a usare l'AI come assistente, non come pilota.",
-    hook: "L'AI non sostituisce la scelta. La rende piu ordinata.",
+    source: "YouTube reale",
+    title: "Ho Testato i MIGLIORI Strumenti AI per Creator",
+    theme: "AI per creator",
+    url: "https://www.youtube.com/watch?v=Ay1QY64Y16A",
+    score: 90,
+    why: "Utile per blogger e creator: mostra strumenti, metodo e scelta, non solo teoria.",
+    transform: "Post: quali strumenti AI aiutano davvero un creator?",
   },
   {
+    id: "mkLkx2-fIps",
     rank: "03",
-    badge: "Da trasformare",
-    title: "Profilo piu umano, meno caos",
-    category: "LoveMatch360",
-    views: "9.400",
-    points: 78,
-    growth: "+62/h",
-    format: "Long",
-    why: "Collega il cuore del sito: identita, fiducia e presenza personale.",
-    hook: "Un profilo non deve impressionare. Deve far capire.",
+    source: "YouTube reale",
+    title: "CHAT GPT COME SCRIVERE UN ARTICOLO | del tuo blog o sito",
+    theme: "Blog",
+    url: "https://www.youtube.com/watch?v=mkLkx2-fIps",
+    score: 86,
+    why: "Collega direttamente ChatGPT, scrittura, blog e contenuti utili per il sito.",
+    transform: "Blog: da un'idea a un articolo leggibile.",
   },
   {
+    id: "oSl-HCECogE",
     rank: "04",
-    badge: "Lead utile",
-    title: "Checklist che fa tornare le persone",
-    category: "Blogger",
-    views: "7.800",
-    points: 73,
-    growth: "+51/h",
-    format: "Short + Blog",
-    why: "Una checklist diventa motivo per salvare, condividere e tornare.",
-    hook: "Se una pagina non lascia niente, nessuno torna.",
+    source: "YouTube reale",
+    title: "Trasforma Video YouTube in Articoli di Blog con Python e ChatGPT",
+    theme: "Video -> Blog",
+    url: "https://www.youtube.com/watch?v=oSl-HCECogE",
+    score: 82,
+    why: "Perfetto per spiegare la logica centrale: un video puo diventare articolo, post e messaggio.",
+    transform: "Metodo: da video a blog, poi Facebook e WhatsApp.",
   },
 ];
 
@@ -57,26 +53,22 @@ const channels = [
   {
     label: "YouTube",
     title: "Video o Short",
-    text: "Titolo chiaro, gancio iniziale, tre punti forti e invito a continuare.",
-    sample: "Perche questo tema interessa adesso?",
+    text: "Si parte dal tema forte: titolo chiaro, gancio iniziale e invito a continuare.",
   },
   {
     label: "Facebook",
     title: "Post pubblico",
-    text: "Una frase forte, spiegazione breve e domanda finale per commenti puliti.",
-    sample: "Ti e mai capitato di vedere questo segnale?",
+    text: "Dal video nasce una frase forte, una spiegazione breve e una domanda finale.",
   },
   {
     label: "WhatsApp",
     title: "Messaggio condivisibile",
-    text: "Testo corto, umano, senza pressione. Utile per gruppi e contatti diretti.",
-    sample: "Guarda questa idea, secondo me fa riflettere.",
+    text: "Versione corta, umana, senza pressione, pensata per essere letta subito.",
   },
   {
     label: "Blog",
     title: "Articolo utile",
-    text: "Titolo, introduzione, elenco punti, conclusione e collegamento al percorso.",
-    sample: "Da un video nasce una guida da leggere.",
+    text: "Il tema diventa una guida: titolo, punti chiari, esempio e conclusione.",
   },
 ];
 
@@ -88,47 +80,108 @@ async function trackClick(target) {
   }
 }
 
-function scrollToTopVideo() {
-  document.getElementById("top-video")?.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
-}
+function VideoCard({ item, active, onPlay, onOpenYoutube }) {
+  const thumb = `https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`;
+  const embed = `https://www.youtube-nocookie.com/embed/${item.id}?autoplay=1&rel=0&modestbranding=1`;
 
-function VideoCard({ item }) {
   return (
-    <article className="yn-card">
+    <article
+      className={active ? "yn-card yn-card-active" : "yn-card"}
+      onDoubleClick={active ? () => onOpenYoutube(item) : undefined}
+      title={active ? "Doppio clic sulla scheda per aprire YouTube" : undefined}
+    >
       <div className="yn-card-top">
         <span className="yn-rank">{item.rank}</span>
-        <span className="yn-badge">{item.badge}</span>
+        <span className="yn-badge">{item.source}</span>
       </div>
 
-      <div className="yn-screen" aria-label="Anteprima video editoriale">
-        <div className="yn-play">▶</div>
-        <div className="yn-screen-text">
-          <strong>{item.format}</strong>
-          <span>{item.category}</span>
+      {active ? (
+        <div className="yn-player-wrap">
+          <button
+            type="button"
+            className="yn-open-youtube"
+            onClick={() => onOpenYoutube(item)}
+            onDoubleClick={() => onOpenYoutube(item)}
+            title="Apri questo video su YouTube"
+          >
+            Apri su YouTube ? doppio clic sulla scheda
+          </button>
+
+          <iframe
+            className="yn-player"
+            src={embed}
+            title={item.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+
+          <button
+            type="button"
+            className="yn-secondary-open"
+            onClick={() => onOpenYoutube(item)}
+            onDoubleClick={() => onOpenYoutube(item)}
+          >
+            Apri questo video su YouTube
+          </button>
         </div>
-      </div>
+      ) : (
+        <button
+          type="button"
+          className="yn-thumb"
+          onClick={() => onPlay(item)}
+          onDoubleClick={() => onOpenYoutube(item)}
+          aria-label={`Avvia video: ${item.title}`}
+        >
+          <img src={thumb} alt={item.title} loading="lazy" />
+          <span className="yn-play">▶</span>
+          <span className="yn-click-help">1 clic: guarda qui · doppio clic: YouTube</span>
+        </button>
+      )}
 
       <h3>{item.title}</h3>
       <p>{item.why}</p>
 
       <div className="yn-stats">
-        <span><strong>{item.views}</strong> visualizzazioni</span>
-        <span><strong>{item.points}</strong> punti</span>
-        <span><strong>{item.growth}</strong> crescita</span>
+        <span><strong>Reale</strong> video</span>
+        <span><strong>{item.score}</strong> punti editoriali</span>
+        <span><strong>Da verificare</strong> visualizzazioni</span>
       </div>
 
       <div className="yn-hook">
-        <small>Gancio</small>
-        <p>{item.hook}</p>
+        <small>Trasformazione</small>
+        <p>{item.transform}</p>
       </div>
     </article>
   );
 }
 
 export default function YoutubeNewsPage() {
+  const [activeVideoId, setActiveVideoId] = useState(null);
+  const clickTimerRef = useRef(null);
+
+  function clearPendingClick() {
+    if (clickTimerRef.current) {
+      window.clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+    }
+  }
+
+  function handlePlay(item) {
+    clearPendingClick();
+
+    clickTimerRef.current = window.setTimeout(() => {
+      setActiveVideoId(item.id);
+      trackClick(`play_inline_${item.id}`);
+      clickTimerRef.current = null;
+    }, 220);
+  }
+
+  function handleOpenYoutube(item) {
+    clearPendingClick();
+    trackClick(`open_youtube_${item.id}`);
+    window.open(item.url, "_blank", "noopener,noreferrer");
+  }
+
   return (
     <main className="yn-page" aria-labelledby="youtube-news-title">
       <style>{css}</style>
@@ -136,61 +189,57 @@ export default function YoutubeNewsPage() {
       <section className="yn-hero">
         <div>
           <p className="yn-eyebrow">LoveMatch360 - YouTube News</p>
-          <h1 id="youtube-news-title">Video richiesti, idee pronte.</h1>
+          <h1 id="youtube-news-title">Video reali, idee da trasformare.</h1>
           <p className="yn-lead">
-            Una vetrina per blogger e creator: temi forti, visualizzazioni, punti e contenuti da trasformare.
+            Una vetrina per blogger e creator: video veri, temi utili e percorsi per trasformarli in YouTube, Facebook, WhatsApp e Blog.
           </p>
         </div>
 
         <div className="yn-actions">
-          <button
-            type="button"
-            className="yn-btn primary"
-            onClick={() => {
-              trackClick("top-video");
-              scrollToTopVideo();
-            }}
-          >
-            Vedi top video
-          </button>
-
+          <a className="yn-btn primary" href="#video-reali" onClick={() => trackClick("video-reali")}>
+            Vedi video reali
+          </a>
           <Link className="yn-btn secondary" to="/membri" onClick={() => trackClick("membri")}>
             Sono interessato
           </Link>
         </div>
 
         <div className="yn-note">
-          Selezione editoriale iniziale: i dati reali YouTube non sono ancora collegati.
-          Prima costruiamo valore, poi automazione.
+          Primo clic: il video parte qui. Doppio clic: apri YouTube quando hai scelto il video che ti interessa.
         </div>
       </section>
 
-      <section id="top-video" className="yn-panel">
+      <section id="video-reali" className="yn-panel">
         <div className="yn-section-head">
           <div>
-            <p className="yn-eyebrow">Top richiesti</p>
-            <h2>Video piu interessanti da trasformare.</h2>
+            <p className="yn-eyebrow">Selezione reale</p>
+            <h2>Video utili da trasformare in contenuti.</h2>
             <p>
-              Ogni scheda mostra tema, visualizzazioni, punti, crescita e gancio.
-              L'obiettivo e scegliere cosa pubblicare, non inseguire rumore.
+              Ogni scheda usa un video reale, una miniatura reale e un link reale. I punti sono una valutazione editoriale LoveMatch360, non una promessa di risultato.
             </p>
           </div>
 
           <div className="yn-mini">
-            <strong>4 idee</strong>
+            <strong>4 video</strong>
             <span>YouTube + Facebook + WhatsApp + Blog</span>
           </div>
         </div>
 
         <div className="yn-video-grid">
-          {topVideos.map((item) => (
-            <VideoCard item={item} key={item.rank} />
+          {realVideos.map((item) => (
+            <VideoCard
+              item={item}
+              key={item.id}
+              active={activeVideoId === item.id}
+              onPlay={handlePlay}
+              onOpenYoutube={handleOpenYoutube}
+            />
           ))}
         </div>
       </section>
 
       <section className="yn-panel">
-        <p className="yn-eyebrow">Da una idea a quattro contenuti</p>
+        <p className="yn-eyebrow">Da un video a quattro contenuti</p>
         <h2>Una sola idea deve viaggiare bene.</h2>
 
         <div className="yn-channel-grid">
@@ -199,7 +248,6 @@ export default function YoutubeNewsPage() {
               <small>{item.label}</small>
               <h3>{item.title}</h3>
               <p>{item.text}</p>
-              <div className="yn-sample">{item.sample}</div>
             </article>
           ))}
         </div>
@@ -207,10 +255,9 @@ export default function YoutubeNewsPage() {
 
       <section className="yn-panel yn-accent">
         <p className="yn-eyebrow">Dietro le quinte</p>
-        <h2>Le pagine tecniche restano dietro link intuitivi.</h2>
+        <h2>Il metodo resta accessibile, ma non disturba il visitatore.</h2>
         <p>
-          Chi vuole capire il metodo puo aprire gli strumenti. Chi visita la pagina pubblica
-          vede prima esempi, utilita e direzione.
+          Le pagine tecniche restano nascoste dal menu principale, ma raggiungibili con link intuitivi per chi vuole capire come vengono scelti i temi.
         </p>
 
         <div className="yn-actions">
@@ -267,7 +314,7 @@ const css = `
 }
 .yn-hero h1{
   margin:10px 0 0;
-  max-width:760px;
+  max-width:800px;
   font-size:clamp(2rem,4.4vw,3.55rem);
   line-height:1;
   letter-spacing:-.055em;
@@ -287,7 +334,6 @@ const css = `
   line-height:1.58;
   font-size:15px;
 }
-.yn-lead{margin:10px 0 0}
 .yn-actions{
   display:flex;
   flex-wrap:wrap;
@@ -352,6 +398,9 @@ const css = `
   border:1px solid #242a32;
   background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.025));
 }
+.yn-card-active{
+  border-color:rgba(139,92,246,.55);
+}
 .yn-card-top{
   display:flex;
   align-items:center;
@@ -381,21 +430,30 @@ const css = `
   font-size:12px;
   font-weight:950;
 }
-.yn-screen{
-  min-height:118px;
+.yn-thumb{
+  position:relative;
+  display:block;
+  width:100%;
+  overflow:hidden;
+  min-height:145px;
   border-radius:16px;
   border:1px solid rgba(255,255,255,.10);
-  background:
-    linear-gradient(135deg,rgba(139,92,246,.34),rgba(16,20,26,.86)),
-    radial-gradient(circle at 82% 18%,rgba(34,197,94,.20),transparent 32%);
-  display:flex;
-  align-items:end;
-  justify-content:space-between;
-  gap:12px;
-  padding:14px;
+  background:#090b10;
   margin-bottom:14px;
+  padding:0;
+  cursor:pointer;
+  text-align:left;
+}
+.yn-thumb img{
+  width:100%;
+  height:145px;
+  object-fit:cover;
+  opacity:.9;
 }
 .yn-play{
+  position:absolute;
+  left:14px;
+  bottom:14px;
   width:46px;
   height:46px;
   display:grid;
@@ -405,8 +463,44 @@ const css = `
   color:#111;
   font-weight:950;
 }
-.yn-screen-text strong{display:block;color:#fff;font-size:18px}
-.yn-screen-text span{display:block;color:#d8dcec;font-size:13px}
+.yn-click-help{
+  position:absolute;
+  right:10px;
+  bottom:12px;
+  max-width:170px;
+  padding:7px 9px;
+  border-radius:999px;
+  background:rgba(0,0,0,.62);
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+}
+.yn-player-wrap{
+  overflow:hidden;
+  border-radius:16px;
+  border:1px solid rgba(139,92,246,.36);
+  background:#090b10;
+  margin-bottom:14px;
+}
+.yn-open-youtube{
+  width:100%;
+  min-height:34px;
+  border:0;
+  border-bottom:1px solid rgba(139,92,246,.28);
+  background:rgba(139,92,246,.18);
+  color:#ddd6fe;
+  cursor:pointer;
+  font:inherit;
+  font-size:12px;
+  font-weight:900;
+}
+.yn-player{
+  display:block;
+  width:100%;
+  aspect-ratio:16 / 9;
+  border:0;
+  background:#000;
+}
 .yn-card h3{
   margin:0;
   color:#fff;
@@ -476,14 +570,6 @@ const css = `
   color:#fff;
   font-size:21px;
 }
-.yn-sample{
-  margin-top:12px;
-  padding:12px;
-  border-radius:13px;
-  background:rgba(139,92,246,.12);
-  color:#ddd6fe;
-  font-weight:850;
-}
 @media(max-width:880px){
   .yn-hero,.yn-section-head{grid-template-columns:1fr}
 }
@@ -491,5 +577,36 @@ const css = `
   .yn-page{padding:18px 12px 56px}
   .yn-hero,.yn-panel{padding:18px}
   .yn-stats{grid-template-columns:1fr}
+  .yn-click-help{left:14px;right:auto;bottom:66px}
 }
+
+.yn-card-active{
+  cursor:pointer;
+}
+.yn-open-youtube{
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 12px;
+  background:rgba(139,92,246,.26);
+  color:#ffffff;
+  border-bottom:1px solid rgba(139,92,246,.38);
+}
+.yn-open-youtube:hover,
+.yn-secondary-open:hover{
+  filter:brightness(1.12);
+}
+.yn-secondary-open{
+  width:100%;
+  min-height:42px;
+  border:0;
+  border-top:1px solid rgba(139,92,246,.28);
+  background:rgba(255,255,255,.07);
+  color:#ffffff;
+  cursor:pointer;
+  font:inherit;
+  font-weight:950;
+}
+
 `;
