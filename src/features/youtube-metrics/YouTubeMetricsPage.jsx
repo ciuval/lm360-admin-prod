@@ -131,18 +131,18 @@ export function YouTubeMetricsPage() {
     <main className="ytm-page" aria-labelledby="metrics-title">
       <div className="ytm-wrap">
         <section className="ytm-hero">
-          <p className="ytm-eyebrow">LoveMatch360 - YouTube Metrics</p>
-          <h1 id="metrics-title" className="ytm-title">Cosa posso fare oggi?</h1>
+          <p className="ytm-eyebrow">LoveMatch360 - Come scegliamo</p>
+          <h1 id="metrics-title" className="ytm-title">Come scegliamo i temi?</h1>
           <p className="ytm-lead">
             Una anteprima chiara per scegliere idee, contenuti e prossime mosse senza leggere una tabella tecnica.
           </p>
 
           <div className="ytm-actions">
             <Link className="ytm-btn ytm-primary" to="/youtube-news">YouTube News</Link>
-            <Link className="ytm-btn ytm-soft" to="/playbook">Playbook</Link>
+            <Link className="ytm-btn ytm-soft" to="/playbook">Metodo</Link>
             <Link className="ytm-btn ytm-ghost" to="/membri">Membri</Link>
             <button type="button" className="ytm-btn ytm-ghost" onClick={() => downloadDemoCsv(filtered)}>
-              Scarica esempio CSV
+              Scarica CSV
             </button>
           </div>
 
@@ -157,36 +157,7 @@ export function YouTubeMetricsPage() {
             <span><strong>{laterCount}</strong> Non ora</span>
           </div>
         </section>
-
-        <section className="ytm-panel">
-          <p className="ytm-eyebrow">Risultato chiaro</p>
-          <h2 className="ytm-h2">Prima scegliamo cosa vale attenzione.</h2>
-
-          <div className="ytm-kpis">
-            <article className="ytm-kpi">
-              <span>Idee calde</span>
-              <strong>{hotCount}</strong>
-              <p>Contenuti da preparare per primi.</p>
-            </article>
-            <article className="ytm-kpi">
-              <span>Da osservare</span>
-              <strong>{watchCount}</strong>
-              <p>Buoni segnali, ma senza fretta.</p>
-            </article>
-            <article className="ytm-kpi">
-              <span>Da migliorare</span>
-              <strong>{improveCount}</strong>
-              <p>Idea interessante, titolo da correggere.</p>
-            </article>
-            <article className="ytm-kpi">
-              <span>Non ora</span>
-              <strong>{laterCount}</strong>
-              <p>Non sprechiamo energia.</p>
-            </article>
-          </div>
-        </section>
-
-        <section className="ytm-panel">
+<section className="ytm-panel">
           <p className="ytm-eyebrow">Scegli vista</p>
           <h2 className="ytm-h2">Mostrami solo quello che serve.</h2>
 

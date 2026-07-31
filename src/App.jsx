@@ -5,6 +5,7 @@ import { Routes, Route } from "react-router-dom";
    SHELL & GUARDS
 ====================================================== */
 import AppShell from "./AppShell.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import RequirePremium from "./components/RequirePremium.jsx";
 import RequireAdmin from "./components/RequireAdmin.jsx";
@@ -92,6 +93,7 @@ export default function App() {
         path="*"
         element={
           <AppShell>
+            <ScrollToTop />
             <Routes>
               {/* ======================================================
                   PUBLIC

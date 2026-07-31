@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import "./brand-dark.css";
 
 const steps = [
-  { label: "01", title: "Apri Metrics", text: "Guarda quali idee sono calde, da osservare o da migliorare." },
+  { label: "01", title: "Come scegliamo", text: "Guarda quali idee sono calde, da osservare o da migliorare." },
   { label: "02", title: "Scegli una sola idea", text: "Non pubblicare tutto. Parti da un contenuto chiaro." },
   { label: "03", title: "Crea contenuto utile", text: "Short se vuoi testare. Video lungo se vuoi spiegare." },
   { label: "04", title: "Porta al percorso", text: "Libro, YouTube News, Membri e risorse devono restare collegati." },
@@ -23,14 +23,14 @@ export function YouTubePlaybookPage() {
     <main className="ytm-page" aria-labelledby="playbook-title">
       <div className="ytm-wrap">
         <section className="ytm-hero">
-          <p className="ytm-eyebrow">LoveMatch360 - Playbook</p>
-          <h1 id="playbook-title" className="ytm-title">Come usare le idee.</h1>
+          <p className="ytm-eyebrow">LoveMatch360 - Metodo editoriale</p>
+          <h1 id="playbook-title" className="ytm-title">Metodo editoriale.</h1>
           <p className="ytm-lead">
             Una guida semplice: scegli un tema, crea un contenuto, misura interesse e porta le persone verso un percorso utile.
           </p>
 
           <div className="ytm-actions">
-            <Link className="ytm-btn ytm-primary" to="/metrics">Apri Metrics</Link>
+            <Link className="ytm-btn ytm-primary" to="/metrics">Come scegliamo</Link>
             <Link className="ytm-btn ytm-soft" to="/youtube-news">YouTube News</Link>
             <Link className="ytm-btn ytm-ghost" to="/membri">Membri</Link>
           </div>

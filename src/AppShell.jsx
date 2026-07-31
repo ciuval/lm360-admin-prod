@@ -125,15 +125,15 @@ function getCurrentSection(pathname, isAuthed, tier) {
 
   if (pathname.startsWith("/metrics")) {
     return {
-      label: "YouTube Metrics",
-      helper: "Anteprima chiara: idee calde, passi semplici e nessuna promessa falsa.",
+      label: "Come scegliamo",
+      helper: "Metodo semplice per scegliere pochi temi utili, senza rumore.",
     };
   }
 
   if (pathname.startsWith("/playbook")) {
     return {
-      label: "Playbook",
-      helper: "Qui vedi come passare da idea a contenuto utile, senza confusione.",
+      label: "Metodo",
+      helper: "Il metodo editoriale: idea, contenuto, fiducia, ritorno.",
     };
   }
 
@@ -408,8 +408,6 @@ export default function AppShell({ children }) {
               <ShellLink to="/messaggi">Messaggi</ShellLink>
               <ShellLink to="/membri">Membri</ShellLink>
               <ShellLink to="/youtube-news">YouTube News</ShellLink>
-              <ShellLink to="/metrics">Metrics</ShellLink>
-              <ShellLink to="/playbook">Playbook</ShellLink>
               <ShellLink to="/scopri">Scopri</ShellLink>
               <ShellLink to="/premium">Premium</ShellLink>
 

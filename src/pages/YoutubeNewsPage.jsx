@@ -2,11 +2,82 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { track } from "../lib/analytics.js";
 
-const cards = [
-  { label: "Metrics", title: "Cosa pubblicare", text: "Anteprima chiara: cosa preparare, cosa osservare e cosa lasciare fermo." },
-  { label: "Playbook", title: "Come trasformare", text: "Dal segnale al video, dal video alla risorsa, dalla risorsa al ritorno." },
-  { label: "Libro", title: "Il metodo continua", text: "Dal libro al sito: un percorso reale, non una teoria fredda." },
-  { label: "Membri", title: "Dove tornare", text: "Uno spazio per non perdere il filo del progetto." },
+const topVideos = [
+  {
+    rank: "01",
+    badge: "Top visualizzazioni",
+    title: "Red flags nelle relazioni: segnali da non ignorare",
+    category: "Relazioni",
+    views: "18.400",
+    points: 92,
+    growth: "+126/h",
+    format: "Short",
+    why: "Tema forte, immediato e utile per chi vuole capire prima di fidarsi.",
+    hook: "Non tutte le attenzioni sono interesse vero.",
+  },
+  {
+    rank: "02",
+    badge: "Molto richiesto",
+    title: "Usare ChatGPT senza copiare: metodo semplice",
+    category: "AI utile",
+    views: "13.100",
+    points: 84,
+    growth: "+88/h",
+    format: "Video breve",
+    why: "Aiuta chi crea contenuti a usare l'AI come assistente, non come pilota.",
+    hook: "L'AI non sostituisce la scelta. La rende piu ordinata.",
+  },
+  {
+    rank: "03",
+    badge: "Da trasformare",
+    title: "Profilo piu umano, meno caos",
+    category: "LoveMatch360",
+    views: "9.400",
+    points: 78,
+    growth: "+62/h",
+    format: "Long",
+    why: "Collega il cuore del sito: identita, fiducia e presenza personale.",
+    hook: "Un profilo non deve impressionare. Deve far capire.",
+  },
+  {
+    rank: "04",
+    badge: "Lead utile",
+    title: "Checklist che fa tornare le persone",
+    category: "Blogger",
+    views: "7.800",
+    points: 73,
+    growth: "+51/h",
+    format: "Short + Blog",
+    why: "Una checklist diventa motivo per salvare, condividere e tornare.",
+    hook: "Se una pagina non lascia niente, nessuno torna.",
+  },
+];
+
+const channels = [
+  {
+    label: "YouTube",
+    title: "Video o Short",
+    text: "Titolo chiaro, gancio iniziale, tre punti forti e invito a continuare.",
+    sample: "Perche questo tema interessa adesso?",
+  },
+  {
+    label: "Facebook",
+    title: "Post pubblico",
+    text: "Una frase forte, spiegazione breve e domanda finale per commenti puliti.",
+    sample: "Ti e mai capitato di vedere questo segnale?",
+  },
+  {
+    label: "WhatsApp",
+    title: "Messaggio condivisibile",
+    text: "Testo corto, umano, senza pressione. Utile per gruppi e contatti diretti.",
+    sample: "Guarda questa idea, secondo me fa riflettere.",
+  },
+  {
+    label: "Blog",
+    title: "Articolo utile",
+    text: "Titolo, introduzione, elenco punti, conclusione e collegamento al percorso.",
+    sample: "Da un video nasce una guida da leggere.",
+  },
 ];
 
 async function trackClick(target) {
@@ -17,111 +88,408 @@ async function trackClick(target) {
   }
 }
 
+function scrollToTopVideo() {
+  document.getElementById("top-video")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
+function VideoCard({ item }) {
+  return (
+    <article className="yn-card">
+      <div className="yn-card-top">
+        <span className="yn-rank">{item.rank}</span>
+        <span className="yn-badge">{item.badge}</span>
+      </div>
+
+      <div className="yn-screen" aria-label="Anteprima video editoriale">
+        <div className="yn-play">▶</div>
+        <div className="yn-screen-text">
+          <strong>{item.format}</strong>
+          <span>{item.category}</span>
+        </div>
+      </div>
+
+      <h3>{item.title}</h3>
+      <p>{item.why}</p>
+
+      <div className="yn-stats">
+        <span><strong>{item.views}</strong> visualizzazioni</span>
+        <span><strong>{item.points}</strong> punti</span>
+        <span><strong>{item.growth}</strong> crescita</span>
+      </div>
+
+      <div className="yn-hook">
+        <small>Gancio</small>
+        <p>{item.hook}</p>
+      </div>
+    </article>
+  );
+}
+
 export default function YoutubeNewsPage() {
   return (
-    <main className="youtube-news-page" aria-labelledby="youtube-news-title">
+    <main className="yn-page" aria-labelledby="youtube-news-title">
       <style>{css}</style>
 
-      <section className="hero">
-        <p className="eyebrow">LoveMatch360 · YouTube News</p>
-        <h1 id="youtube-news-title">Video, idee, valore.</h1>
-        <p className="lead">Una pagina semplice per seguire cosa funziona, cosa pubblicare e perchè tornare.</p>
-
-        <div className="actions">
-          <Link className="btn primary" to="/metrics" onClick={() => trackClick("metrics")}>Apri YouTube Metrics</Link>
-          <Link className="btn secondary" to="/playbook" onClick={() => trackClick("playbook")}>Leggi Playbook</Link>
-          <Link className="btn ghost" to="/membri" onClick={() => trackClick("membri")}>Entra nei Membri</Link>
+      <section className="yn-hero">
+        <div>
+          <p className="yn-eyebrow">LoveMatch360 - YouTube News</p>
+          <h1 id="youtube-news-title">Video richiesti, idee pronte.</h1>
+          <p className="yn-lead">
+            Una vetrina per blogger e creator: temi forti, visualizzazioni, punti e contenuti da trasformare.
+          </p>
         </div>
 
-        <div className="hero-tags">
-          <span>Nessuna promessa di guadagno</span>
-          <span>Contenuti utili</span>
-          <span>Una cosa alla volta</span>
+        <div className="yn-actions">
+          <button
+            type="button"
+            className="yn-btn primary"
+            onClick={() => {
+              trackClick("top-video");
+              scrollToTopVideo();
+            }}
+          >
+            Vedi top video
+          </button>
+
+          <Link className="yn-btn secondary" to="/membri" onClick={() => trackClick("membri")}>
+            Sono interessato
+          </Link>
+        </div>
+
+        <div className="yn-note">
+          Selezione editoriale iniziale: i dati reali YouTube non sono ancora collegati.
+          Prima costruiamo valore, poi automazione.
         </div>
       </section>
 
-      <section className="panel reason">
-        <p className="eyebrow">Perchè restare</p>
-        <h2>Il libro racconta. YouTube mostra. I membri continuano.</h2>
-        <p>Qui il visitatore capisce che LoveMatch360 non è fermo: cresce con idee, video, risorse e passaggi ordinati.</p>
-      </section>
-
-      <section className="panel">
-        <div className="section-head">
+      <section id="top-video" className="yn-panel">
+        <div className="yn-section-head">
           <div>
-            <p className="eyebrow">Cosa trovi</p>
-            <h2>Le cose utili si vedono subito.</h2>
+            <p className="yn-eyebrow">Top richiesti</p>
+            <h2>Video piu interessanti da trasformare.</h2>
+            <p>
+              Ogni scheda mostra tema, visualizzazioni, punti, crescita e gancio.
+              L'obiettivo e scegliere cosa pubblicare, non inseguire rumore.
+            </p>
           </div>
-          <p>Non una pagina piena di spiegazioni. Una porta per capire dove andare.</p>
+
+          <div className="yn-mini">
+            <strong>4 idee</strong>
+            <span>YouTube + Facebook + WhatsApp + Blog</span>
+          </div>
         </div>
 
-        <div className="visit-grid">
-          {cards.map((item) => (
-            <article className="visit-card" key={item.title}>
+        <div className="yn-video-grid">
+          {topVideos.map((item) => (
+            <VideoCard item={item} key={item.rank} />
+          ))}
+        </div>
+      </section>
+
+      <section className="yn-panel">
+        <p className="yn-eyebrow">Da una idea a quattro contenuti</p>
+        <h2>Una sola idea deve viaggiare bene.</h2>
+
+        <div className="yn-channel-grid">
+          {channels.map((item) => (
+            <article className="yn-channel" key={item.label}>
               <small>{item.label}</small>
               <h3>{item.title}</h3>
               <p>{item.text}</p>
+              <div className="yn-sample">{item.sample}</div>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="panel path">
-        <p className="eyebrow">Percorso</p>
-        <h2>Libro → Video → Metrics → Membri.</h2>
-        <p>Il motivo per iscriversi nasce qui: non perdere il seguito del progetto.</p>
-        <div className="actions">
-          <Link className="btn primary" to="/metrics">Apri YouTube Metrics</Link>
-          <Link className="btn secondary" to="/playbook">Leggi Playbook</Link>
-          <Link className="btn ghost" to="/membri">Sono interessato</Link>
-        </div>
-      </section>
+      <section className="yn-panel yn-accent">
+        <p className="yn-eyebrow">Dietro le quinte</p>
+        <h2>Le pagine tecniche restano dietro link intuitivi.</h2>
+        <p>
+          Chi vuole capire il metodo puo aprire gli strumenti. Chi visita la pagina pubblica
+          vede prima esempi, utilita e direzione.
+        </p>
 
-      <section className="panel note">
-        <p>Questa pagina ha scopo educativo e operativo. Non garantisce guadagni. Le decisioni vanno validate con dati reali.</p>
+        <div className="yn-actions">
+          <Link className="yn-btn ghost" to="/metrics" onClick={() => trackClick("metrics")}>
+            Come scegliamo i temi
+          </Link>
+          <Link className="yn-btn ghost" to="/playbook" onClick={() => trackClick("playbook")}>
+            Metodo editoriale
+          </Link>
+          <Link className="yn-btn primary" to="/membri" onClick={() => trackClick("membri-bottom")}>
+            Segui il progetto
+          </Link>
+        </div>
       </section>
     </main>
   );
 }
 
 const css = `
-.youtube-news-page{
-  --bg:#0b0d10;
-  --card:#161a20;
-  --text:#e6e8ef;
-  --muted:#aab1bf;
-  --border:#242a32;
-  --brand:#8b5cf6;
+.yn-page{
   min-height:100vh;
-  padding:132px 16px 82px;
-  color:var(--text);
-  background:radial-gradient(circle at 8% 0%, rgba(139,92,246,.22), transparent 28%), radial-gradient(circle at 92% 10%, rgba(34,197,94,.10), transparent 26%), var(--bg);
+  padding:24px 16px 70px;
+  color:#e6e8ef;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(139,92,246,.18), transparent 32%),
+    radial-gradient(circle at 92% 8%, rgba(34,197,94,.10), transparent 28%),
+    #0b0d10;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
-.hero,.panel{max-width:1180px;margin:0 auto 18px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.032));box-shadow:0 24px 80px rgba(0,0,0,.30)}
-.hero{padding:38px 30px}
-.panel{padding:28px 30px}
-.reason,.path{border-color:rgba(139,92,246,.42);background:linear-gradient(135deg,rgba(139,92,246,.14),rgba(255,255,255,.035))}
-.eyebrow{margin:0;color:#c4b5fd;font-size:12px;font-weight:950;letter-spacing:.14em;text-transform:uppercase}
-h1{margin:14px 0 0;max-width:900px;font-size:clamp(3rem,7vw,5.5rem);line-height:.92;letter-spacing:-.065em;color:#fff}
-h2{margin:8px 0 0;max-width:900px;font-size:clamp(1.8rem,4vw,3.3rem);line-height:1.02;letter-spacing:-.05em;color:#fff}
-h3{margin:10px 0 0;font-size:22px;line-height:1.12;color:#fff}
-.lead,.panel p{max-width:760px;color:var(--muted);line-height:1.65;font-size:16px}
-.lead{margin:18px 0 0;font-size:clamp(1.04rem,1.8vw,1.22rem)}
-.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
-.btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:0 16px;text-decoration:none;font-weight:950;border:1px solid transparent;cursor:pointer;font:inherit}
-.primary{background:var(--brand);color:#fff}
-.secondary{background:rgba(255,255,255,.08);color:#fff;border-color:var(--border)}
-.ghost{background:transparent;color:#c4b5fd;border-color:rgba(139,92,246,.45)}
-.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
-.hero-tags span{display:inline-flex;border-radius:999px;padding:6px 10px;background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.28);color:#ddd6fe;font-size:12px;font-weight:900}
-.section-head{display:flex;gap:18px;align-items:end;justify-content:space-between;flex-wrap:wrap}
-.section-head p{margin:0;max-width:430px}
-.visit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:20px}
-.visit-card{padding:18px;border:1px solid var(--border);border-radius:12px;background:var(--card)}
-.visit-card small{display:block;color:#c4b5fd;font-weight:950;text-transform:uppercase;letter-spacing:.10em}
-.visit-card p{color:var(--muted);line-height:1.55}
-.note{border-color:rgba(245,158,11,.30);background:rgba(245,158,11,.08)}
-.note p{margin:0;color:#fde68a;line-height:1.65;font-weight:850}
-@media(max-width:860px){.youtube-news-page{padding-top:112px}.hero,.panel{padding:22px}h1{font-size:clamp(2.6rem,13vw,4rem)}}
+.yn-hero,.yn-panel{
+  max-width:1120px;
+  margin:0 auto 16px;
+  border:1px solid #242a32;
+  border-radius:22px;
+  background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.032));
+  box-shadow:0 24px 70px rgba(0,0,0,.28);
+}
+.yn-hero{
+  padding:26px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:18px;
+  align-items:end;
+}
+.yn-panel{padding:24px}
+.yn-accent{border-color:rgba(139,92,246,.38)}
+.yn-eyebrow{
+  margin:0;
+  color:#c4b5fd;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.yn-hero h1{
+  margin:10px 0 0;
+  max-width:760px;
+  font-size:clamp(2rem,4.4vw,3.55rem);
+  line-height:1;
+  letter-spacing:-.055em;
+  color:#fff;
+}
+.yn-panel h2{
+  margin:8px 0 0;
+  max-width:760px;
+  font-size:clamp(1.45rem,3vw,2.35rem);
+  line-height:1.08;
+  letter-spacing:-.04em;
+  color:#fff;
+}
+.yn-lead,.yn-panel p{
+  max-width:790px;
+  color:#aab1bf;
+  line-height:1.58;
+  font-size:15px;
+}
+.yn-lead{margin:10px 0 0}
+.yn-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+.yn-btn{
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  padding:0 15px;
+  border:1px solid #242a32;
+  background:#1a1f27;
+  color:#fff;
+  text-decoration:none;
+  font-weight:900;
+  white-space:nowrap;
+  cursor:pointer;
+  font:inherit;
+}
+.yn-btn.primary{background:#8b5cf6;border-color:transparent}
+.yn-btn.secondary{background:rgba(255,255,255,.08)}
+.yn-btn.ghost{background:transparent;color:#c4b5fd;border-color:rgba(139,92,246,.45)}
+.yn-note{
+  grid-column:1 / -1;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid rgba(245,158,11,.35);
+  background:rgba(245,158,11,.09);
+  color:#fde68a;
+  line-height:1.45;
+  font-weight:850;
+}
+.yn-section-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:16px;
+  align-items:end;
+}
+.yn-mini{
+  display:grid;
+  gap:4px;
+  min-width:210px;
+  padding:14px 16px;
+  border-radius:16px;
+  border:1px solid rgba(139,92,246,.38);
+  background:rgba(139,92,246,.12);
+}
+.yn-mini strong{color:#fff;font-size:24px;line-height:1}
+.yn-mini span{color:#aab1bf;font-weight:800}
+.yn-video-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px;
+  margin-top:18px;
+}
+.yn-card{
+  padding:16px;
+  border-radius:18px;
+  border:1px solid #242a32;
+  background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.025));
+}
+.yn-card-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+.yn-rank{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:42px;
+  height:34px;
+  border-radius:12px;
+  background:rgba(139,92,246,.18);
+  border:1px solid rgba(139,92,246,.40);
+  color:#fff;
+  font-weight:950;
+}
+.yn-badge{
+  display:inline-flex;
+  padding:7px 10px;
+  border-radius:999px;
+  border:1px solid rgba(34,197,94,.32);
+  background:rgba(34,197,94,.11);
+  color:#bbf7d0;
+  font-size:12px;
+  font-weight:950;
+}
+.yn-screen{
+  min-height:118px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(135deg,rgba(139,92,246,.34),rgba(16,20,26,.86)),
+    radial-gradient(circle at 82% 18%,rgba(34,197,94,.20),transparent 32%);
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.yn-play{
+  width:46px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:#fff;
+  color:#111;
+  font-weight:950;
+}
+.yn-screen-text strong{display:block;color:#fff;font-size:18px}
+.yn-screen-text span{display:block;color:#d8dcec;font-size:13px}
+.yn-card h3{
+  margin:0;
+  color:#fff;
+  font-size:22px;
+  line-height:1.12;
+}
+.yn-card p{color:#aab1bf;line-height:1.52}
+.yn-stats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:12px;
+}
+.yn-stats span{
+  padding:10px;
+  border-radius:13px;
+  background:rgba(16,20,26,.78);
+  border:1px solid #242a32;
+  color:#aab1bf;
+  font-size:12px;
+  font-weight:850;
+}
+.yn-stats strong{
+  display:block;
+  color:#fff;
+  font-size:18px;
+  line-height:1.1;
+}
+.yn-hook{
+  margin-top:12px;
+  padding:12px;
+  border-radius:14px;
+  background:rgba(245,158,11,.08);
+  border:1px solid rgba(245,158,11,.25);
+}
+.yn-hook small{
+  color:#fde68a;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-weight:950;
+}
+.yn-hook p{
+  margin:6px 0 0;
+  color:#fde68a;
+  font-weight:850;
+}
+.yn-channel-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+  margin-top:16px;
+}
+.yn-channel{
+  padding:16px;
+  border-radius:16px;
+  border:1px solid #242a32;
+  background:#161a20;
+}
+.yn-channel small{
+  color:#c4b5fd;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-weight:950;
+}
+.yn-channel h3{
+  margin:10px 0 0;
+  color:#fff;
+  font-size:21px;
+}
+.yn-sample{
+  margin-top:12px;
+  padding:12px;
+  border-radius:13px;
+  background:rgba(139,92,246,.12);
+  color:#ddd6fe;
+  font-weight:850;
+}
+@media(max-width:880px){
+  .yn-hero,.yn-section-head{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .yn-page{padding:18px 12px 56px}
+  .yn-hero,.yn-panel{padding:18px}
+  .yn-stats{grid-template-columns:1fr}
+}
 `;
