@@ -88,7 +88,7 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
     <article
       className={active ? "yn-card yn-card-active" : "yn-card"}
       onDoubleClick={active ? () => onOpenYoutube(item) : undefined}
-      title={active ? "Doppio clic sulla scheda per aprire YouTube" : undefined}
+      title={active ? "Video avviato dentro LoveMatch360" : undefined}
     >
       <div className="yn-card-top">
         <span className="yn-rank">{item.rank}</span>
@@ -104,7 +104,7 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
             onDoubleClick={() => onOpenYoutube(item)}
             title="Apri questo video su YouTube"
           >
-            Apri su YouTube ? doppio clic sulla scheda
+            Apri su YouTube
           </button>
 
           <iframe
@@ -134,7 +134,7 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
         >
           <img src={thumb} alt={item.title} loading="lazy" />
           <span className="yn-play">▶</span>
-          <span className="yn-click-help">1 clic: guarda qui · doppio clic: YouTube</span>
+          <span className="yn-click-help">1 clic: guarda qui · YouTube dal pulsante</span>
         </button>
       )}
 
@@ -205,7 +205,7 @@ export default function YoutubeNewsPage() {
         </div>
 
         <div className="yn-note">
-          Primo clic: il video parte qui. Doppio clic: apri YouTube quando hai scelto il video che ti interessa.
+          Un clic sulla miniatura avvia il video qui. Per aprire YouTube usa il pulsante Apri su YouTube o il logo YouTube nel player.
         </div>
       </section>
 
