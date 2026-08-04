@@ -1,15 +1,20 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { track } from "../lib/analytics.js";
 
-const realVideos = [
+const nf = new Intl.NumberFormat("it-IT");
+
+const fallbackVideos = [
   {
     id: "sXtbY973PT8",
     rank: "01",
-    source: "YouTube reale",
+    source: "Selezione ponte",
     title: "Red Flag nelle relazioni: come riconoscere i segnali di allarme",
+    channel: "YouTube",
     theme: "Relazioni",
     url: "https://www.youtube.com/watch?v=sXtbY973PT8",
+    thumb: "https://i.ytimg.com/vi/sXtbY973PT8/hqdefault.jpg",
+    views: null,
     score: 94,
     why: "Tema forte per LoveMatch360: fiducia, segnali, attenzione e relazioni piu consapevoli.",
     transform: "Short: 3 segnali da osservare prima di fidarsi.",
@@ -17,10 +22,13 @@ const realVideos = [
   {
     id: "Ay1QY64Y16A",
     rank: "02",
-    source: "YouTube reale",
+    source: "Selezione ponte",
     title: "Ho Testato i MIGLIORI Strumenti AI per Creator",
+    channel: "YouTube",
     theme: "AI per creator",
     url: "https://www.youtube.com/watch?v=Ay1QY64Y16A",
+    thumb: "https://i.ytimg.com/vi/Ay1QY64Y16A/hqdefault.jpg",
+    views: null,
     score: 90,
     why: "Utile per blogger e creator: mostra strumenti, metodo e scelta, non solo teoria.",
     transform: "Post: quali strumenti AI aiutano davvero un creator?",
@@ -28,10 +36,13 @@ const realVideos = [
   {
     id: "mkLkx2-fIps",
     rank: "03",
-    source: "YouTube reale",
+    source: "Selezione ponte",
     title: "CHAT GPT COME SCRIVERE UN ARTICOLO | del tuo blog o sito",
+    channel: "YouTube",
     theme: "Blog",
     url: "https://www.youtube.com/watch?v=mkLkx2-fIps",
+    thumb: "https://i.ytimg.com/vi/mkLkx2-fIps/hqdefault.jpg",
+    views: null,
     score: 86,
     why: "Collega direttamente ChatGPT, scrittura, blog e contenuti utili per il sito.",
     transform: "Blog: da un'idea a un articolo leggibile.",
@@ -39,10 +50,13 @@ const realVideos = [
   {
     id: "oSl-HCECogE",
     rank: "04",
-    source: "YouTube reale",
+    source: "Selezione ponte",
     title: "Trasforma Video YouTube in Articoli di Blog con Python e ChatGPT",
+    channel: "YouTube",
     theme: "Video -> Blog",
     url: "https://www.youtube.com/watch?v=oSl-HCECogE",
+    thumb: "https://i.ytimg.com/vi/oSl-HCECogE/hqdefault.jpg",
+    views: null,
     score: 82,
     why: "Perfetto per spiegare la logica centrale: un video puo diventare articolo, post e messaggio.",
     transform: "Metodo: da video a blog, poi Facebook e WhatsApp.",
@@ -80,19 +94,24 @@ async function trackClick(target) {
   }
 }
 
+function viewsLabel(value) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    return "Da collegare";
+  }
+
+  return nf.format(value);
+}
+
 function VideoCard({ item, active, onPlay, onOpenYoutube }) {
-  const thumb = `https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`;
   const embed = `https://www.youtube-nocookie.com/embed/${item.id}?autoplay=1&rel=0&modestbranding=1`;
 
   return (
-    <article
-      className={active ? "yn-card yn-card-active" : "yn-card"}
-      onDoubleClick={active ? () => onOpenYoutube(item) : undefined}
-      title={active ? "Video avviato dentro LoveMatch360" : undefined}
-    >
+    <article className={active ? "yn-card yn-card-active" : "yn-card"}>
       <div className="yn-card-top">
         <span className="yn-rank">{item.rank}</span>
-        <span className="yn-badge">{item.source}</span>
+        <span className={item.source === "Top YouTube" ? "yn-badge yn-badge-live" : "yn-badge"}>
+          {item.source}
+        </span>
       </div>
 
       {active ? (
@@ -101,7 +120,6 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
             type="button"
             className="yn-open-youtube"
             onClick={() => onOpenYoutube(item)}
-            onDoubleClick={() => onOpenYoutube(item)}
             title="Apri questo video su YouTube"
           >
             Apri su YouTube
@@ -119,7 +137,6 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
             type="button"
             className="yn-secondary-open"
             onClick={() => onOpenYoutube(item)}
-            onDoubleClick={() => onOpenYoutube(item)}
           >
             Apri questo video su YouTube
           </button>
@@ -129,12 +146,11 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
           type="button"
           className="yn-thumb"
           onClick={() => onPlay(item)}
-          onDoubleClick={() => onOpenYoutube(item)}
           aria-label={`Avvia video: ${item.title}`}
         >
-          <img src={thumb} alt={item.title} loading="lazy" />
+          <img src={item.thumb || `https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`} alt={item.title} loading="lazy" />
           <span className="yn-play">▶</span>
-          <span className="yn-click-help">1 clic: guarda qui · YouTube dal pulsante</span>
+          <span className="yn-click-help">1 clic: guarda qui</span>
         </button>
       )}
 
@@ -142,9 +158,9 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
       <p>{item.why}</p>
 
       <div className="yn-stats">
-        <span><strong>Reale</strong> video</span>
-        <span><strong>{item.score}</strong> punti editoriali</span>
-        <span><strong>Da verificare</strong> visualizzazioni</span>
+        <span><strong>{viewsLabel(item.views)}</strong> visualizzazioni</span>
+        <span><strong>{item.score}</strong> punti</span>
+        <span><strong>{item.theme}</strong> tema</span>
       </div>
 
       <div className="yn-hook">
@@ -156,8 +172,52 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
 }
 
 export default function YoutubeNewsPage() {
+  const [videos, setVideos] = useState(fallbackVideos);
   const [activeVideoId, setActiveVideoId] = useState(null);
+  const [loadingTop, setLoadingTop] = useState(true);
+  const [feedState, setFeedState] = useState("Caricamento top video...");
   const clickTimerRef = useRef(null);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadTopVideos() {
+      try {
+        setLoadingTop(true);
+
+        const response = await fetch("/api/youtube-top-videos?regionCode=IT&categoryIds=27,28,22&maxResults=8", {
+          headers: { Accept: "application/json" },
+        });
+
+        if (!response.ok) throw new Error("Endpoint non disponibile");
+
+        const data = await response.json();
+
+        if (data?.ok && Array.isArray(data.videos) && data.videos.length) {
+          if (!alive) return;
+          setVideos(data.videos);
+          setFeedState(`Top YouTube aggiornati: ${new Date(data.updatedAt).toLocaleString("it-IT")}`);
+          return;
+        }
+
+        if (!alive) return;
+        setVideos(fallbackVideos);
+        setFeedState("Top automatici non ancora collegati: uso selezione ponte verificabile.");
+      } catch {
+        if (!alive) return;
+        setVideos(fallbackVideos);
+        setFeedState("Top automatici non disponibili in locale: uso selezione ponte verificabile.");
+      } finally {
+        if (alive) setLoadingTop(false);
+      }
+    }
+
+    loadTopVideos();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   function clearPendingClick() {
     if (clickTimerRef.current) {
@@ -173,7 +233,7 @@ export default function YoutubeNewsPage() {
       setActiveVideoId(item.id);
       trackClick(`play_inline_${item.id}`);
       clickTimerRef.current = null;
-    }, 220);
+    }, 180);
   }
 
   function handleOpenYoutube(item) {
@@ -189,44 +249,44 @@ export default function YoutubeNewsPage() {
       <section className="yn-hero">
         <div>
           <p className="yn-eyebrow">LoveMatch360 - YouTube News</p>
-          <h1 id="youtube-news-title">Video reali, idee da trasformare.</h1>
+          <h1 id="youtube-news-title">Top video reali da trasformare.</h1>
           <p className="yn-lead">
-            Una vetrina per blogger e creator: video veri, temi utili e percorsi per trasformarli in YouTube, Facebook, WhatsApp e Blog.
+            Una pagina per blogger e creator: video popolari, temi utili e percorsi per trasformarli in YouTube, Facebook, WhatsApp e Blog.
           </p>
         </div>
 
         <div className="yn-actions">
           <a className="yn-btn primary" href="#video-reali" onClick={() => trackClick("video-reali")}>
-            Vedi video reali
+            Vedi top video
           </a>
           <Link className="yn-btn secondary" to="/membri" onClick={() => trackClick("membri")}>
             Sono interessato
           </Link>
         </div>
 
-        <div className="yn-note">
-          Un clic sulla miniatura avvia il video qui. Per aprire YouTube usa il pulsante Apri su YouTube o il logo YouTube nel player.
+        <div className={loadingTop ? "yn-note" : "yn-note yn-note-ready"}>
+          {feedState}
         </div>
       </section>
 
       <section id="video-reali" className="yn-panel">
         <div className="yn-section-head">
           <div>
-            <p className="yn-eyebrow">Selezione reale</p>
-            <h2>Video utili da trasformare in contenuti.</h2>
+            <p className="yn-eyebrow">Selezione dinamica</p>
+            <h2>I migliori video disponibili adesso.</h2>
             <p>
-              Ogni scheda usa un video reale, una miniatura reale e un link reale. I punti sono una valutazione editoriale LoveMatch360, non una promessa di risultato.
+              Se la chiave YouTube server è attiva, questa sezione mostra top video reali. Se non è ancora attiva, resta una selezione ponte senza numeri inventati.
             </p>
           </div>
 
           <div className="yn-mini">
-            <strong>4 video</strong>
+            <strong>{videos.length} video</strong>
             <span>YouTube + Facebook + WhatsApp + Blog</span>
           </div>
         </div>
 
         <div className="yn-video-grid">
-          {realVideos.map((item) => (
+          {videos.map((item) => (
             <VideoCard
               item={item}
               key={item.id}
@@ -314,7 +374,7 @@ const css = `
 }
 .yn-hero h1{
   margin:10px 0 0;
-  max-width:800px;
+  max-width:820px;
   font-size:clamp(2rem,4.4vw,3.55rem);
   line-height:1;
   letter-spacing:-.055em;
@@ -369,6 +429,11 @@ const css = `
   line-height:1.45;
   font-weight:850;
 }
+.yn-note-ready{
+  border-color:rgba(34,197,94,.35);
+  background:rgba(34,197,94,.09);
+  color:#bbf7d0;
+}
 .yn-section-head{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
@@ -398,9 +463,7 @@ const css = `
   border:1px solid #242a32;
   background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.025));
 }
-.yn-card-active{
-  border-color:rgba(139,92,246,.55);
-}
+.yn-card-active{border-color:rgba(139,92,246,.55)}
 .yn-card-top{
   display:flex;
   align-items:center;
@@ -429,6 +492,11 @@ const css = `
   color:#bbf7d0;
   font-size:12px;
   font-weight:950;
+}
+.yn-badge-live{
+  border-color:rgba(139,92,246,.48);
+  background:rgba(139,92,246,.18);
+  color:#ddd6fe;
 }
 .yn-thumb{
   position:relative;
@@ -484,16 +552,29 @@ const css = `
 }
 .yn-open-youtube{
   width:100%;
-  min-height:34px;
+  min-height:42px;
   border:0;
-  border-bottom:1px solid rgba(139,92,246,.28);
-  background:rgba(139,92,246,.18);
-  color:#ddd6fe;
+  border-bottom:1px solid rgba(139,92,246,.38);
+  background:rgba(139,92,246,.26);
+  color:#ffffff;
   cursor:pointer;
   font:inherit;
-  font-size:12px;
-  font-weight:900;
+  font-size:13px;
+  font-weight:950;
 }
+.yn-secondary-open{
+  width:100%;
+  min-height:42px;
+  border:0;
+  border-top:1px solid rgba(139,92,246,.28);
+  background:rgba(255,255,255,.07);
+  color:#ffffff;
+  cursor:pointer;
+  font:inherit;
+  font-weight:950;
+}
+.yn-open-youtube:hover,
+.yn-secondary-open:hover{filter:brightness(1.12)}
 .yn-player{
   display:block;
   width:100%;
@@ -579,34 +660,4 @@ const css = `
   .yn-stats{grid-template-columns:1fr}
   .yn-click-help{left:14px;right:auto;bottom:66px}
 }
-
-.yn-card-active{
-  cursor:pointer;
-}
-.yn-open-youtube{
-  min-height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:8px 12px;
-  background:rgba(139,92,246,.26);
-  color:#ffffff;
-  border-bottom:1px solid rgba(139,92,246,.38);
-}
-.yn-open-youtube:hover,
-.yn-secondary-open:hover{
-  filter:brightness(1.12);
-}
-.yn-secondary-open{
-  width:100%;
-  min-height:42px;
-  border:0;
-  border-top:1px solid rgba(139,92,246,.28);
-  background:rgba(255,255,255,.07);
-  color:#ffffff;
-  cursor:pointer;
-  font:inherit;
-  font-weight:950;
-}
-
 `;
