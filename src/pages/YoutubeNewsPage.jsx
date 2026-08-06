@@ -185,7 +185,7 @@ export default function YoutubeNewsPage() {
       try {
         setLoadingTop(true);
 
-        const response = await fetch("/api/youtube-top-videos?regionCode=IT&categoryIds=27,28,22&maxResults=8", {
+        const response = await fetch("/api/youtube-top-videos?regionCode=IT&categoryIds=28,22,0&maxResults=8", {
           headers: { Accept: "application/json" },
         });
 

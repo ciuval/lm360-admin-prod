@@ -1,5 +1,5 @@
 const DEFAULT_REGION = "IT";
-const DEFAULT_CATEGORY_IDS = ["27", "28", "22"];
+const DEFAULT_CATEGORY_IDS = ["28", "22", "0"];
 const MAX_RESULTS_LIMIT = 12;
 
 function clampNumber(value, min, max, fallback) {
@@ -22,7 +22,7 @@ function normalizeCategoryIds(value) {
     .split(",")
     .map((item) => item.trim())
     .filter((item) => /^\d+$/.test(item))
-    .slice(0, 4);
+    .slice(0, 5);
 
   return ids.length ? ids : DEFAULT_CATEGORY_IDS;
 }
@@ -49,6 +49,7 @@ function themeFor(categoryId) {
   if (categoryId === "27") return "Educazione";
   if (categoryId === "28") return "Tecnologia";
   if (categoryId === "22") return "Persone e blog";
+  if (categoryId === "0") return "Top generali";
   return "YouTube";
 }
 
@@ -56,6 +57,7 @@ function transformFor(categoryId) {
   if (categoryId === "27") return "Guida breve: cosa imparare e come applicarlo.";
   if (categoryId === "28") return "Post pratico: strumento, vantaggio, limite e prossimo passo.";
   if (categoryId === "22") return "Messaggio umano: storia, domanda e invito a commentare.";
+  if (categoryId === "0") return "Idea generale: Short, post, WhatsApp e articolo.";
   return "Da video a Short, post, WhatsApp e articolo.";
 }
 
@@ -63,6 +65,7 @@ function whyFor(categoryId) {
   if (categoryId === "27") return "Tema utile per trasformare attenzione in apprendimento e contenuto condivisibile.";
   if (categoryId === "28") return "Tema forte per creator e blogger: tecnologia spiegata in modo pratico.";
   if (categoryId === "22") return "Tema adatto a persone, storie, relazioni e conversazioni pubbliche.";
+  if (categoryId === "0") return "Video popolare utile per capire cosa sta attirando attenzione adesso.";
   return "Video utile da trasformare in contenuto editoriale.";
 }
 
@@ -107,19 +110,35 @@ async function fetchCategory({ apiKey, regionCode, categoryId, maxResults }) {
   url.searchParams.set("part", "snippet,statistics,status");
   url.searchParams.set("chart", "mostPopular");
   url.searchParams.set("regionCode", regionCode);
-  url.searchParams.set("videoCategoryId", categoryId);
   url.searchParams.set("maxResults", String(maxResults));
   url.searchParams.set("key", apiKey);
+
+  // categoryId=0 significa: top generali. In questo caso non forziamo videoCategoryId.
+  if (categoryId && categoryId !== "0") {
+    url.searchParams.set("videoCategoryId", categoryId);
+  }
 
   const response = await fetch(url.toString());
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(`YouTube API ${response.status}: ${text.slice(0, 240)}`);
+    throw new Error(`YouTube API ${response.status} category ${categoryId}: ${text.slice(0, 240)}`);
   }
 
   const data = await response.json();
   return Array.isArray(data.items) ? data.items : [];
+}
+
+function uniqueVideos(items) {
+  const unique = new Map();
+
+  for (const item of items) {
+    if (!item?.id) continue;
+    if (item?.status && item.status.embeddable === false) continue;
+    if (!unique.has(item.id)) unique.set(item.id, item);
+  }
+
+  return Array.from(unique.values());
 }
 
 export default async function handler(req, res) {
@@ -142,22 +161,44 @@ export default async function handler(req, res) {
     const categoryIds = normalizeCategoryIds(req.query.categoryIds);
     const maxResults = clampNumber(req.query.maxResults, 4, MAX_RESULTS_LIMIT, 8);
     const perCategory = Math.max(2, Math.ceil(maxResults / categoryIds.length));
+    const categoryErrors = [];
 
-    const batches = await Promise.all(
+    const settled = await Promise.allSettled(
       categoryIds.map((categoryId) =>
-        fetchCategory({ apiKey, regionCode, categoryId, maxResults: perCategory })
+        fetchCategory({ apiKey, regionCode, categoryId, maxResults: perCategory }).then((items) => ({
+          categoryId,
+          items,
+        }))
       )
     );
 
-    const unique = new Map();
+    let fetchedItems = [];
 
-    for (const item of batches.flat()) {
-      if (!item?.id) continue;
-      if (item?.status && item.status.embeddable === false) continue;
-      if (!unique.has(item.id)) unique.set(item.id, item);
+    for (const result of settled) {
+      if (result.status === "fulfilled") {
+        fetchedItems.push(...result.value.items);
+      } else {
+        categoryErrors.push(String(result.reason?.message || result.reason || "category_error"));
+      }
     }
 
-    const videos = Array.from(unique.values())
+    // Se tutte le categorie specifiche falliscono, proviamo top generali.
+    if (!fetchedItems.length && !categoryIds.includes("0")) {
+      try {
+        const fallbackItems = await fetchCategory({
+          apiKey,
+          regionCode,
+          categoryId: "0",
+          maxResults,
+        });
+
+        fetchedItems.push(...fallbackItems);
+      } catch (error) {
+        categoryErrors.push(String(error?.message || error || "fallback_0_error"));
+      }
+    }
+
+    const videos = uniqueVideos(fetchedItems)
       .map((item, index) => normalizeVideo(item, index))
       .sort((a, b) => b.score - a.score || b.views - a.views)
       .slice(0, maxResults)
@@ -166,11 +207,25 @@ export default async function handler(req, res) {
         rank: String(index + 1).padStart(2, "0"),
       }));
 
+    if (!videos.length) {
+      return res.status(200).json({
+        ok: false,
+        source: "fallback",
+        reason: "youtube_no_videos",
+        message: "YouTube API raggiunta, ma nessun video utilizzabile e stato restituito.",
+        regionCode,
+        categoryIds,
+        categoryErrors: categoryErrors.slice(0, 6),
+        videos: [],
+      });
+    }
+
     return res.status(200).json({
       ok: true,
       source: "youtube_api",
       regionCode,
       categoryIds,
+      categoryErrors: categoryErrors.slice(0, 6),
       updatedAt: new Date().toISOString(),
       videos,
     });
