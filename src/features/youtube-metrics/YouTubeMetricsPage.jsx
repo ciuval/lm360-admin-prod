@@ -13,7 +13,7 @@ const ideas = [
     statusLabel: "Idea calda",
     result: "Prossimo passo: crea uno Short oggi.",
     reason: "Tema chiaro, facile da capire e utile per attirare attenzione senza promettere miracoli.",
-    numbers: "18.400 viste esempio - interesse alto",
+    numbers: "Dati dimostrativi - interesse alto",
   },
   {
     id: "profilo-umano",
@@ -24,7 +24,7 @@ const ideas = [
     statusLabel: "Idea calda",
     result: "Prossimo passo: prepara un video di 6 minuti.",
     reason: "Collega direttamente il progetto al bisogno reale del visitatore: capire e fidarsi.",
-    numbers: "9.400 viste esempio - interesse buono",
+    numbers: "Dati dimostrativi - interesse buono",
   },
   {
     id: "checklist",
@@ -35,7 +35,7 @@ const ideas = [
     statusLabel: "Idea calda",
     result: "Prossimo passo: trasformala in PDF semplice.",
     reason: "Una checklist puo diventare motivo per iscriversi senza forzare pagamenti.",
-    numbers: "7.800 viste esempio - ritorno possibile",
+    numbers: "Dati dimostrativi - ritorno possibile",
   },
   {
     id: "libro",
@@ -57,7 +57,7 @@ const ideas = [
     statusLabel: "Da migliorare",
     result: "Prossimo passo: prova un titolo piu umano.",
     reason: "Il tema attira, ma deve promettere un beneficio piu chiaro.",
-    numbers: "13.100 viste esempio - apertura da correggere",
+    numbers: "Dati dimostrativi - apertura da correggere",
   },
   {
     id: "rumore",
