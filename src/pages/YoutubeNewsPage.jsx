@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { track } from "../lib/analytics.js";
 
@@ -15,9 +15,9 @@ const fallbackVideos = [
     url: "https://www.youtube.com/watch?v=sXtbY973PT8",
     thumb: "https://i.ytimg.com/vi/sXtbY973PT8/hqdefault.jpg",
     views: null,
-    score: 94,
-    why: "Tema forte per LoveMatch360: fiducia, segnali, attenzione e relazioni piu consapevoli.",
-    transform: "Short: 3 segnali da osservare prima di fidarsi.",
+    score: null,
+    why: "Tema forte per LoveMatch360: fiducia, segnali, attenzione e relazioni più consapevoli.",
+    transform: "Da video a Short, post, messaggio e articolo.",
   },
   {
     id: "Ay1QY64Y16A",
@@ -29,9 +29,9 @@ const fallbackVideos = [
     url: "https://www.youtube.com/watch?v=Ay1QY64Y16A",
     thumb: "https://i.ytimg.com/vi/Ay1QY64Y16A/hqdefault.jpg",
     views: null,
-    score: 90,
-    why: "Utile per blogger e creator: mostra strumenti, metodo e scelta, non solo teoria.",
-    transform: "Post: quali strumenti AI aiutano davvero un creator?",
+    score: null,
+    why: "Utile per blogger e creator: strumenti, metodo e scelta pratica.",
+    transform: "Da video a post guida e checklist semplice.",
   },
   {
     id: "mkLkx2-fIps",
@@ -43,9 +43,9 @@ const fallbackVideos = [
     url: "https://www.youtube.com/watch?v=mkLkx2-fIps",
     thumb: "https://i.ytimg.com/vi/mkLkx2-fIps/hqdefault.jpg",
     views: null,
-    score: 86,
-    why: "Collega direttamente ChatGPT, scrittura, blog e contenuti utili per il sito.",
-    transform: "Blog: da un'idea a un articolo leggibile.",
+    score: null,
+    why: "Collega ChatGPT, scrittura, blog e contenuti utili per il sito.",
+    transform: "Da video a struttura articolo.",
   },
   {
     id: "oSl-HCECogE",
@@ -53,13 +53,13 @@ const fallbackVideos = [
     source: "Selezione ponte",
     title: "Trasforma Video YouTube in Articoli di Blog con Python e ChatGPT",
     channel: "YouTube",
-    theme: "Video -> Blog",
+    theme: "Video → Blog",
     url: "https://www.youtube.com/watch?v=oSl-HCECogE",
     thumb: "https://i.ytimg.com/vi/oSl-HCECogE/hqdefault.jpg",
     views: null,
-    score: 82,
-    why: "Perfetto per spiegare la logica centrale: un video puo diventare articolo, post e messaggio.",
-    transform: "Metodo: da video a blog, poi Facebook e WhatsApp.",
+    score: null,
+    why: "Mostra il passaggio centrale: un video può diventare contenuto scritto.",
+    transform: "Da video a blog, Facebook e WhatsApp.",
   },
 ];
 
@@ -67,22 +67,22 @@ const channels = [
   {
     label: "YouTube",
     title: "Video o Short",
-    text: "Si parte dal tema forte: titolo chiaro, gancio iniziale e invito a continuare.",
+    text: "Il tema forte diventa un contenuto da guardare: chiaro, breve, diretto.",
   },
   {
     label: "Facebook",
-    title: "Post pubblico",
-    text: "Dal video nasce una frase forte, una spiegazione breve e una domanda finale.",
+    title: "Post breve",
+    text: "Una frase forte, un esempio e una domanda per aprire conversazione.",
   },
   {
     label: "WhatsApp",
     title: "Messaggio condivisibile",
-    text: "Versione corta, umana, senza pressione, pensata per essere letta subito.",
+    text: "Versione corta e umana, facile da leggere e inoltrare.",
   },
   {
     label: "Blog",
     title: "Articolo utile",
-    text: "Il tema diventa una guida: titolo, punti chiari, esempio e conclusione.",
+    text: "Il video diventa guida: titolo, punti chiari, esempio e conclusione.",
   },
 ];
 
@@ -96,10 +96,18 @@ async function trackClick(target) {
 
 function viewsLabel(value) {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
-    return "Da collegare";
+    return "in attesa";
   }
 
   return nf.format(value);
+}
+
+function scoreLabel(value) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    return "—";
+  }
+
+  return String(value);
 }
 
 function VideoCard({ item, active, onPlay, onOpenYoutube }) {
@@ -155,18 +163,15 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
       )}
 
       <h3>{item.title}</h3>
-      <p>{item.why}</p>
+      <p className="yn-card-text">{item.why}</p>
 
       <div className="yn-stats">
-        <span><strong>{viewsLabel(item.views)}</strong> visualizzazioni</span>
-        <span><strong>{item.score}</strong> punti</span>
+        <span><strong>{viewsLabel(item.views)}</strong> views</span>
+        <span><strong>{scoreLabel(item.score)}</strong> punti</span>
         <span><strong>{item.theme}</strong> tema</span>
       </div>
 
-      <div className="yn-hook">
-        <small>Trasformazione</small>
-        <p>{item.transform}</p>
-      </div>
+      <p className="yn-transform">{item.transform}</p>
     </article>
   );
 }
@@ -176,7 +181,6 @@ export default function YoutubeNewsPage() {
   const [activeVideoId, setActiveVideoId] = useState(null);
   const [loadingTop, setLoadingTop] = useState(true);
   const [feedState, setFeedState] = useState("Caricamento top video...");
-  const clickTimerRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
@@ -202,7 +206,7 @@ export default function YoutubeNewsPage() {
 
         if (!alive) return;
         setVideos(fallbackVideos);
-        setFeedState("Top automatici non ancora collegati: uso selezione ponte verificabile.");
+        setFeedState("Top automatici non disponibili in locale: uso selezione ponte verificabile.");
       } catch {
         if (!alive) return;
         setVideos(fallbackVideos);
@@ -219,179 +223,183 @@ export default function YoutubeNewsPage() {
     };
   }, []);
 
-  function clearPendingClick() {
-    if (clickTimerRef.current) {
-      window.clearTimeout(clickTimerRef.current);
-      clickTimerRef.current = null;
-    }
-  }
-
   function handlePlay(item) {
-    clearPendingClick();
-
-    clickTimerRef.current = window.setTimeout(() => {
-      setActiveVideoId(item.id);
-      trackClick(`play_inline_${item.id}`);
-      clickTimerRef.current = null;
-    }, 180);
+    setActiveVideoId(item.id);
+    trackClick(`play_inline_${item.id}`);
   }
 
   function handleOpenYoutube(item) {
-    clearPendingClick();
     trackClick(`open_youtube_${item.id}`);
     window.open(item.url, "_blank", "noopener,noreferrer");
   }
 
-  return (
+  
+  function scrollToTopVideos() {
+    const element = document.getElementById("top-video");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    trackClick("top-video-scroll");
+  }return (
     <main className="yn-page" aria-labelledby="youtube-news-title">
       <style>{css}</style>
 
-      <section className="yn-hero">
-        <div>
-          <p className="yn-eyebrow">LoveMatch360 - YouTube News</p>
-          <h1 id="youtube-news-title">Top video reali da trasformare.</h1>
-          <p className="yn-lead">
-            Una pagina per blogger e creator: video popolari, temi utili e percorsi per trasformarli in YouTube, Facebook, WhatsApp e Blog.
-          </p>
-        </div>
-
-        <div className="yn-actions">
-          <a className="yn-btn primary" href="#video-reali" onClick={() => trackClick("video-reali")}>
-            Vedi top video
-          </a>
-          <Link className="yn-btn secondary" to="/membri" onClick={() => trackClick("membri")}>
-            Sono interessato
-          </Link>
-        </div>
-
-        <div className={loadingTop ? "yn-note" : "yn-note yn-note-ready"}>
-          {feedState}
-        </div>
-      </section>
-
-      <section id="video-reali" className="yn-panel">
-        <div className="yn-section-head">
-          <div>
-            <p className="yn-eyebrow">Selezione dinamica</p>
-            <h2>I migliori video disponibili adesso.</h2>
-            <p>
-              Se la chiave YouTube server è attiva, questa sezione mostra top video reali. Se non è ancora attiva, resta una selezione ponte senza numeri inventati.
+      <div className="yn-shell">
+        <section className="yn-hero">
+          <div className="yn-hero-copy">
+            <p className="yn-eyebrow">LoveMatch360 · YouTube News</p>
+            <h1 id="youtube-news-title">Da un video a quattro contenuti.</h1>
+            <p className="yn-lead">
+              Prendiamo video reali, scegliamo i temi utili e li trasformiamo in uscite semplici:
+              YouTube, Facebook, WhatsApp e Blog.
             </p>
           </div>
 
-          <div className="yn-mini">
-            <strong>{videos.length} video</strong>
-            <span>YouTube + Facebook + WhatsApp + Blog</span>
+          <div className="yn-hero-side">
+            <div className="yn-mini">
+              <strong>{videos.length} video</strong>
+              <span>{loadingTop ? "caricamento..." : "pronti da leggere"}</span>
+            </div>
+
+            <div className="yn-actions">
+              <button type="button" className="yn-btn primary" onClick={scrollToTopVideos}>Vedi video</button>
+              <Link className="yn-btn secondary" to="/membri" onClick={() => trackClick("membri")}>
+                Sono interessato
+              </Link>
+            </div>
           </div>
-        </div>
 
-        <div className="yn-video-grid">
-          {videos.map((item) => (
-            <VideoCard
-              item={item}
-              key={item.id}
-              active={activeVideoId === item.id}
-              onPlay={handlePlay}
-              onOpenYoutube={handleOpenYoutube}
-            />
-          ))}
-        </div>
-      </section>
+          <div className={loadingTop ? "yn-note" : "yn-note yn-note-ready"}>
+            {feedState}
+          </div>
+        </section>
+        <section id="top-video" className="yn-panel">
+          <div className="yn-section-head">
+            <div>
+              <p className="yn-eyebrow">Top video reali</p>
+              <h2>I migliori video disponibili adesso.</h2>
+              <p>
+                Ogni scheda mostra un video reale o una selezione ponte verificabile. Il motore API resta separato e non viene modificato da questo restyling.
+              </p>
+            </div>
 
-      <section className="yn-panel">
-        <p className="yn-eyebrow">Da un video a quattro contenuti</p>
-        <h2>Una sola idea deve viaggiare bene.</h2>
+            <div className="yn-mini yn-mini-soft">
+              <strong>Top</strong>
+              <span>YouTube → contenuti</span>
+            </div>
+          </div>
 
-        <div className="yn-channel-grid">
-          {channels.map((item) => (
-            <article className="yn-channel" key={item.label}>
-              <small>{item.label}</small>
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+          <div className="yn-inline-flow" aria-label="Da un video a quattro contenuti">
+            <div className="yn-inline-head">
+              <div>
+                <p className="yn-eyebrow">Da un video a quattro contenuti</p>
+                <strong>YouTube → Facebook → WhatsApp → Blog</strong>
+              </div>
+              <span>Un tema solo, quattro uscite utili.</span>
+            </div>
 
-      <section className="yn-panel yn-accent">
-        <p className="yn-eyebrow">Dietro le quinte</p>
-        <h2>Il metodo resta accessibile, ma non disturba il visitatore.</h2>
-        <p>
-          Le pagine tecniche restano nascoste dal menu principale, ma raggiungibili con link intuitivi per chi vuole capire come vengono scelti i temi.
-        </p>
+            <div className="yn-inline-grid">
+              {channels.map((item) => (
+                <article className="yn-flow-card" key={item.label}>
+                  <small>{item.label}</small>
+                  <h3>{item.title}</h3>
+                  <p>{item.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+          <div className="yn-video-grid">
+            {videos.map((item) => (
+              <VideoCard
+                item={item}
+                key={item.id}
+                active={activeVideoId === item.id}
+                onPlay={handlePlay}
+                onOpenYoutube={handleOpenYoutube}
+              />
+            ))}
+          </div>
+        </section>
 
-        <div className="yn-actions">
-          <Link className="yn-btn ghost" to="/metrics" onClick={() => trackClick("metrics")}>
-            Come scegliamo i temi
-          </Link>
-          <Link className="yn-btn ghost" to="/playbook" onClick={() => trackClick("playbook")}>
-            Metodo editoriale
-          </Link>
-          <Link className="yn-btn primary" to="/membri" onClick={() => trackClick("membri-bottom")}>
-            Segui il progetto
-          </Link>
-        </div>
-      </section>
+        <section className="yn-panel yn-bottom">
+          <div>
+            <p className="yn-eyebrow">Metodo discreto</p>
+            <h2>Il motore resta dietro. Il valore resta davanti.</h2>
+            <p>
+              Le pagine tecniche non devono disturbare il visitatore. Restano raggiungibili solo da chi vuole capire come vengono scelti i temi.
+            </p>
+          </div>
+
+          <div className="yn-actions">
+            <Link className="yn-btn ghost" to="/metrics" onClick={() => trackClick("metrics")}>
+              Come scegliamo i temi
+            </Link>
+            <Link className="yn-btn ghost" to="/playbook" onClick={() => trackClick("playbook")}>
+              Metodo editoriale
+            </Link>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
 
 const css = `
 .yn-page{
+  width:100%;
   min-height:100vh;
-  padding:24px 16px 70px;
+  padding:20px 14px 64px;
   color:#e6e8ef;
   background:
-    radial-gradient(circle at 8% 0%, rgba(139,92,246,.18), transparent 32%),
-    radial-gradient(circle at 92% 8%, rgba(34,197,94,.10), transparent 28%),
+    radial-gradient(circle at 10% 0%, rgba(139,92,246,.18), transparent 34%),
+    radial-gradient(circle at 90% 6%, rgba(34,197,94,.12), transparent 30%),
     #0b0d10;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
-.yn-hero,.yn-panel{
-  max-width:1120px;
-  margin:0 auto 16px;
+.yn-shell{
+  width:min(1180px,100%);
+  margin:0 auto;
+}
+.yn-hero,.yn-panel,.yn-channel-strip{
   border:1px solid #242a32;
   border-radius:22px;
   background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.032));
-  box-shadow:0 24px 70px rgba(0,0,0,.28);
+  box-shadow:0 22px 64px rgba(0,0,0,.26);
 }
 .yn-hero{
-  padding:26px;
+  padding:22px;
   display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-columns:minmax(0,1fr) 270px;
   gap:18px;
-  align-items:end;
+  align-items:center;
 }
-.yn-panel{padding:24px}
-.yn-accent{border-color:rgba(139,92,246,.38)}
+.yn-hero-copy{min-width:0}
+.yn-hero-side{
+  display:grid;
+  gap:12px;
+  justify-items:stretch;
+}
 .yn-eyebrow{
   margin:0;
   color:#c4b5fd;
   font-size:11px;
   font-weight:950;
-  letter-spacing:.14em;
+  letter-spacing:.13em;
   text-transform:uppercase;
 }
 .yn-hero h1{
-  margin:10px 0 0;
-  max-width:820px;
-  font-size:clamp(2rem,4.4vw,3.55rem);
-  line-height:1;
+  margin:8px 0 0;
+  max-width:760px;
+  font-size:clamp(2rem,4.2vw,3.7rem);
+  line-height:.98;
   letter-spacing:-.055em;
   color:#fff;
 }
-.yn-panel h2{
-  margin:8px 0 0;
-  max-width:760px;
-  font-size:clamp(1.45rem,3vw,2.35rem);
-  line-height:1.08;
-  letter-spacing:-.04em;
-  color:#fff;
-}
-.yn-lead,.yn-panel p{
-  max-width:790px;
+.yn-lead{
+  margin:12px 0 0;
+  max-width:720px;
   color:#aab1bf;
-  line-height:1.58;
+  line-height:1.5;
   font-size:15px;
 }
 .yn-actions{
@@ -419,9 +427,29 @@ const css = `
 .yn-btn.primary{background:#8b5cf6;border-color:transparent}
 .yn-btn.secondary{background:rgba(255,255,255,.08)}
 .yn-btn.ghost{background:transparent;color:#c4b5fd;border-color:rgba(139,92,246,.45)}
+.yn-mini{
+  display:grid;
+  gap:4px;
+  padding:14px 16px;
+  border-radius:16px;
+  border:1px solid rgba(139,92,246,.38);
+  background:rgba(139,92,246,.12);
+}
+.yn-mini strong{
+  color:#fff;
+  font-size:24px;
+  line-height:1;
+}
+.yn-mini span{
+  color:#aab1bf;
+  font-weight:800;
+}
+.yn-mini-soft{
+  min-width:190px;
+}
 .yn-note{
   grid-column:1 / -1;
-  padding:12px 14px;
+  padding:11px 13px;
   border-radius:14px;
   border:1px solid rgba(245,158,11,.35);
   background:rgba(245,158,11,.09);
@@ -434,31 +462,160 @@ const css = `
   background:rgba(34,197,94,.09);
   color:#bbf7d0;
 }
+.yn-channel-strip{
+  margin-top:14px;
+  padding:18px;
+}
+.yn-channel-head{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:end;
+  margin-bottom:12px;
+}
+.yn-channel-head h2{
+  margin:6px 0 0;
+  color:#fff;
+  font-size:clamp(1.35rem,2.6vw,2rem);
+  letter-spacing:-.04em;
+}
+.yn-channel-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.yn-channel{
+  min-height:128px;
+  padding:16px;
+  border-radius:18px;
+  border:1px solid #242a32;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025));
+}
+.yn-channel small{
+  color:#c4b5fd;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-weight:950;
+  font-size:11px;
+}
+.yn-channel h3{
+  margin:9px 0 0;
+  color:#fff;
+  font-size:20px;
+  line-height:1.1;
+}
+.yn-channel p{
+  margin:8px 0 0;
+  color:#aab1bf;
+  line-height:1.45;
+  font-size:14px;
+}
+.yn-panel{
+  margin-top:14px;
+  padding:20px;
+}
 .yn-section-head{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
   gap:16px;
   align-items:end;
 }
-.yn-mini{
-  display:grid;
-  gap:4px;
-  min-width:210px;
-  padding:14px 16px;
-  border-radius:16px;
-  border:1px solid rgba(139,92,246,.38);
-  background:rgba(139,92,246,.12);
+.yn-panel h2{
+  margin:8px 0 0;
+  max-width:760px;
+  font-size:clamp(1.45rem,3vw,2.35rem);
+  line-height:1.06;
+  letter-spacing:-.045em;
+  color:#fff;
 }
-.yn-mini strong{color:#fff;font-size:24px;line-height:1}
-.yn-mini span{color:#aab1bf;font-weight:800}
+.yn-panel p{
+  max-width:790px;
+  color:#aab1bf;
+  line-height:1.52;
+  font-size:15px;
+}
+.yn-inline-flow{
+  margin:16px 0 14px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid rgba(139,92,246,.34);
+  background:
+    linear-gradient(135deg,rgba(139,92,246,.14),rgba(34,197,94,.07)),
+    rgba(255,255,255,.025);
+}
+.yn-inline-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:12px;
+}
+.yn-inline-head strong{
+  display:block;
+  margin-top:5px;
+  color:#fff;
+  font-size:clamp(1.2rem,2.2vw,1.75rem);
+  line-height:1.05;
+  letter-spacing:-.035em;
+}
+.yn-inline-head span{
+  color:#aab1bf;
+  font-size:13px;
+  font-weight:800;
+  text-align:right;
+}
+.yn-inline-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.yn-flow-card{
+  min-width:0;
+  padding:13px;
+  border-radius:15px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(11,13,16,.62);
+}
+.yn-flow-card small{
+  color:#c4b5fd;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-weight:950;
+  font-size:10px;
+}
+.yn-flow-card h3{
+  margin:7px 0 0;
+  color:#fff;
+  font-size:17px;
+  line-height:1.08;
+}
+.yn-flow-card p{
+  margin:7px 0 0;
+  color:#aab1bf;
+  font-size:12.5px;
+  line-height:1.42;
+}
+@media(max-width:1080px){
+  .yn-inline-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .yn-inline-head{display:block}
+  .yn-inline-head span{
+    display:block;
+    margin-top:8px;
+    text-align:left;
+  }
+  .yn-inline-grid{grid-template-columns:1fr}
+}
 .yn-video-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  grid-template-columns:repeat(4,minmax(0,1fr));
   gap:14px;
-  margin-top:18px;
+  margin-top:16px;
 }
 .yn-card{
-  padding:16px;
+  min-width:0;
+  padding:14px;
   border-radius:18px;
   border:1px solid #242a32;
   background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.025));
@@ -469,7 +626,7 @@ const css = `
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  margin-bottom:12px;
+  margin-bottom:10px;
 }
 .yn-rank{
   display:inline-flex;
@@ -503,27 +660,27 @@ const css = `
   display:block;
   width:100%;
   overflow:hidden;
-  min-height:145px;
+  aspect-ratio:16 / 9;
   border-radius:16px;
   border:1px solid rgba(255,255,255,.10);
   background:#090b10;
-  margin-bottom:14px;
+  margin-bottom:12px;
   padding:0;
   cursor:pointer;
   text-align:left;
 }
 .yn-thumb img{
   width:100%;
-  height:145px;
+  height:100%;
   object-fit:cover;
-  opacity:.9;
+  opacity:.92;
 }
 .yn-play{
   position:absolute;
-  left:14px;
-  bottom:14px;
-  width:46px;
-  height:46px;
+  left:12px;
+  bottom:12px;
+  width:42px;
+  height:42px;
   display:grid;
   place-items:center;
   border-radius:999px;
@@ -533,14 +690,14 @@ const css = `
 }
 .yn-click-help{
   position:absolute;
-  right:10px;
-  bottom:12px;
-  max-width:170px;
+  right:8px;
+  bottom:10px;
+  max-width:150px;
   padding:7px 9px;
   border-radius:999px;
   background:rgba(0,0,0,.62);
   color:#fff;
-  font-size:11px;
+  font-size:10px;
   font-weight:900;
 }
 .yn-player-wrap{
@@ -548,11 +705,11 @@ const css = `
   border-radius:16px;
   border:1px solid rgba(139,92,246,.36);
   background:#090b10;
-  margin-bottom:14px;
+  margin-bottom:12px;
 }
 .yn-open-youtube{
   width:100%;
-  min-height:42px;
+  min-height:38px;
   border:0;
   border-bottom:1px solid rgba(139,92,246,.38);
   background:rgba(139,92,246,.26);
@@ -564,7 +721,7 @@ const css = `
 }
 .yn-secondary-open{
   width:100%;
-  min-height:42px;
+  min-height:38px;
   border:0;
   border-top:1px solid rgba(139,92,246,.28);
   background:rgba(255,255,255,.07);
@@ -585,79 +742,148 @@ const css = `
 .yn-card h3{
   margin:0;
   color:#fff;
-  font-size:22px;
-  line-height:1.12;
+  font-size:18px;
+  line-height:1.13;
+  letter-spacing:-.02em;
 }
-.yn-card p{color:#aab1bf;line-height:1.52}
+.yn-card-text{
+  margin:9px 0 0;
+  color:#aab1bf;
+  line-height:1.45;
+  font-size:14px;
+}
 .yn-stats{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:8px;
-  margin-top:12px;
+  gap:7px;
+  margin-top:11px;
 }
 .yn-stats span{
-  padding:10px;
+  padding:9px;
   border-radius:13px;
   background:rgba(16,20,26,.78);
   border:1px solid #242a32;
   color:#aab1bf;
-  font-size:12px;
+  font-size:11px;
   font-weight:850;
+  overflow:hidden;
 }
 .yn-stats strong{
   display:block;
   color:#fff;
-  font-size:18px;
+  font-size:15px;
   line-height:1.1;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
 }
-.yn-hook{
-  margin-top:12px;
-  padding:12px;
-  border-radius:14px;
-  background:rgba(245,158,11,.08);
-  border:1px solid rgba(245,158,11,.25);
-}
-.yn-hook small{
-  color:#fde68a;
-  text-transform:uppercase;
-  letter-spacing:.10em;
-  font-weight:950;
-}
-.yn-hook p{
-  margin:6px 0 0;
-  color:#fde68a;
+.yn-transform{
+  margin:11px 0 0;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.08);
+  color:#fde68a !important;
+  font-size:13px !important;
   font-weight:850;
+  line-height:1.4 !important;
 }
-.yn-channel-grid{
+.yn-bottom{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:12px;
-  margin-top:16px;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:16px;
+  align-items:center;
 }
-.yn-channel{
-  padding:16px;
-  border-radius:16px;
-  border:1px solid #242a32;
-  background:#161a20;
+@media(max-width:1080px){
+  .yn-inline-flow{
+  margin:16px 0 14px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid rgba(139,92,246,.34);
+  background:
+    linear-gradient(135deg,rgba(139,92,246,.14),rgba(34,197,94,.07)),
+    rgba(255,255,255,.025);
 }
-.yn-channel small{
+.yn-inline-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:12px;
+}
+.yn-inline-head strong{
+  display:block;
+  margin-top:5px;
+  color:#fff;
+  font-size:clamp(1.2rem,2.2vw,1.75rem);
+  line-height:1.05;
+  letter-spacing:-.035em;
+}
+.yn-inline-head span{
+  color:#aab1bf;
+  font-size:13px;
+  font-weight:800;
+  text-align:right;
+}
+.yn-inline-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.yn-flow-card{
+  min-width:0;
+  padding:13px;
+  border-radius:15px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(11,13,16,.62);
+}
+.yn-flow-card small{
   color:#c4b5fd;
   text-transform:uppercase;
   letter-spacing:.10em;
   font-weight:950;
+  font-size:10px;
 }
-.yn-channel h3{
-  margin:10px 0 0;
+.yn-flow-card h3{
+  margin:7px 0 0;
   color:#fff;
-  font-size:21px;
+  font-size:17px;
+  line-height:1.08;
 }
-@media(max-width:880px){
-  .yn-hero,.yn-section-head{grid-template-columns:1fr}
+.yn-flow-card p{
+  margin:7px 0 0;
+  color:#aab1bf;
+  font-size:12.5px;
+  line-height:1.42;
 }
-@media(max-width:760px){
-  .yn-page{padding:18px 12px 56px}
-  .yn-hero,.yn-panel{padding:18px}
+@media(max-width:1080px){
+  .yn-inline-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .yn-inline-head{display:block}
+  .yn-inline-head span{
+    display:block;
+    margin-top:8px;
+    text-align:left;
+  }
+  .yn-inline-grid{grid-template-columns:1fr}
+}
+.yn-video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .yn-channel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:820px){
+  .yn-page{padding:16px 10px 52px}
+  .yn-hero,.yn-section-head,.yn-bottom{grid-template-columns:1fr}
+  .yn-hero{padding:18px}
+  .yn-panel,.yn-channel-strip{padding:16px}
+  .yn-hero-side{justify-items:start}
+  .yn-mini{width:100%}
+  .yn-actions{width:100%}
+  .yn-btn{flex:1 1 auto}
+}
+@media(max-width:620px){
+  .yn-video-grid,.yn-channel-grid{grid-template-columns:1fr}
+  .yn-hero h1{font-size:2.25rem}
+  .yn-panel h2,.yn-channel-head h2{font-size:1.65rem}
   .yn-stats{grid-template-columns:1fr}
-  .yn-click-help{left:14px;right:auto;bottom:66px}
+  .yn-click-help{left:12px;right:auto;bottom:62px}
 }
 `;
