@@ -37,9 +37,9 @@ function pointsFor({ views, likes, comments }, index) {
   const l = safeNumber(likes);
   const c = safeNumber(comments);
 
-  const viewScore = Math.min(55, Math.log10(v + 1) * 8);
-  const likeScore = Math.min(25, Math.log10(l + 1) * 6);
-  const commentScore = Math.min(15, Math.log10(c + 1) * 5);
+  const viewScore = Math.min(35, Math.log10(v + 1) * 5);
+  const likeScore = Math.min(30, Math.log10(l + 1) * 7);
+  const commentScore = Math.min(25, Math.log10(c + 1) * 7);
   const rankScore = Math.max(0, 10 - index);
 
   return Math.max(1, Math.min(99, Math.round(viewScore + likeScore + commentScore + rankScore)));

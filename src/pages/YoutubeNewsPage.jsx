@@ -166,8 +166,8 @@ function VideoCard({ item, active, onPlay, onOpenYoutube }) {
       <p className="yn-card-text">{item.why}</p>
 
       <div className="yn-stats">
-        <span><strong>{viewsLabel(item.views)}</strong> views</span>
-        <span><strong>{scoreLabel(item.score)}</strong> punti</span>
+        <span><strong>{viewsLabel(item.views)}</strong> visualizzazioni pubbliche</span>
+        <span><strong>{scoreLabel(item.score)}</strong> punteggio LM360</span>
         <span><strong>{item.theme}</strong> tema</span>
       </div>
 
@@ -277,9 +277,9 @@ export default function YoutubeNewsPage() {
           <div className="yn-section-head">
             <div>
               <p className="yn-eyebrow">Top video reali</p>
-              <h2>I migliori video disponibili adesso.</h2>
+              <h2>Video selezionati dai segnali pubblici disponibili.</h2>
               <p>
-                Ogni scheda mostra un video reale o una selezione ponte verificabile. Il motore API resta separato e non viene modificato da questo restyling.
+                Ogni scheda mostra un video reale o una selezione ponte verificabile. Il punteggio LM360 combina visualizzazioni pubbliche, like, commenti e posizione nel feed: non è un ranking ufficiale YouTube.
               </p>
             </div>
 
@@ -308,6 +308,8 @@ export default function YoutubeNewsPage() {
               ))}
             </div>
           </div>
+          <p className="yn-card-text">Dal 24 agosto 2026 YouTube conta una visualizzazione pubblica quando il video inizia a essere riprodotto, inclusi alcuni avvii automatici.</p>
+
           <div className="yn-video-grid">
             {videos.map((item) => (
               <VideoCard

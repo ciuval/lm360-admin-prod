@@ -46,7 +46,7 @@ const ideas = [
     statusLabel: "Da osservare",
     result: "Prossimo passo: tenerla come contenuto stabile.",
     reason: "Tema forte per fiducia, ma non va spinto come vendita aggressiva.",
-    numbers: "6.100 viste esempio - interesse stabile",
+    numbers: "Dati dimostrativi - interesse stabile",
   },
   {
     id: "hook",
@@ -68,7 +68,7 @@ const ideas = [
     statusLabel: "Non ora",
     result: "Prossimo passo: non pubblicare adesso.",
     reason: "Non porta abbastanza motivo per restare. Meglio usare energie su idee piu forti.",
-    numbers: "1.100 viste esempio - energia bassa",
+    numbers: "Dati dimostrativi - energia bassa",
   },
 ];
 
