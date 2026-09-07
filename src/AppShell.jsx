@@ -111,8 +111,8 @@ function getCurrentSection(pathname, isAuthed, tier) {
   }
   if (pathname.startsWith("/scopri")) {
     return {
-      label: "Scopri",
-      helper: "Qui trovi messaggi, percorsi e idee chiare per cambiare con ordine.",
+      label: "Risorse",
+      helper: "Qui trovi articoli, libro, metodo e contenuti utili per continuare con ordine.",
     };
   }
   if (pathname.startsWith("/match")) {
@@ -404,23 +404,19 @@ export default function AppShell({ children }) {
           <div style={bottomRowStyle}>
             <nav aria-label="Navigazione principale" style={navStyle}>
               <ShellLink to="/">Home</ShellLink>
-          <ShellLink to="/welcome">Inizia</ShellLink>
+              {!isAuthed ? <ShellLink to="/welcome">Inizia</ShellLink> : null}
+              <ShellLink to="/scopri-profili">Scopri persone</ShellLink>
+              {isAuthed ? <ShellLink to="/match">Match</ShellLink> : null}
               <ShellLink to="/messaggi">Messaggi</ShellLink>
-              <ShellLink to="/membri">Membri</ShellLink>
-              <ShellLink to="/youtube-news">YouTube News</ShellLink>
-              <ShellLink to="/scopri">Scopri</ShellLink>
+              <ShellLink to="/scopri">Risorse</ShellLink>
               <ShellLink to="/premium">Premium</ShellLink>
 
               {isAuthed ? (
                 <>
-                  <ShellLink to="/billing">Abbonamento</ShellLink>
-                  <ShellLink to="/quantum">Spazio speciale</ShellLink>
                   <ShellLink to="/profilo">Profilo</ShellLink>
                   {showAdminLink ? <ShellLink to="/admin">Regia</ShellLink> : null}
                 </>
-              ) : (
-                <ShellLink to="/login">Accedi</ShellLink>
-              )}
+              ) : null}
             </nav>
 
             <div style={actionsStyle}>

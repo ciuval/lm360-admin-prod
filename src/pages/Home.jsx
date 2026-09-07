@@ -187,7 +187,7 @@ const handlePrimary = () => {
       return;
     }
 
-    go("/scopri");
+    go("/scopri-profili");
   };
 
   const handleSecondary = () => {
@@ -271,9 +271,9 @@ const handlePrimary = () => {
               <span style={quickTextStyle}>Foto, bio, interessi e identità.</span>
             </button>
 
-            <button type="button" style={quickCardStyle} onClick={() => go("/scopri")}>
-              <span style={quickTitleStyle}>Scopri</span>
-              <span style={quickTextStyle}>Profili pubblici, like e incontri.</span>
+            <button type="button" style={quickCardStyle} onClick={() => go("/scopri-profili")}>
+              <span style={quickTitleStyle}>Scopri persone</span>
+              <span style={quickTextStyle}>Profili reali, like e possibili match.</span>
             </button>
 
             <button type="button" style={quickCardStyle} onClick={() => go("/premium")}>
@@ -301,8 +301,8 @@ const handlePrimary = () => {
         <article style={infoCardStyle}>
           <h2 style={cardTitleStyle}>Dove puoi andare</h2>
           <p style={cardTextStyle}>
-            Inizia, Profilo, Scopri, Premium, Billing, Admin: solo percorsi vivi. Niente pulsanti fantasma,
-            niente strade senza uscita.
+            Inizia, Profilo, Scopri persone, Risorse e Premium: percorsi distinti, senza pulsanti fantasma
+            e senza strade che portano altrove.
           </p>
         </article>
 

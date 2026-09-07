@@ -147,7 +147,7 @@ export default function ScopriEditoriale() {
       <style>{css}</style>
 
       <section className="hero">
-        <p className="eyebrow">{"LoveMatch360 \u00b7 Scopri"}</p>
+        <p className="eyebrow">{"LoveMatch360 \u00b7 Risorse"}</p>
         <h1 id="scopri-title">
           Idee per chi vuole cambiare, ma non sa da dove iniziare.
         </h1>
@@ -161,8 +161,11 @@ export default function ScopriEditoriale() {
           <Link to="/libro/da-zero-a-lovematch360" className="btn secondary">
             Vai al libro
           </Link>
+          <Link to="/youtube-news" className="btn secondary">
+            YouTube News
+          </Link>
           <Link to="/scopri-profili" className="btn ghost">
-            Area profili
+            Scopri persone
           </Link>
         </div>
 

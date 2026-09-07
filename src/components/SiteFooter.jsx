@@ -16,17 +16,23 @@ const linkGroups = [
   },
   {
     title: "Per entrare",
-    note: "Passi semplici per vivere meglio il sito.",
+    note: "Il percorso relazionale, senza deviazioni.",
     links: [
+      { label: "Scopri persone", href: "#/scopri-profili" },
       { label: "Profilo", href: "#/profilo" },
-      { label: "Scopri", href: "#/scopri" },
-  { label: "Membri", href: "#/membri" },
-  { label: "YouTube News", href: "#/youtube-news" },
       { label: "Match", href: "#/match" },
-      { label: "Impostazioni", href: "#/impostazioni" },
-      { label: "Notifiche", href: "#/notifiche" },
+      { label: "Messaggi", href: "#/messaggi" },
       { label: "Premium", href: "#/premium" },
-      { label: "Abbonamento", href: "#/billing" },
+    ],
+  },
+  {
+    title: "Risorse",
+    note: "Contenuti che sostengono il percorso.",
+    links: [
+      { label: "Articoli e idee", href: "#/scopri" },
+      { label: "YouTube News", href: "#/youtube-news" },
+      { label: "Libro", href: "#/libro/da-zero-a-lovematch360" },
+      { label: "Metodo", href: "#/playbook" },
     ],
   },
   {
