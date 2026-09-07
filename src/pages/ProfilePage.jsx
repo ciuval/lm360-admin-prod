@@ -7,6 +7,7 @@ import StoricoAbbonamenti from "../components/StoricoAbbonamenti";
 import ProfilePhotoGallery from "../components/profile/ProfilePhotoGallery";
 import ProfileCompletionCard from "../components/profile/ProfileCompletionCard";
 import { calculateProfileCompletion } from "../lib/profileCompletion";
+import { track } from "../lib/analytics.js";
 
 function normalizeRole(value) {
   return String(value || "").trim().toLowerCase();
@@ -428,8 +429,18 @@ export default function ProfilePage() {
         ...payload,
       };
 
+      const nextCompletion = calculateProfileCompletion({
+        profile: nextProfile,
+        photos,
+      });
+
       setProfilo(nextProfile);
-      toast.success("✅ Profilo aggiornato!");
+      track("profile_saved", { completion: nextCompletion.score }).catch(() => {});
+      toast.success(
+        nextCompletion.isComplete
+          ? "Profilo completo. Ora puoi scoprire persone."
+          : `Profilo salvato: ${nextCompletion.score}% completo.`
+      );
     } catch (error) {
       console.error("ProfilePage save error:", error);
       toast.error("Errore temporaneo durante il salvataggio.");
@@ -440,7 +451,7 @@ export default function ProfilePage() {
 
   const handleProfileCompletionAction = () => {
     if (profileCompletion.isComplete) {
-      navigate("/scopri");
+      navigate("/scopri-profili");
       return;
     }
 

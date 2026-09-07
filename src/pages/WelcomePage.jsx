@@ -7,8 +7,8 @@ const steps = [
     text: "Nome, bio, interessi e foto aiutano le altre persone a capire chi sei davvero.",
   },
   {
-    title: "2. Entra in Scopri",
-    text: "Guarda i profili disponibili e usa il sito con calma, senza caos e senza pulsanti inutili.",
+    title: "2. Entra in Scopri persone",
+    text: "Guarda persone reali, leggi ciò che raccontano e scegli con intenzione.",
   },
   {
     title: "3. Dai valore ai like",
@@ -47,8 +47,8 @@ export default function WelcomePage() {
             Inizia dal profilo
           </button>
 
-          <button type="button" style={secondaryButtonStyle} onClick={() => navigate("/scopri")}>
-            Vai a Scopri
+          <button type="button" style={secondaryButtonStyle} onClick={() => navigate("/scopri-profili")}>
+            Scopri persone
           </button>
         </div>
       </section>

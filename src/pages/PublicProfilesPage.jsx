@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
+import { track } from "../lib/analytics.js";
 
 function normalizeRole(value) {
   return String(value || "").trim().toLowerCase();
@@ -117,6 +118,7 @@ export default function PublicProfilesPage() {
 
         const pubblici = (profiliData || []).filter((profilo) => profilo.id !== currentUserId);
         setProfili(pubblici);
+        track("discovery_opened", { results: pubblici.length }).catch(() => {});
       } catch (error) {
         console.error("Errore fetchAll PublicProfilesPage:", error);
         if (!alive) return;
@@ -158,6 +160,7 @@ export default function PublicProfilesPage() {
     }
 
     setLikes((prev) => [...prev, profiloId]);
+    track("like_sent").catch(() => {});
 
     const { data: likeBack } = await supabase
       .from("likes")
@@ -189,6 +192,7 @@ export default function PublicProfilesPage() {
       return;
     }
 
+    track("match_created").catch(() => {});
     toast.success("💘 Match reciproco trovato!");
     setMatches((prev) => [...prev, profiloId]);
   };
@@ -231,7 +235,10 @@ export default function PublicProfilesPage() {
       `}</style>
 
       <Toaster position="top-right" />
-      <h2 style={titleStyle}>🌐 Profili Pubblici</h2>
+      <h2 style={titleStyle}>Scopri persone</h2>
+      <p style={{ margin: "-0.45rem 0 1.25rem", color: "#d8d8e2", lineHeight: 1.6 }}>
+        Guarda un profilo, leggi ciò che racconta e scegli con intenzione.
+      </p>
 
       {!isUserPremium && (
         <div style={promoBox}>
@@ -292,12 +299,11 @@ export default function PublicProfilesPage() {
             }}
           >
             <p style={{ margin: "0 0 0.5rem", fontWeight: 800 }}>
-              Scopri e pronto: nessun profilo reale disponibile ora.
+              Scopri è pronto: al momento non ci sono profili reali da mostrare.
             </p>
             <p style={{ margin: 0, opacity: 0.82 }}>
-              La base e pulita: non e un errore. Completa il profilo, torna qui e appena ci saranno profili reali
-              li vedrai qui. Intanto puoi completare il tuo profilo: rendera piu chiaro
-              chi sei quando la discovery iniziera a popolarsi.
+              Non è un errore. Completa il tuo profilo e torna qui: quando saranno disponibili
+              altre persone, capiranno subito meglio chi sei.
             </p>
             <a
               href="#/profilo"
@@ -373,7 +379,7 @@ export default function PublicProfilesPage() {
                       fontSize: "1rem",
                     }}
                   >
-                    💗 {likes.includes(profilo.id) ? "Già messo" : "Mi Piace"}
+                    💗 {likes.includes(profilo.id) ? "Like inviato" : "Mi piace"}
                   </button>
                 )}
               </motion.li>

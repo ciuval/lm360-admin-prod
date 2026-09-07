@@ -15,10 +15,10 @@ export default function ProfileCompletionCard({ completion, disabled = false, on
     : "Completa il profilo per sbloccare più valore.";
 
   const subtitle = safeCompletion.isComplete
-    ? "Hai le basi giuste per entrare in Scopri con più contesto."
+    ? "Hai le basi giuste per entrare in Scopri persone con più contesto."
     : "Nome, bio, interessi e foto aiutano le altre persone a capire chi sei davvero.";
 
-  const actionLabel = safeCompletion.isComplete ? "Vai a Scopri" : "Completa il prossimo passo del profilo";
+  const actionLabel = safeCompletion.isComplete ? "Vai a Scopri persone" : "Completa il prossimo passo del profilo";
 
   return (
     <section style={cardStyle} aria-labelledby="profile-completion-title">
