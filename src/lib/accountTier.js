@@ -67,7 +67,7 @@ export async function loadCurrentAccountTier() {
 
   const { data: profileData, error: profileError } = await supabase
     .from("profili")
-    .select("id, premium, ruolo, premium_fine, tipo_abbonamento, stripe_customer_id, status_account")
+    .select("id, nome, bio, interessi, foto_url, avatar_url, premium, ruolo, premium_fine, tipo_abbonamento, stripe_customer_id, status_account")
     .eq("id", user.id)
     .maybeSingle();
 

@@ -1,534 +1,469 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadCurrentAccountTier } from "../lib/accountTier";
+import { track } from "../lib/analytics.js";
 
-const HOME_SECONDARY_ROUTE = "/premium";
+const journey = [
+  {
+    number: "01",
+    title: "Raccontati con sostanza",
+    text: "Una bio, interessi veri e immagini scelte bene: il profilo diventa un invito, non una vetrina vuota.",
+  },
+  {
+    number: "02",
+    title: "Scopri con intenzione",
+    text: "Leggi prima di scegliere. Ogni like ha più senso quando nasce da qualcosa che hai davvero notato.",
+  },
+  {
+    number: "03",
+    title: "Lascia spazio alla reciprocità",
+    text: "Il match arriva solo quando l'interesse è reciproco. Da lì può iniziare una conversazione reale.",
+  },
+];
 
-function createClickSound() {
-  try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return null;
+function hasProfileSignal(profile) {
+  const interests = Array.isArray(profile?.interessi)
+    ? profile.interessi.filter(Boolean)
+    : String(profile?.interessi || "").trim();
 
-    const ctx = new AudioContextClass();
-
-    return () => {
-      try {
-        if (ctx.state === "suspended") {
-          ctx.resume();
-        }
-
-        const oscillator = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-
-        oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(740, ctx.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.06);
-
-        gainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.035, ctx.currentTime + 0.01);
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.09);
-
-        oscillator.connect(gainNode);
-        gainNode.connect(ctx.destination);
-
-        oscillator.start(ctx.currentTime);
-        oscillator.stop(ctx.currentTime + 0.09);
-      } catch {
-        // no-op
-      }
-    };
-  } catch {
-    return null;
-  }
+  return Boolean(
+    String(profile?.nome || "").trim() &&
+      String(profile?.bio || "").trim().length >= 20 &&
+      interests &&
+      (profile?.foto_url || profile?.avatar_url)
+  );
 }
 
 export default function Home() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [isAuthed, setIsAuthed] = useState(false);
-  const [tier, setTier] = useState("free");
-  const [profile, setProfile] = useState(null);
-
-  const clickSoundRef = useRef(null);
-
-  useEffect(() => {
-    clickSoundRef.current = createClickSound();
-  }, []);
+  const [account, setAccount] = useState({
+    loading: true,
+    isAuthed: false,
+    tier: "free",
+    profile: null,
+  });
 
   useEffect(() => {
     let alive = true;
 
-    async function run() {
-      try {
-        setLoading(true);
-
-        const result = await loadCurrentAccountTier();
-
+    loadCurrentAccountTier()
+      .then((result) => {
         if (!alive) return;
-
-        setIsAuthed(Boolean(result?.isAuthed));
-        setTier(result?.tier || "free");
-        setProfile(result?.profile || null);
-      } catch {
+        setAccount({
+          loading: false,
+          isAuthed: Boolean(result?.isAuthed),
+          tier: result?.tier || "free",
+          profile: result?.profile || null,
+        });
+      })
+      .catch(() => {
         if (!alive) return;
-        setIsAuthed(false);
-        setTier("free");
-        setProfile(null);
-      } finally {
-        if (alive) {
-          setLoading(false);
-        }
-      }
-    }
-
-    run();
+        setAccount({ loading: false, isAuthed: false, tier: "free", profile: null });
+      });
 
     return () => {
       alive = false;
     };
   }, []);
 
-  const displayName = useMemo(() => {
-    if (profile?.nome && String(profile.nome).trim()) return String(profile.nome).trim();
-    return isAuthed ? "Bentornato" : "Benvenuto";
-  }, [profile, isAuthed]);
+  const profileReady = useMemo(
+    () => hasProfileSignal(account.profile),
+    [account.profile]
+  );
 
-  const heroContent = useMemo(() => {
-    if (loading) {
+  const displayName = String(account.profile?.nome || "").trim();
+
+  const hero = useMemo(() => {
+    if (account.loading) {
       return {
-        title: "LoveMatch360 sta accendendo il tuo spazio.",
-        description:
-          "Un attimo ancora: stiamo leggendo il tuo stato account per mostrarti il percorso giusto.",
-        primaryLabel: "Attendi",
-        secondaryLabel: "Home",
+        eyebrow: "LoveMatch360",
+        title: "Stiamo preparando il tuo spazio.",
+        description: "Un istante per riconoscere il percorso giusto.",
+        primary: "Attendi…",
+        primaryRoute: null,
+        secondary: null,
+        secondaryRoute: null,
       };
     }
 
-    if (!isAuthed) {
+    if (!account.isAuthed) {
       return {
-        title: "Connessioni vere, profili più umani, meno caos.",
+        eyebrow: "Relazioni con più contesto",
+        title: "Non devi sapere cosa stai cercando. Qui iniziamo da te.",
         description:
-          "LoveMatch360 è uno spazio collaborativo e relazionale: scopri, entra in contatto, costruisci presenza e muoviti con più chiarezza.",
-        primaryLabel: "Accedi",
-        secondaryLabel: "Scopri Premium",
+          "LoveMatch360 è uno spazio per presentarti meglio, scoprire persone con calma e lasciare che l'interesse diventi reciproco senza rumore.",
+        primary: "Crea il tuo spazio",
+        primaryRoute: "/register",
+        secondary: "Scopri come funziona",
+        secondaryRoute: "/welcome",
       };
     }
 
-    if (tier === "admin") {
+    if (account.tier === "admin") {
       return {
-        title: `Ciao ${displayName}, il sistema è vivo.`,
+        eyebrow: "Regia LoveMatch360",
+        title: displayName ? `${displayName}, il progetto è nelle tue mani.` : "Il progetto è nelle tue mani.",
         description:
-          "Hai accesso amministrativo e una vista completa del progetto. Puoi orientarti subito, controllare i percorsi reali e tenere il sito sotto guida.",
-        primaryLabel: "Apri Admin",
-        secondaryLabel: "Vai al profilo",
+          "Controlla il sistema oppure attraversa il percorso come una persona reale: ogni dettaglio deve meritare il prossimo passo.",
+        primary: "Apri la regia",
+        primaryRoute: "/admin",
+        secondary: "Prova Scopri persone",
+        secondaryRoute: "/scopri-profili",
       };
     }
 
-    if (tier === "super") {
+    if (!profileReady) {
       return {
-        title: `${displayName}, hai già il massimo accesso.`,
+        eyebrow: "Il tuo primo passo",
+        title: displayName ? `${displayName}, fatti riconoscere prima di farti trovare.` : "Fatti riconoscere prima di farti trovare.",
         description:
-          "Il tuo accesso è già al livello più alto. Ora conta usare bene visibilità, scoperta e qualità della presenza.",
-        primaryLabel: "Scopri i profili",
-        secondaryLabel: "Vai al profilo",
-      };
-    }
-
-    if (tier === "premium") {
-      return {
-        title: `${displayName}, il tuo Premium è acceso.`,
-        description:
-          "Hai già accesso alle funzioni sbloccate. Adesso il valore sta nel modo in cui usi scoperta, immagini, bio e presenza.",
-        primaryLabel: "Scopri i profili",
-        secondaryLabel: "Vai al profilo",
+          "Completa nome, bio, interessi e foto. Bastano pochi minuti per trasformare un account in una presenza autentica.",
+        primary: "Completa il profilo",
+        primaryRoute: "/profilo",
+        secondary: "Vedi il percorso",
+        secondaryRoute: "/welcome",
       };
     }
 
     return {
-      title: `${displayName}, il tuo profilo può brillare molto di più.`,
+      eyebrow: "Il tuo spazio è pronto",
+      title: displayName ? `${displayName}, ora puoi incontrare ciò che non avevi previsto.` : "Ora puoi incontrare ciò che non avevi previsto.",
       description:
-        "Completa immagini, bio e interessi. Entra in scoperta e costruisci un percorso più vivo, più chiaro e più attraente.",
-      primaryLabel: "Scopri i profili",
-      secondaryLabel: "Diventa Premium",
+        "Il profilo racconta già qualcosa di te. Entra in Scopri persone, osserva con cura e lascia che il prossimo gesto abbia un significato.",
+      primary: "Scopri persone",
+      primaryRoute: "/scopri-profili",
+      secondary: "I tuoi match",
+      secondaryRoute: "/match",
     };
-  }, [loading, isAuthed, tier, displayName]);
+  }, [account, displayName, profileReady]);
 
-  const statusLabel = useMemo(() => {
-    if (loading) return "Caricamento stato account...";
-    if (!isAuthed) return "Accesso ospite";
-    if (tier === "admin") return "Account admin attivo";
-    if (tier === "super") return "Account super attivo";
-    if (tier === "premium") return "Account premium attivo";
-    return "Account base attivo";
-  }, [loading, isAuthed, tier]);
-
-  const profileImage = useMemo(() => {
-    return profile?.foto_url || profile?.avatar_url || null;
-  }, [profile]);
-
-  const playClick = () => {
-    clickSoundRef.current?.();
-  };
-
-  const go = (path) => {
-    playClick();
+  function go(path, action) {
+    if (!path) return;
+    track("home_cta", { action }).catch(() => {});
     navigate(path);
-  };
-const handlePrimary = () => {
-    if (loading) return;
-
-    if (!isAuthed) {
-      go("/login");
-      return;
-    }
-
-    if (tier === "admin") {
-      go("/admin");
-      return;
-    }
-
-    go("/scopri-profili");
-  };
-
-  const handleSecondary = () => {
-    if (loading) return;
-
-    if (!isAuthed) {
-      go(HOME_SECONDARY_ROUTE);
-      return;
-    }
-
-    if (tier === "admin" || tier === "premium" || tier === "super") {
-      go("/profilo");
-      return;
-    }
-
-    go("/premium");
-  };
+  }
 
   return (
-    <section style={pageStyle}>
-      <div style={heroGridStyle}>
-        <div style={heroTextCardStyle}>
-          <span style={eyebrowStyle}>LoveMatch360 · progetto vivo</span>
+    <div className="lm-home">
+      <style>{`
+        .lm-home {
+          --rose: #f08fc0;
+          --rose-soft: #ffd6ea;
+          --sky: #8ddcff;
+          --ink: #07080d;
+          --panel: rgba(19, 20, 29, 0.84);
+          color: #f8fafc;
+          padding: 8px 0 36px;
+        }
 
-          <h1 style={titleStyle}>{heroContent.title}</h1>
+        .lm-home * { box-sizing: border-box; }
 
-          <p style={descriptionStyle}>{heroContent.description}</p>
+        .lm-home-hero {
+          position: relative;
+          overflow: hidden;
+          min-height: 620px;
+          display: grid;
+          grid-template-columns: minmax(0, 1.15fr) minmax(310px, 0.85fr);
+          gap: 24px;
+          align-items: center;
+          padding: clamp(28px, 6vw, 72px);
+          border: 1px solid rgba(255,255,255,.1);
+          border-radius: 32px;
+          background:
+            radial-gradient(circle at 84% 16%, rgba(141,220,255,.22), transparent 30%),
+            radial-gradient(circle at 18% 82%, rgba(240,143,192,.20), transparent 34%),
+            linear-gradient(145deg, #11121a 0%, #090a10 60%, #11101a 100%);
+          box-shadow: 0 32px 90px rgba(0,0,0,.38);
+        }
 
-          <div style={actionsStyle}>
+        .lm-home-hero::after {
+          content: "";
+          position: absolute;
+          width: 360px;
+          height: 360px;
+          right: -120px;
+          bottom: -180px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,.1);
+          box-shadow: 0 0 0 56px rgba(255,255,255,.018), 0 0 0 112px rgba(255,255,255,.012);
+          pointer-events: none;
+        }
+
+        .lm-home-copy { position: relative; z-index: 1; max-width: 760px; }
+
+        .lm-home-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          min-height: 34px;
+          padding: 0 13px;
+          border: 1px solid rgba(240,143,192,.3);
+          border-radius: 999px;
+          color: var(--rose-soft);
+          background: rgba(240,143,192,.09);
+          font-size: .76rem;
+          font-weight: 900;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+        }
+
+        .lm-home h1 {
+          max-width: 13ch;
+          margin: 22px 0 0;
+          color: #fff;
+          font-size: clamp(2.75rem, 7vw, 6.4rem);
+          line-height: .94;
+          letter-spacing: -.065em;
+          text-wrap: balance;
+        }
+
+        .lm-home-lead {
+          max-width: 62ch;
+          margin: 24px 0 0;
+          color: rgba(248,250,252,.82);
+          font-size: clamp(1.05rem, 2vw, 1.28rem);
+          line-height: 1.72;
+        }
+
+        .lm-home-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-top: 30px;
+        }
+
+        .lm-home-button {
+          min-height: 52px;
+          padding: 0 21px;
+          border-radius: 16px;
+          font: inherit;
+          font-weight: 900;
+          cursor: pointer;
+          transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+        }
+
+        .lm-home-button:hover { transform: translateY(-2px); }
+        .lm-home-button:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; }
+        .lm-home-button:disabled { cursor: wait; opacity: .6; transform: none; }
+
+        .lm-home-button--primary {
+          border: 0;
+          color: #180d14;
+          background: linear-gradient(135deg, #ffd6ea, var(--rose));
+          box-shadow: 0 14px 34px rgba(240,143,192,.22);
+        }
+
+        .lm-home-button--secondary {
+          border: 1px solid rgba(255,255,255,.18);
+          color: #fff;
+          background: rgba(255,255,255,.055);
+        }
+
+        .lm-home-proof {
+          position: relative;
+          z-index: 1;
+          display: grid;
+          gap: 12px;
+          align-content: center;
+        }
+
+        .lm-home-proof-card {
+          padding: 21px;
+          border: 1px solid rgba(255,255,255,.11);
+          border-radius: 22px;
+          background: rgba(5,7,12,.46);
+          backdrop-filter: blur(10px);
+        }
+
+        .lm-home-proof-card strong {
+          display: block;
+          color: #fff;
+          font-size: 1.05rem;
+        }
+
+        .lm-home-proof-card span {
+          display: block;
+          margin-top: 7px;
+          color: rgba(248,250,252,.68);
+          line-height: 1.55;
+        }
+
+        .lm-home-section {
+          padding: clamp(48px, 8vw, 88px) 8px 0;
+        }
+
+        .lm-home-section-head {
+          max-width: 760px;
+          margin-bottom: 24px;
+        }
+
+        .lm-home-section-head p {
+          margin: 10px 0 0;
+          color: rgba(248,250,252,.68);
+          line-height: 1.65;
+        }
+
+        .lm-home h2 {
+          margin: 0;
+          color: #fff;
+          font-size: clamp(1.9rem, 4vw, 3.2rem);
+          letter-spacing: -.035em;
+          line-height: 1.05;
+        }
+
+        .lm-home-journey {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px;
+        }
+
+        .lm-home-step {
+          min-height: 260px;
+          padding: 24px;
+          border: 1px solid rgba(255,255,255,.09);
+          border-radius: 24px;
+          background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+        }
+
+        .lm-home-step-number {
+          color: var(--rose);
+          font-size: .78rem;
+          font-weight: 900;
+          letter-spacing: .14em;
+        }
+
+        .lm-home-step h3 {
+          margin: 54px 0 0;
+          color: #fff;
+          font-size: 1.35rem;
+          line-height: 1.15;
+        }
+
+        .lm-home-step p {
+          margin: 14px 0 0;
+          color: rgba(248,250,252,.7);
+          line-height: 1.65;
+        }
+
+        .lm-home-callout {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 24px;
+          align-items: center;
+          margin-top: clamp(48px, 8vw, 88px);
+          padding: clamp(25px, 5vw, 46px);
+          border: 1px solid rgba(141,220,255,.18);
+          border-radius: 28px;
+          background: linear-gradient(135deg, rgba(141,220,255,.09), rgba(240,143,192,.08));
+        }
+
+        .lm-home-callout p {
+          max-width: 66ch;
+          margin: 12px 0 0;
+          color: rgba(248,250,252,.72);
+          line-height: 1.65;
+        }
+
+        @media (max-width: 820px) {
+          .lm-home-hero {
+            min-height: auto;
+            grid-template-columns: 1fr;
+            padding: 32px 22px;
+            border-radius: 24px;
+          }
+
+          .lm-home h1 { max-width: 15ch; }
+          .lm-home-proof { grid-template-columns: 1fr; }
+          .lm-home-journey { grid-template-columns: 1fr; }
+          .lm-home-step { min-height: 0; }
+          .lm-home-step h3 { margin-top: 28px; }
+          .lm-home-callout { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .lm-home-button { transition: none; }
+        }
+      `}</style>
+
+      <section className="lm-home-hero" aria-labelledby="home-title">
+        <div className="lm-home-copy">
+          <span className="lm-home-eyebrow">{hero.eyebrow}</span>
+          <h1 id="home-title">{hero.title}</h1>
+          <p className="lm-home-lead">{hero.description}</p>
+
+          <div className="lm-home-actions">
             <button
               type="button"
-              style={primaryButtonStyle}
-              onClick={handlePrimary}
-              disabled={loading}
+              className="lm-home-button lm-home-button--primary"
+              disabled={account.loading}
+              onClick={() => go(hero.primaryRoute, "primary")}
             >
-              {heroContent.primaryLabel}
+              {hero.primary}
             </button>
 
-            <button
-              type="button"
-              style={secondaryButtonStyle}
-              onClick={handleSecondary}
-              disabled={loading}
-            >
-              {heroContent.secondaryLabel}
-            </button>
-          </div>
-
-          <div style={statusRowStyle}>
-            <span style={statusBadgeStyle}>{statusLabel}</span>
-            <span style={mutedInlineStyle}>Sai sempre dove sei e cosa puoi fare davvero.</span>
+            {hero.secondary ? (
+              <button
+                type="button"
+                className="lm-home-button lm-home-button--secondary"
+                onClick={() => go(hero.secondaryRoute, "secondary")}
+              >
+                {hero.secondary}
+              </button>
+            ) : null}
           </div>
         </div>
 
-        <div style={identityPanelStyle}>
-          <div style={identityHeroStyle}>
-            {profileImage ? (
-              <img
-                src={profileImage}
-                alt={displayName}
-                style={identityImageStyle}
-              />
-            ) : (
-              <div style={identityPlaceholderStyle}>💖</div>
-            )}
-
-            <div style={identityCopyStyle}>
-              <div style={identityKickerStyle}>Il tuo spazio</div>
-              <div style={identityNameStyle}>{displayName}</div>
-              <div style={identityMetaStyle}>
-                {isAuthed
-                  ? "Profilo vivo, presenza modificabile, accesso reale."
-                  : "Entra per costruire il tuo profilo e iniziare il percorso."}
-              </div>
-            </div>
+        <aside className="lm-home-proof" aria-label="Principi LoveMatch360">
+          <div className="lm-home-proof-card">
+            <strong>Prima la persona</strong>
+            <span>Il profilo serve a farti capire, non a ridurti a una fotografia.</span>
           </div>
-
-          <div style={quickGridStyle}>
-            <button type="button" style={quickCardStyle} onClick={() => go("/profilo")}>
-              <span style={quickTitleStyle}>Profilo</span>
-              <span style={quickTextStyle}>Foto, bio, interessi e identità.</span>
-            </button>
-
-            <button type="button" style={quickCardStyle} onClick={() => go("/scopri-profili")}>
-              <span style={quickTitleStyle}>Scopri persone</span>
-              <span style={quickTextStyle}>Profili reali, like e possibili match.</span>
-            </button>
-
-            <button type="button" style={quickCardStyle} onClick={() => go("/premium")}>
-              <span style={quickTitleStyle}>Premium</span>
-              <span style={quickTextStyle}>Valore, accesso e percorso chiaro.</span>
-            </button>
-
-            <button type="button" style={quickCardStyle} onClick={() => go("/welcome")}>
-              <span style={quickTitleStyle}>Inizia</span>
-              <span style={quickTextStyle}>Percorso guidato: profilo, scoperta e Premium con calma.</span>
-            </button>
+          <div className="lm-home-proof-card">
+            <strong>Scelte meno casuali</strong>
+            <span>Bio e interessi danno contesto prima del like.</span>
           </div>
+          <div className="lm-home-proof-card">
+            <strong>Reciprocità visibile</strong>
+            <span>Il match nasce soltanto quando l'interesse si incontra.</span>
+          </div>
+        </aside>
+      </section>
+
+      <section className="lm-home-section" aria-labelledby="journey-title">
+        <div className="lm-home-section-head">
+          <h2 id="journey-title">Non più swipe. Un percorso.</h2>
+          <p>
+            LoveMatch360 non promette chimica a comando. Costruisce condizioni migliori
+            perché una connessione possa cominciare.
+          </p>
         </div>
-      </div>
 
-      <div style={infoGridStyle}>
-        <article style={infoCardStyle}>
-          <h2 style={cardTitleStyle}>Chi siamo</h2>
-          <p style={cardTextStyle}>
-            Un sito relazionale e collaborativo: più umano, più diretto, meno tecnico da sentire,
-            più chiaro da vivere.
-          </p>
-        </article>
+        <div className="lm-home-journey">
+          {journey.map((step) => (
+            <article className="lm-home-step" key={step.number}>
+              <span className="lm-home-step-number">{step.number}</span>
+              <h3>{step.title}</h3>
+              <p>{step.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
 
-        <article style={infoCardStyle}>
-          <h2 style={cardTitleStyle}>Dove puoi andare</h2>
-          <p style={cardTextStyle}>
-            Inizia, Profilo, Scopri persone, Risorse e Premium: percorsi distinti, senza pulsanti fantasma
-            e senza strade che portano altrove.
+      <section className="lm-home-callout" aria-labelledby="resources-title">
+        <div>
+          <h2 id="resources-title">Anche quando non cerchi un match, puoi trovare valore.</h2>
+          <p>
+            Idee, messaggi, articoli e metodo: risorse pubbliche per capire meglio relazioni,
+            presenza digitale e scelte quotidiane.
           </p>
-        </article>
-
-        <article style={infoCardStyle}>
-          <h2 style={cardTitleStyle}>Come si usa</h2>
-          <p style={cardTextStyle}>
-            Entri, sistemi il profilo, scopri persone, metti like, crei match e costruisci una
-            presenza più forte nel tempo.
-          </p>
-        </article>
-      </div>
-    </section>
+        </div>
+        <button
+          type="button"
+          className="lm-home-button lm-home-button--secondary"
+          onClick={() => go("/scopri", "resources")}
+        >
+          Esplora le risorse
+        </button>
+      </section>
+    </div>
   );
 }
-
-const pageStyle = {
-  padding: "20px 16px 40px",
-};
-
-const heroGridStyle = {
-  maxWidth: "1180px",
-  margin: "0 auto",
-  display: "grid",
-  gridTemplateColumns: "minmax(0, 1.25fr) minmax(320px, 0.95fr)",
-  gap: "16px",
-};
-
-const heroTextCardStyle = {
-  padding: "28px 24px",
-  borderRadius: "24px",
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "linear-gradient(180deg, rgba(28,28,34,0.96) 0%, rgba(16,16,22,0.96) 100%)",
-  boxShadow: "0 20px 50px rgba(0,0,0,0.24)",
-};
-
-const eyebrowStyle = {
-  display: "inline-block",
-  fontSize: "12px",
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  color: "rgba(255,255,255,0.62)",
-  fontWeight: 800,
-};
-
-const titleStyle = {
-  margin: "12px 0 0",
-  color: "#f08fc0",
-  fontSize: "clamp(2.2rem, 5vw, 3.8rem)",
-  lineHeight: 1.02,
-};
-
-const descriptionStyle = {
-  marginTop: "18px",
-  marginBottom: 0,
-  color: "rgba(255,255,255,0.88)",
-  fontSize: "1.16rem",
-  lineHeight: 1.85,
-  maxWidth: "64ch",
-};
-
-const actionsStyle = {
-  display: "flex",
-  gap: "12px",
-  flexWrap: "wrap",
-  marginTop: "24px",
-};
-
-const primaryButtonStyle = {
-  padding: "15px 22px",
-  border: "none",
-  borderRadius: "14px",
-  backgroundColor: "#e48abb",
-  color: "#111111",
-  fontWeight: 800,
-  fontSize: "1rem",
-  cursor: "pointer",
-};
-
-const secondaryButtonStyle = {
-  padding: "15px 22px",
-  borderRadius: "14px",
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(255,255,255,0.05)",
-  color: "#ffffff",
-  fontWeight: 700,
-  fontSize: "1rem",
-  cursor: "pointer",
-};
-
-const statusRowStyle = {
-  marginTop: "18px",
-  display: "flex",
-  gap: "10px",
-  flexWrap: "wrap",
-  alignItems: "center",
-};
-
-const statusBadgeStyle = {
-  display: "inline-flex",
-  alignItems: "center",
-  minHeight: 34,
-  padding: "0 12px",
-  borderRadius: 999,
-  background: "rgba(255,255,255,0.07)",
-  border: "1px solid rgba(255,255,255,0.10)",
-  color: "#ffffff",
-  fontWeight: 700,
-};
-
-const mutedInlineStyle = {
-  color: "rgba(255,255,255,0.66)",
-  fontSize: "0.95rem",
-};
-
-const identityPanelStyle = {
-  display: "grid",
-  gap: "16px",
-};
-
-const identityHeroStyle = {
-  padding: "18px",
-  borderRadius: "24px",
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(255,255,255,0.04)",
-  boxShadow: "0 18px 36px rgba(0,0,0,0.22)",
-};
-
-const identityImageStyle = {
-  width: "100%",
-  aspectRatio: "1 / 1",
-  objectFit: "cover",
-  borderRadius: "22px",
-  display: "block",
-};
-
-const identityPlaceholderStyle = {
-  width: "100%",
-  aspectRatio: "1 / 1",
-  borderRadius: "22px",
-  display: "grid",
-  placeItems: "center",
-  fontSize: "4rem",
-  background: "linear-gradient(180deg, rgba(240,143,192,0.18), rgba(125,211,252,0.10))",
-  border: "1px solid rgba(255,255,255,0.08)",
-};
-
-const identityCopyStyle = {
-  marginTop: "14px",
-};
-
-const identityKickerStyle = {
-  fontSize: "12px",
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  color: "rgba(255,255,255,0.62)",
-  fontWeight: 800,
-};
-
-const identityNameStyle = {
-  marginTop: "8px",
-  fontSize: "1.7rem",
-  fontWeight: 900,
-  color: "#ffffff",
-  lineHeight: 1.08,
-};
-
-const identityMetaStyle = {
-  marginTop: "10px",
-  color: "rgba(255,255,255,0.76)",
-  lineHeight: 1.7,
-};
-
-const quickGridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: "12px",
-};
-
-const quickCardStyle = {
-  textAlign: "left",
-  padding: "16px",
-  borderRadius: "18px",
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(255,255,255,0.03)",
-  color: "#ffffff",
-  cursor: "pointer",
-};
-
-const quickTitleStyle = {
-  display: "block",
-  fontWeight: 800,
-  fontSize: "1rem",
-};
-
-const quickTextStyle = {
-  display: "block",
-  marginTop: "8px",
-  color: "rgba(255,255,255,0.70)",
-  lineHeight: 1.55,
-  fontSize: "0.94rem",
-};
-
-const infoGridStyle = {
-  maxWidth: "1180px",
-  margin: "16px auto 0",
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-  gap: "16px",
-};
-
-const infoCardStyle = {
-  padding: "20px",
-  borderRadius: "20px",
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(255,255,255,0.03)",
-};
-
-const cardTitleStyle = {
-  margin: 0,
-  color: "#ffffff",
-  fontSize: "1.15rem",
-};
-
-const cardTextStyle = {
-  marginTop: "12px",
-  marginBottom: 0,
-  color: "rgba(255,255,255,0.78)",
-  lineHeight: 1.75,
-};
