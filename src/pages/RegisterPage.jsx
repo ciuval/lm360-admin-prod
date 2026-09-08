@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
+import { track } from "../lib/analytics.js";
 import toast from "react-hot-toast";
 
 const reservedEmails = new Set([
@@ -41,11 +42,13 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-
   const navigate = useNavigate();
 
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
+  const passwordReady = password.length >= 8;
+  const formReady = isEmailValid(normalizedEmail) && passwordReady && acceptedLegal;
 
   async function handleRegister(event) {
     event.preventDefault();
@@ -58,7 +61,7 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 8) {
+    if (!passwordReady) {
       const message = "La password deve contenere almeno 8 caratteri.";
       setStatusMessage(message);
       toast.error(message);
@@ -74,54 +77,96 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
-      email: normalizedEmail,
-      password,
-      options: {
-        data: {
-          privacy_acknowledged: true,
-          terms_accepted: true,
-          legal_accepted_at: new Date().toISOString(),
-          legal_version: "v1",
-          source: "register_page_v1",
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/#/login?verified=1`,
+          data: {
+            privacy_acknowledged: true,
+            terms_accepted: true,
+            legal_accepted_at: new Date().toISOString(),
+            legal_version: "v1",
+            source: "register_page_v2",
+          },
         },
-      },
-    });
+      });
 
-    setLoading(false);
+      if (error) {
+        const message = normalizeSignupError(error);
+        setStatusMessage(message);
+        toast.error(message);
+        return;
+      }
 
-    if (error) {
-      const message = normalizeSignupError(error);
+      track("registration_submitted", { session: Boolean(data?.session) }).catch(() => {});
+
+      if (data?.session) {
+        toast.success("Account creato. Ora costruiamo il tuo profilo.");
+        navigate("/profilo", { replace: true });
+        return;
+      }
+
+      setSubmitted(true);
+      setStatusMessage("Account creato. Ora conferma l'indirizzo dalla tua email.");
+    } catch {
+      const message = "Registrazione non completata. Riprova tra poco.";
       setStatusMessage(message);
       toast.error(message);
-      return;
+    } finally {
+      setLoading(false);
     }
+  }
 
-    const successMessage = "Registrazione inviata. Controlla la tua email per completare l'accesso.";
-    setStatusMessage(successMessage);
-    toast.success(successMessage);
-    navigate("/login");
+  if (submitted) {
+    return (
+      <main style={pageStyle}>
+        <section style={successCardStyle} aria-labelledby="register-success-title">
+          <div aria-hidden="true" style={successMarkStyle}>✓</div>
+          <p style={eyebrowStyle}>Il tuo spazio esiste</p>
+          <h1 id="register-success-title" style={successTitleStyle}>
+            Manca un solo gesto.
+          </h1>
+          <p style={introStyle}>
+            Apri l’email di LoveMatch360 e conferma il tuo indirizzo. Poi tornerai qui
+            per dare forma al profilo: nome, bio, interessi e una foto.
+          </p>
+
+          <ol style={nextStepsStyle}>
+            <li><strong>Conferma l’email</strong><span>Protegge il tuo accesso.</span></li>
+            <li><strong>Completa il profilo</strong><span>Aiuta le persone a capirti.</span></li>
+            <li><strong>Scopri persone</strong><span>Il primo like parte dal contesto.</span></li>
+          </ol>
+
+          <button
+            type="button"
+            style={primaryButtonStyle}
+            onClick={() => navigate("/login")}
+          >
+            Ho confermato l’email
+          </button>
+          <button type="button" style={secondaryButtonStyle} onClick={() => navigate("/")}>
+            Torna alla Home
+          </button>
+        </section>
+      </main>
+    );
   }
 
   return (
     <main style={pageStyle}>
       <section style={cardStyle} aria-labelledby="register-title">
-        <p style={eyebrowStyle}>LoveMatch360</p>
-
-        <h1 id="register-title" style={titleStyle}>
-          Registrati
-        </h1>
-
+        <p style={eyebrowStyle}>Il primo passo · circa un minuto</p>
+        <h1 id="register-title" style={titleStyle}>Crea il tuo spazio.</h1>
         <p style={introStyle}>
-          Crea il tuo account per iniziare il percorso su LoveMatch360. In questa fase
-          usiamo solo email e password.
+          Partiamo solo da email e password. Il resto lo costruirai dopo, con calma e
+          con parole tue.
         </p>
 
         <form onSubmit={handleRegister} noValidate style={formStyle}>
           <div style={fieldStyle}>
-            <label htmlFor="register-email" style={labelStyle}>
-              Email
-            </label>
+            <label htmlFor="register-email" style={labelStyle}>Email</label>
             <input
               id="register-email"
               name="email"
@@ -132,14 +177,16 @@ export default function RegisterPage() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
+              aria-describedby="register-email-help"
               style={inputStyle}
             />
+            <small id="register-email-help" style={helpStyle}>
+              Serve per confermare l’account. Non viene mostrata nel profilo pubblico.
+            </small>
           </div>
 
           <div style={fieldStyle}>
-            <label htmlFor="register-password" style={labelStyle}>
-              Password
-            </label>
+            <label htmlFor="register-password" style={labelStyle}>Password</label>
             <input
               id="register-password"
               name="password"
@@ -150,8 +197,15 @@ export default function RegisterPage() {
               onChange={(event) => setPassword(event.target.value)}
               required
               minLength={8}
+              aria-describedby="register-password-help"
               style={inputStyle}
             />
+            <small
+              id="register-password-help"
+              style={{ ...helpStyle, color: password ? (passwordReady ? "#9cf2bd" : "#ffd0e5") : helpStyle.color }}
+            >
+              {password ? (passwordReady ? "Lunghezza pronta." : `Ancora ${8 - password.length} caratteri.`) : "Usa almeno 8 caratteri."}
+            </small>
           </div>
 
           <label style={checkboxRowStyle}>
@@ -162,15 +216,8 @@ export default function RegisterPage() {
               style={checkboxStyle}
             />
             <span>
-              Accetto i{" "}
-              <Link to="/terms" style={linkStyle}>
-                Termini
-              </Link>{" "}
-              e confermo di aver letto la{" "}
-              <Link to="/privacy" style={linkStyle}>
-                Privacy
-              </Link>
-              .
+              Accetto i <Link to="/terms" style={linkStyle}>Termini</Link> e confermo
+              di aver letto la <Link to="/privacy" style={linkStyle}>Privacy</Link>.
             </span>
           </label>
 
@@ -180,20 +227,14 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            disabled={loading}
-            style={{
-              ...primaryButtonStyle,
-              ...(loading ? disabledButtonStyle : {}),
-            }}
+            disabled={loading || !formReady}
+            aria-busy={loading}
+            style={{ ...primaryButtonStyle, ...(loading || !formReady ? disabledButtonStyle : {}) }}
           >
-            {loading ? "Creazione account..." : "Crea account"}
+            {loading ? "Sto creando il tuo spazio…" : "Crea il mio spazio"}
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate("/login")}
-            style={secondaryButtonStyle}
-          >
+          <button type="button" onClick={() => navigate("/login")} style={secondaryButtonStyle}>
             Hai già un account? Accedi
           </button>
         </form>
@@ -208,106 +249,104 @@ const pageStyle = {
   placeItems: "center",
   padding: "32px 16px",
   color: "#fff",
-  background: "#08080d",
+  background:
+    "radial-gradient(circle at 18% 16%, rgba(240,143,192,.16), transparent 30%), radial-gradient(circle at 88% 82%, rgba(125,211,252,.12), transparent 30%), #08080d",
 };
 
 const cardStyle = {
-  width: "min(560px, 100%)",
-  border: "1px solid rgba(240, 143, 192, 0.28)",
-  borderRadius: "28px",
-  padding: "32px",
-  background: "linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025))",
-  boxShadow: "0 24px 80px rgba(0,0,0,0.42)",
+  width: "min(590px, 100%)",
+  border: "1px solid rgba(240,143,192,.3)",
+  borderRadius: 28,
+  padding: "clamp(24px, 5vw, 38px)",
+  background: "linear-gradient(180deg, rgba(25,25,34,.98), rgba(15,15,22,.98))",
+  boxShadow: "0 28px 90px rgba(0,0,0,.46)",
+};
+
+const successCardStyle = {
+  ...cardStyle,
+  textAlign: "center",
+  border: "1px solid rgba(134,239,172,.34)",
+};
+
+const successMarkStyle = {
+  width: 64,
+  height: 64,
+  margin: "0 auto 18px",
+  display: "grid",
+  placeItems: "center",
+  borderRadius: "50%",
+  background: "rgba(134,239,172,.16)",
+  border: "1px solid rgba(134,239,172,.38)",
+  color: "#9cf2bd",
+  fontSize: 30,
+  fontWeight: 900,
 };
 
 const eyebrowStyle = {
   margin: "0 0 10px",
-  color: "#c9c9d6",
-  fontSize: "0.78rem",
-  fontWeight: 800,
-  letterSpacing: "0.14em",
+  color: "#f3b4d4",
+  fontSize: ".76rem",
+  fontWeight: 900,
+  letterSpacing: ".13em",
   textTransform: "uppercase",
 };
 
 const titleStyle = {
-  margin: "0",
-  color: "#f08fc0",
-  fontSize: "clamp(2.2rem, 6vw, 3.4rem)",
-  lineHeight: 1,
+  margin: 0,
+  color: "#fff",
+  fontSize: "clamp(2.4rem, 7vw, 4rem)",
+  letterSpacing: "-.05em",
+  lineHeight: .98,
 };
 
+const successTitleStyle = { ...titleStyle, fontSize: "clamp(2.1rem, 6vw, 3.2rem)" };
+
 const introStyle = {
-  margin: "14px 0 24px",
+  margin: "16px 0 26px",
   color: "#d7d7e3",
   fontSize: "1rem",
   lineHeight: 1.7,
 };
 
-const formStyle = {
-  display: "grid",
-  gap: "16px",
-};
-
-const fieldStyle = {
-  display: "grid",
-  gap: "8px",
-  textAlign: "left",
-};
-
-const labelStyle = {
-  fontWeight: 800,
-  color: "#fff",
-};
+const formStyle = { display: "grid", gap: 18 };
+const fieldStyle = { display: "grid", gap: 8, textAlign: "left" };
+const labelStyle = { fontWeight: 850, color: "#fff" };
 
 const inputStyle = {
   width: "100%",
-  padding: "14px 16px",
-  borderRadius: "16px",
-  border: "1px solid rgba(240, 143, 192, 0.46)",
-  backgroundColor: "#1e1e1e",
+  padding: "15px 16px",
+  borderRadius: 15,
+  border: "1px solid rgba(240,143,192,.48)",
+  backgroundColor: "#17171f",
   color: "#fff",
   fontSize: "1rem",
   outline: "none",
   boxSizing: "border-box",
 };
 
+const helpStyle = { color: "#aaaaba", lineHeight: 1.45 };
 const checkboxRowStyle = {
   display: "grid",
   gridTemplateColumns: "22px 1fr",
-  gap: "12px",
+  gap: 12,
   alignItems: "start",
   color: "#d7d7e3",
-  fontSize: "0.95rem",
+  fontSize: ".95rem",
   lineHeight: 1.55,
   textAlign: "left",
 };
-
-const checkboxStyle = {
-  width: "18px",
-  height: "18px",
-  marginTop: "3px",
-};
-
-const linkStyle = {
-  color: "#f08fc0",
-  fontWeight: 800,
-};
-
-const statusStyle = {
-  minHeight: "24px",
-  margin: 0,
-  color: "#ffd4e9",
-  fontWeight: 700,
-  lineHeight: 1.5,
-};
+const checkboxStyle = { width: 18, height: 18, marginTop: 3 };
+const linkStyle = { color: "#f08fc0", fontWeight: 800 };
+const statusStyle = { minHeight: 24, margin: 0, color: "#ffd4e9", fontWeight: 700, lineHeight: 1.5 };
 
 const primaryButtonStyle = {
   width: "100%",
-  padding: "15px 18px",
-  backgroundColor: "#f08fc0",
-  color: "#050508",
+  minHeight: 52,
+  padding: "0 18px",
+  background: "linear-gradient(135deg, #ffd6ea, #f08fc0)",
+  color: "#170c13",
   border: "none",
-  borderRadius: "16px",
+  borderRadius: 16,
   fontWeight: 900,
   fontSize: "1rem",
   cursor: "pointer",
@@ -315,17 +354,27 @@ const primaryButtonStyle = {
 
 const secondaryButtonStyle = {
   width: "100%",
-  padding: "14px 18px",
+  minHeight: 50,
+  marginTop: 12,
+  padding: "0 18px",
   backgroundColor: "transparent",
   color: "#fff",
-  border: "1px solid rgba(255,255,255,0.16)",
-  borderRadius: "16px",
+  border: "1px solid rgba(255,255,255,.16)",
+  borderRadius: 16,
   fontWeight: 800,
   fontSize: "1rem",
   cursor: "pointer",
 };
 
-const disabledButtonStyle = {
-  opacity: 0.62,
-  cursor: "wait",
+const disabledButtonStyle = { opacity: .5, cursor: "not-allowed" };
+
+const nextStepsStyle = {
+  display: "grid",
+  gap: 10,
+  margin: "0 0 24px",
+  padding: 0,
+  listStyle: "none",
+  textAlign: "left",
 };
+
+nextStepsStyle["& li"] = undefined;

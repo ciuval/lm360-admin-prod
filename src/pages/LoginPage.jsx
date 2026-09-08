@@ -102,9 +102,13 @@ export default function LoginPage() {
   const redirectTo = useMemo(() => {
     const from = location.state?.from;
     return typeof from === "string" && from.trim() ? from : "/profilo";
-  }, [location.state]);
+  }, [location.search, location.state]);
 
   const guardNotice = useMemo(() => {
+    if (new URLSearchParams(location.search).get("verified") === "1") {
+      return "Email confermata. Accedi e completa il profilo: sei a un passo da Scopri persone.";
+    }
+
     if (location.state?.reason === "premium_required") {
       return "Per continuare serve un account Premium attivo.";
     }

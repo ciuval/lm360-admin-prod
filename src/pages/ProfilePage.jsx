@@ -429,6 +429,10 @@ export default function ProfilePage() {
         ...payload,
       };
 
+      const previousCompletion = calculateProfileCompletion({
+        profile: profilo || {},
+        photos,
+      });
       const nextCompletion = calculateProfileCompletion({
         profile: nextProfile,
         photos,
@@ -441,6 +445,11 @@ export default function ProfilePage() {
           ? "Profilo completo. Ora puoi scoprire persone."
           : `Profilo salvato: ${nextCompletion.score}% completo.`
       );
+
+      if (!previousCompletion.isComplete && nextCompletion.isComplete) {
+        track("activation_completed").catch(() => {});
+        navigate("/scopri-profili");
+      }
     } catch (error) {
       console.error("ProfilePage save error:", error);
       toast.error("Errore temporaneo durante il salvataggio.");
@@ -549,6 +558,9 @@ export default function ProfilePage() {
         disabled={loading || saving || uploading}
       />
 
+      <label htmlFor="profile-name-input" style={fieldLabelStyle}>
+        Come vuoi farti chiamare
+      </label>
       <input
         id="profile-name-input"
         type="text"
@@ -560,6 +572,9 @@ export default function ProfilePage() {
         disabled={loading || saving}
       />
 
+      <label htmlFor="profile-bio-input" style={fieldLabelStyle}>
+        Racconta qualcosa che aiuti a iniziare una conversazione
+      </label>
       <textarea
         id="profile-bio-input"
         placeholder="Bio"
@@ -570,6 +585,9 @@ export default function ProfilePage() {
         disabled={loading || saving}
       />
 
+      <label htmlFor="profile-interests-input" style={fieldLabelStyle}>
+        I tuoi interessi
+      </label>
       <input
         id="profile-interests-input"
         type="text"
@@ -605,6 +623,14 @@ const containerStyle = {
 const titleStyle = {
   color: "#f08fc0",
   textShadow: "0 0 10px #f08fc0",
+};
+
+const fieldLabelStyle = {
+  display: "block",
+  marginTop: "1.15rem",
+  color: "#fff",
+  fontWeight: 800,
+  lineHeight: 1.4,
 };
 
 const inputStyle = {
