@@ -134,9 +134,9 @@ export default function RegisterPage() {
           </p>
 
           <ol style={nextStepsStyle}>
-            <li><strong>Conferma l’email</strong><span>Protegge il tuo accesso.</span></li>
-            <li><strong>Completa il profilo</strong><span>Aiuta le persone a capirti.</span></li>
-            <li><strong>Scopri persone</strong><span>Il primo like parte dal contesto.</span></li>
+            <li style={nextStepItemStyle}><strong>Conferma l’email</strong><span style={nextStepTextStyle}>Protegge il tuo accesso.</span></li>
+            <li style={nextStepItemStyle}><strong>Completa il profilo</strong><span style={nextStepTextStyle}>Aiuta le persone a capirti.</span></li>
+            <li style={nextStepItemStyle}><strong>Scopri persone</strong><span style={nextStepTextStyle}>Il primo like parte dal contesto.</span></li>
           </ol>
 
           <button
@@ -377,4 +377,16 @@ const nextStepsStyle = {
   textAlign: "left",
 };
 
-nextStepsStyle["& li"] = undefined;
+const nextStepItemStyle = {
+  display: "grid",
+  gap: 4,
+  padding: "13px 15px",
+  borderRadius: 14,
+  background: "rgba(255,255,255,.045)",
+  border: "1px solid rgba(255,255,255,.08)",
+};
+
+const nextStepTextStyle = {
+  color: "#aaaaba",
+  lineHeight: 1.45,
+};
