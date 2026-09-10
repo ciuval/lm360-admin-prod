@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { track } from "../lib/analytics.js";
+import { getActivationJourneyProps } from "../lib/activationJourney.js";
+import { calculateProfileCompletion } from "../lib/profileCompletion.js";
 
 function normalizeRole(value) {
   return String(value || "").trim().toLowerCase();
@@ -47,6 +49,9 @@ export default function PublicProfilesPage() {
   const [userId, setUserId] = useState(null);
   const [likes, setLikes] = useState([]);
   const [matches, setMatches] = useState([]);
+  const [likingIds, setLikingIds] = useState(() => new Set());
+  const likingIdsRef = useRef(new Set());
+  const [hasExistingLikes, setHasExistingLikes] = useState(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [filtroInteresse, setFiltroInteresse] = useState("");
@@ -78,13 +83,22 @@ export default function PublicProfilesPage() {
           if (!alive) return;
           setMyProfile(myProfileData || null);
 
-          const { data: likeData } = await supabase
+          const { data: likeData, error: likeError } = await supabase
             .from("likes")
             .select("user_to")
             .eq("user_from", currentUserId);
 
           if (!alive) return;
-          setLikes((likeData || []).map((row) => row.user_to));
+          if (likeError) {
+            setHasExistingLikes(null);
+            track("discovery_load_failed", {
+              ...getActivationJourneyProps(),
+              stage: "likes",
+            }).catch(() => {});
+          } else {
+            setLikes((likeData || []).map((row) => row.user_to));
+            setHasExistingLikes((likeData || []).length > 0);
+          }
 
           const { data: matchData } = await supabase
             .from("match_scores")
@@ -110,18 +124,33 @@ export default function PublicProfilesPage() {
         if (!alive) return;
 
         if (profiliError) {
-          console.error("Errore caricamento profili:", profiliError);
+          track("discovery_load_failed", {
+            ...getActivationJourneyProps(),
+            stage: "profiles",
+          }).catch(() => {});
           toast.error("Errore nel caricamento dei profili.");
           setProfili([]);
           return;
         }
 
-        const pubblici = (profiliData || []).filter((profilo) => profilo.id !== currentUserId);
+        const otherProfiles = (profiliData || []).filter(
+          (profilo) => profilo.id !== currentUserId
+        );
+        const pubblici = otherProfiles.filter((profilo) =>
+          calculateProfileCompletion({ profile: profilo }).isComplete
+        );
         setProfili(pubblici);
-        track("discovery_opened", { results: pubblici.length }).catch(() => {});
-      } catch (error) {
-        console.error("Errore fetchAll PublicProfilesPage:", error);
+        track("discovery_opened", {
+          ...getActivationJourneyProps(),
+          results: pubblici.length,
+          excluded_results: otherProfiles.length - pubblici.length,
+        }).catch(() => {});
+      } catch {
         if (!alive) return;
+        track("discovery_load_failed", {
+          ...getActivationJourneyProps(),
+          stage: "unexpected",
+        }).catch(() => {});
         toast.error("Errore temporaneo nella sezione scopri.");
         setProfili([]);
       } finally {
@@ -145,56 +174,86 @@ export default function PublicProfilesPage() {
   const handleLike = async (profiloId) => {
     if (!userId || userId === profiloId) return;
     if (likes.includes(profiloId)) return;
+    if (likingIdsRef.current.has(profiloId)) return;
 
-    const { error } = await supabase.from("likes").insert([
-      {
-        user_from: userId,
-        user_to: profiloId,
-      },
-    ]);
+    likingIdsRef.current.add(profiloId);
+    setLikingIds((current) => new Set(current).add(profiloId));
+    const isFirstLike = hasExistingLikes === false;
 
-    if (error) {
-      console.error("Errore like:", error);
-      toast.error("Impossibile salvare il like.");
-      return;
-    }
-
-    setLikes((prev) => [...prev, profiloId]);
-    track("like_sent").catch(() => {});
-
-    const { data: likeBack } = await supabase
-      .from("likes")
-      .select("user_from, user_to")
-      .eq("user_from", profiloId)
-      .eq("user_to", userId)
-      .maybeSingle();
-
-    if (!likeBack || matches.includes(profiloId)) return;
-
-    const pair = [userId, profiloId].sort();
-
-    const { error: matchError } = await supabase.from("match_scores").upsert(
-      [
+    try {
+      const { error } = await supabase.from("likes").insert([
         {
-          user_a: pair[0],
-          user_b: pair[1],
-          score: 100,
-          matched_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          user_from: userId,
+          user_to: profiloId,
         },
-      ],
-      { onConflict: "user_a,user_b" }
-    );
+      ]);
 
-    if (matchError) {
-      console.error("Errore match:", matchError);
-      toast.error("Like salvato, ma il match non è stato registrato.");
-      return;
+      if (error) {
+        track("like_failed", getActivationJourneyProps()).catch(() => {});
+        toast.error("Impossibile salvare il like.");
+        return;
+      }
+
+      setLikes((prev) => [...prev, profiloId]);
+      setHasExistingLikes(true);
+      track("like_sent", getActivationJourneyProps()).catch(() => {});
+
+      if (isFirstLike) {
+        track("first_like_sent", getActivationJourneyProps()).catch(() => {});
+      }
+
+      const { data: likeBack, error: likeBackError } = await supabase
+        .from("likes")
+        .select("user_from, user_to")
+        .eq("user_from", profiloId)
+        .eq("user_to", userId)
+        .maybeSingle();
+
+      if (likeBackError) {
+        track("match_check_failed", getActivationJourneyProps()).catch(() => {});
+        return;
+      }
+
+      if (!likeBack || matches.includes(profiloId)) return;
+
+      const pair = [userId, profiloId].sort();
+
+      const { error: matchError } = await supabase.from("match_scores").upsert(
+        [
+          {
+            user_a: pair[0],
+            user_b: pair[1],
+            score: 100,
+            matched_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ],
+        { onConflict: "user_a,user_b" }
+      );
+
+      if (matchError) {
+        track("match_create_failed", getActivationJourneyProps()).catch(() => {});
+        toast.error("Like salvato, ma il match non è stato registrato.");
+        return;
+      }
+
+      track("match_created", getActivationJourneyProps()).catch(() => {});
+      toast.success("💘 Match reciproco trovato!");
+      setMatches((prev) => [...prev, profiloId]);
+    } catch {
+      track("like_failed", {
+        ...getActivationJourneyProps(),
+        stage: "unexpected",
+      }).catch(() => {});
+      toast.error("Impossibile salvare il like.");
+    } finally {
+      likingIdsRef.current.delete(profiloId);
+      setLikingIds((current) => {
+        const next = new Set(current);
+        next.delete(profiloId);
+        return next;
+      });
     }
-
-    track("match_created").catch(() => {});
-    toast.success("💘 Match reciproco trovato!");
-    setMatches((prev) => [...prev, profiloId]);
   };
 
   const interessiUnici = useMemo(() => {
@@ -365,21 +424,21 @@ export default function PublicProfilesPage() {
                 {userId && userId !== profilo.id && (
                   <button
                     onClick={() => handleLike(profilo.id)}
-                    disabled={likes.includes(profilo.id)}
+                    disabled={likes.includes(profilo.id) || likingIds.has(profilo.id)}
                     style={{
                       marginTop: "0.5rem",
-                      backgroundColor: likes.includes(profilo.id) ? "#555" : "#f08fc0",
+                      backgroundColor: likes.includes(profilo.id) || likingIds.has(profilo.id) ? "#555" : "#f08fc0",
                       color: "#fff",
                       border: "none",
                       borderRadius: "6px",
                       padding: "0.6rem 1.4rem",
-                      cursor: likes.includes(profilo.id) ? "not-allowed" : "pointer",
+                      cursor: likes.includes(profilo.id) || likingIds.has(profilo.id) ? "not-allowed" : "pointer",
                       marginRight: "0.5rem",
                       fontWeight: "bold",
                       fontSize: "1rem",
                     }}
                   >
-                    💗 {likes.includes(profilo.id) ? "Like inviato" : "Mi piace"}
+                    💗 {likes.includes(profilo.id) ? "Like inviato" : likingIds.has(profilo.id) ? "Invio…" : "Mi piace"}
                   </button>
                 )}
               </motion.li>

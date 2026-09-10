@@ -1,7 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { track } from "../lib/analytics.js";
+import {
+  getActivationJourneyProps,
+  startActivationJourney,
+} from "../lib/activationJourney.js";
 import toast from "react-hot-toast";
 
 const reservedEmails = new Set([
@@ -42,13 +46,64 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const formStartedRef = useRef(false);
+  const resendingRef = useRef(false);
   const navigate = useNavigate();
 
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
   const passwordReady = password.length >= 8;
   const formReady = isEmailValid(normalizedEmail) && passwordReady && acceptedLegal;
+
+  useEffect(() => {
+    const journey = startActivationJourney();
+    track("registration_viewed", {
+      flow: journey.flow,
+      signup_elapsed_seconds: journey.signup_elapsed_seconds,
+    }).catch(() => {});
+  }, []);
+
+  function markFormStarted() {
+    if (formStartedRef.current) return;
+    formStartedRef.current = true;
+    track("registration_form_started", getActivationJourneyProps()).catch(() => {});
+  }
+
+  async function handleResendEmail() {
+    if (resendingRef.current || !isEmailValid(normalizedEmail)) return;
+
+    try {
+      resendingRef.current = true;
+      setResending(true);
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: normalizedEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/#/login?verified=1`,
+        },
+      });
+
+      if (error) {
+        track("confirmation_resend_failed", getActivationJourneyProps()).catch(() => {});
+        toast.error("Non siamo riusciti a reinviare l’email. Riprova tra poco.");
+        return;
+      }
+
+      track("confirmation_resent", getActivationJourneyProps()).catch(() => {});
+      toast.success("Email reinviata. Controlla anche Spam e Promozioni.");
+    } catch {
+      track("confirmation_resend_failed", {
+        ...getActivationJourneyProps(),
+        stage: "unexpected",
+      }).catch(() => {});
+      toast.error("Non siamo riusciti a reinviare l’email. Riprova tra poco.");
+    } finally {
+      resendingRef.current = false;
+      setResending(false);
+    }
+  }
 
   async function handleRegister(event) {
     event.preventDefault();
@@ -94,13 +149,20 @@ export default function RegisterPage() {
       });
 
       if (error) {
+        track("registration_failed", {
+          ...getActivationJourneyProps(),
+          stage: "signup",
+        }).catch(() => {});
         const message = normalizeSignupError(error);
         setStatusMessage(message);
         toast.error(message);
         return;
       }
 
-      track("registration_submitted", { session: Boolean(data?.session) }).catch(() => {});
+      track("registration_submitted", {
+        ...getActivationJourneyProps(),
+        immediate_access: Boolean(data?.session),
+      }).catch(() => {});
 
       if (data?.session) {
         toast.success("Account creato. Ora costruiamo il tuo profilo.");
@@ -111,6 +173,10 @@ export default function RegisterPage() {
       setSubmitted(true);
       setStatusMessage("Account creato. Ora conferma l'indirizzo dalla tua email.");
     } catch {
+      track("registration_failed", {
+        ...getActivationJourneyProps(),
+        stage: "unexpected",
+      }).catch(() => {});
       const message = "Registrazione non completata. Riprova tra poco.";
       setStatusMessage(message);
       toast.error(message);
@@ -130,7 +196,8 @@ export default function RegisterPage() {
           </h1>
           <p style={introStyle}>
             Apri l’email di LoveMatch360 e conferma il tuo indirizzo. Poi tornerai qui
-            per dare forma al profilo: nome, bio, interessi e una foto.
+            per dare forma al profilo: nome, bio, interessi e una foto. Se non la trovi,
+            controlla anche Spam e Promozioni.
           </p>
 
           <ol style={nextStepsStyle}>
@@ -145,6 +212,15 @@ export default function RegisterPage() {
             onClick={() => navigate("/login")}
           >
             Ho confermato l’email
+          </button>
+          <button
+            type="button"
+            disabled={resending}
+            aria-busy={resending}
+            style={{ ...secondaryButtonStyle, ...(resending ? disabledButtonStyle : {}) }}
+            onClick={handleResendEmail}
+          >
+            {resending ? "Reinvio in corso…" : "Reinvia l’email"}
           </button>
           <button type="button" style={secondaryButtonStyle} onClick={() => navigate("/")}>
             Torna alla Home
@@ -175,7 +251,10 @@ export default function RegisterPage() {
               inputMode="email"
               placeholder="nome@dominio.com"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                markFormStarted();
+                setEmail(event.target.value);
+              }}
               required
               aria-describedby="register-email-help"
               style={inputStyle}
@@ -194,7 +273,10 @@ export default function RegisterPage() {
               autoComplete="new-password"
               placeholder="Almeno 8 caratteri"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                markFormStarted();
+                setPassword(event.target.value);
+              }}
               required
               minLength={8}
               aria-describedby="register-password-help"
@@ -212,12 +294,33 @@ export default function RegisterPage() {
             <input
               type="checkbox"
               checked={acceptedLegal}
-              onChange={(event) => setAcceptedLegal(event.target.checked)}
+              onChange={(event) => {
+                markFormStarted();
+                setAcceptedLegal(event.target.checked);
+              }}
               style={checkboxStyle}
             />
             <span>
-              Accetto i <Link to="/terms" style={linkStyle}>Termini</Link> e confermo
-              di aver letto la <Link to="/privacy" style={linkStyle}>Privacy</Link>.
+              Accetto i{" "}
+              <Link
+                to="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Termini (si apre in una nuova scheda)"
+                style={linkStyle}
+              >
+                Termini
+              </Link>{" "}
+              e confermo di aver letto la{" "}
+              <Link
+                to="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Privacy (si apre in una nuova scheda)"
+                style={linkStyle}
+              >
+                Privacy
+              </Link>.
             </span>
           </label>
 

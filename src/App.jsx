@@ -7,6 +7,7 @@ import { Routes, Route } from "react-router-dom";
 import AppShell from "./AppShell.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
+import RequireCompleteProfile from "./components/RequireCompleteProfile.jsx";
 import RequirePremium from "./components/RequirePremium.jsx";
 import RequireAdmin from "./components/RequireAdmin.jsx";
 
@@ -131,7 +132,9 @@ export default function App() {
                 path="/scopri-profili"
                 element={
                   <RequireAuth>
-                    <PublicProfilesPage />
+                    <RequireCompleteProfile>
+                      <PublicProfilesPage />
+                    </RequireCompleteProfile>
                   </RequireAuth>
                 }
               />

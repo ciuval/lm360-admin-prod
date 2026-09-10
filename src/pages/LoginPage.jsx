@@ -1,7 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { supabase } from "../lib/supabaseClient";
+import { getActivationJourneyProps } from "../lib/activationJourney.js";
+import { track } from "../lib/analytics.js";
 
 function normalizeAuthError(error) {
   const code = String(error?.code || "").toLowerCase();
@@ -35,61 +37,6 @@ function normalizeAuthError(error) {
   return "Errore temporaneo di accesso. Riprova.";
 }
 
-function normalizeSignupError(error) {
-  const code = String(error?.code || "").toLowerCase();
-  const message = String(error?.message || "").toLowerCase();
-  const status = Number(error?.status || 0);
-
-  if (
-    code === "user_already_exists" ||
-    message.includes("user already registered")
-  ) {
-    return "Questo account esiste già. Prova ad accedere.";
-  }
-
-  if (
-    code === "weak_password" ||
-    message.includes("weak_password") ||
-    message.includes("password should contain at least")
-  ) {
-    return "La password è troppo debole. Usa almeno una maiuscola, una minuscola, un numero e una password non banale.";
-  }
-
-  if (message.includes("password should be at least")) {
-    return "La password è troppo corta.";
-  }
-
-  if (code === "email_address_not_authorized") {
-    return "Questo indirizzo email non è autorizzato per la registrazione in questo momento.";
-  }
-
-  if (
-    code === "signup_disabled" ||
-    code === "email_provider_disabled"
-  ) {
-    return "La registrazione via email non è attiva in questo momento.";
-  }
-
-  if (
-    code === "validation_failed" ||
-    code === "email_address_invalid" ||
-    message.includes("invalid email") ||
-    status === 400 ||
-    status === 422
-  ) {
-    return "Controlla email e password prima di registrarti.";
-  }
-
-  if (
-    message.includes("too many requests") ||
-    status === 429
-  ) {
-    return "Troppi tentativi. Riprova tra poco.";
-  }
-
-  return "Errore temporaneo durante la registrazione.";
-}
-
 export default function LoginPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -98,6 +45,35 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
+  const confirmationTrackedRef = useRef(false);
+  const emailConfirmationLanded = new URLSearchParams(location.search).get("verified") === "1";
+
+  useEffect(() => {
+    if (!emailConfirmationLanded || confirmationTrackedRef.current) return;
+    confirmationTrackedRef.current = true;
+    track("email_confirmation_landed", getActivationJourneyProps()).catch(() => {});
+
+    let alive = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!alive || !data?.session?.user) return;
+
+      track("email_confirmed", {
+        ...getActivationJourneyProps(),
+        access: "automatic",
+      }).catch(() => {});
+      track("login_success", {
+        ...getActivationJourneyProps(),
+        method: "email_confirmation",
+      }).catch(() => {});
+      toast.success("Email confermata. Ora completa il tuo profilo.");
+      navigate("/profilo", { replace: true });
+    }).catch(() => {});
+
+    return () => {
+      alive = false;
+    };
+  }, [emailConfirmationLanded, navigate]);
 
   const redirectTo = useMemo(() => {
     const from = location.state?.from;
@@ -105,7 +81,7 @@ export default function LoginPage() {
   }, [location.search, location.state]);
 
   const guardNotice = useMemo(() => {
-    if (new URLSearchParams(location.search).get("verified") === "1") {
+    if (emailConfirmationLanded) {
       return "Email confermata. Accedi e completa il profilo: sei a un passo da Scopri persone.";
     }
 
@@ -118,7 +94,7 @@ export default function LoginPage() {
     }
 
     return "";
-  }, [location.state]);
+  }, [emailConfirmationLanded, location.state]);
 
   const isDisabled = useMemo(() => {
     return submitting || !email.trim() || !password.trim();
@@ -142,51 +118,35 @@ export default function LoginPage() {
       });
 
       if (error) {
+        track("login_failed", {
+          ...getActivationJourneyProps(),
+          confirmation_return: emailConfirmationLanded,
+        }).catch(() => {});
         const uiMessage = normalizeAuthError(error);
         setAuthError(uiMessage);
         toast.error(uiMessage);
         return;
       }
 
+      if (emailConfirmationLanded) {
+        track("email_confirmed", {
+          ...getActivationJourneyProps(),
+          access: "password",
+        }).catch(() => {});
+      }
+
+      track("login_success", {
+        ...getActivationJourneyProps(),
+        confirmation_return: emailConfirmationLanded,
+      }).catch(() => {});
       toast.success("Accesso riuscito.");
       navigate(redirectTo, { replace: true });
     } catch {
+      track("login_failed", {
+        ...getActivationJourneyProps(),
+        stage: "unexpected",
+      }).catch(() => {});
       const uiMessage = "Errore temporaneo di accesso. Riprova.";
-      setAuthError(uiMessage);
-      toast.error(uiMessage);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleSignup = async () => {
-    if (isDisabled) return;
-
-    setAuthError("");
-    setSubmitting(true);
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: normalizedEmail,
-        password: password.trim(),
-      });
-
-      if (error) {
-        const uiMessage = normalizeSignupError(error);
-        setAuthError(uiMessage);
-        toast.error(uiMessage);
-        return;
-      }
-
-      if (data?.session) {
-        toast.success("Account creato e accesso effettuato.");
-        navigate("/profilo", { replace: true });
-        return;
-      }
-
-      toast.success("Account creato. Controlla la tua email per completare l’accesso.");
-    } catch {
-      const uiMessage = "Errore temporaneo durante la registrazione.";
       setAuthError(uiMessage);
       toast.error(uiMessage);
     } finally {

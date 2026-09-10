@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import PremiumStatusBox from "../components/PremiumStatusBox";
 import StoricoAbbonamenti from "../components/StoricoAbbonamenti";
@@ -8,6 +8,7 @@ import ProfilePhotoGallery from "../components/profile/ProfilePhotoGallery";
 import ProfileCompletionCard from "../components/profile/ProfileCompletionCard";
 import { calculateProfileCompletion } from "../lib/profileCompletion";
 import { track } from "../lib/analytics.js";
+import { getActivationJourneyProps } from "../lib/activationJourney.js";
 
 function normalizeRole(value) {
   return String(value || "").trim().toLowerCase();
@@ -49,6 +50,9 @@ function normalizePhotos(rows = []) {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const completionTrackedRef = useRef(false);
+  const profileStartedTrackedRef = useRef(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -149,15 +153,31 @@ export default function ProfilePage() {
           .order("ordine", { ascending: true });
 
         if (photoError) {
-          console.error("Errore caricamento foto profilo:", photoError);
+          track("profile_photo_failed", {
+            ...getActivationJourneyProps(),
+            stage: "load",
+          }).catch(() => {});
           toast.error("Errore nel caricamento delle foto.");
         }
 
         const normalized = normalizePhotos(photoRows || []);
         setPhotos(normalized);
-      } catch (error) {
-        console.error("ProfilePage fetch error:", error);
+        const initialCompletion = calculateProfileCompletion({
+          profile: safeProfile,
+          photos: normalized,
+        });
+        completionTrackedRef.current = initialCompletion.isComplete;
+
+        if (!initialCompletion.isComplete && !profileStartedTrackedRef.current) {
+          profileStartedTrackedRef.current = true;
+          track("profile_started", {
+            ...getActivationJourneyProps(),
+            completion: initialCompletion.score,
+          }).catch(() => {});
+        }
+      } catch {
         if (!alive) return;
+        track("profile_load_failed", getActivationJourneyProps()).catch(() => {});
         toast.error("Errore temporaneo nel profilo.");
       } finally {
         if (alive) setLoading(false);
@@ -256,7 +276,10 @@ export default function ProfilePage() {
       const { error } = await supabase.from("profili_foto").insert(rowsToInsert);
 
       if (error) {
-        console.error("Errore caricamento foto:", error);
+        track("profile_photo_failed", {
+          ...getActivationJourneyProps(),
+          stage: "insert",
+        }).catch(() => {});
         toast.error("Impossibile caricare le foto.");
         return;
       }
@@ -268,7 +291,10 @@ export default function ProfilePage() {
         .order("ordine", { ascending: true });
 
       if (refreshError) {
-        console.error("Errore refresh foto:", refreshError);
+        track("profile_photo_failed", {
+          ...getActivationJourneyProps(),
+          stage: "refresh",
+        }).catch(() => {});
         toast.error("Foto caricate, ma elenco non aggiornato.");
         return;
       }
@@ -276,8 +302,11 @@ export default function ProfilePage() {
       const normalized = normalizePhotos(refreshed || []);
       setPhotos(normalized);
       toast.success("📸 Foto caricate");
-    } catch (error) {
-      console.error("Profile photo upload error:", error);
+    } catch {
+      track("profile_photo_failed", {
+        ...getActivationJourneyProps(),
+        stage: "unexpected",
+      }).catch(() => {});
       toast.error("Errore temporaneo durante il caricamento.");
     } finally {
       setUploading(false);
@@ -322,8 +351,11 @@ export default function ProfilePage() {
 
       setPhotos(normalizePhotos(refreshed || []));
       toast.success("✨ Foto principale aggiornata");
-    } catch (error) {
-      console.error("Errore foto principale:", error);
+    } catch {
+      track("profile_photo_failed", {
+        ...getActivationJourneyProps(),
+        stage: "set_primary",
+      }).catch(() => {});
       toast.error("Impossibile aggiornare la foto principale.");
     } finally {
       setSaving(false);
@@ -380,8 +412,11 @@ export default function ProfilePage() {
       const normalized = normalizePhotos(compacted || []);
       setPhotos(normalized);
       toast.success("🗑️ Foto rimossa");
-    } catch (error) {
-      console.error("Errore rimozione foto:", error);
+    } catch {
+      track("profile_photo_failed", {
+        ...getActivationJourneyProps(),
+        stage: "remove",
+      }).catch(() => {});
       toast.error("Impossibile rimuovere la foto.");
     } finally {
       setSaving(false);
@@ -419,7 +454,7 @@ export default function ProfilePage() {
         .maybeSingle();
 
       if (error) {
-        console.error("Errore salvataggio profilo:", error);
+        track("profile_save_failed", getActivationJourneyProps()).catch(() => {});
         toast.error("Impossibile salvare il profilo.");
         return;
       }
@@ -429,29 +464,35 @@ export default function ProfilePage() {
         ...payload,
       };
 
-      const previousCompletion = calculateProfileCompletion({
-        profile: profilo || {},
-        photos,
-      });
       const nextCompletion = calculateProfileCompletion({
         profile: nextProfile,
         photos,
       });
 
       setProfilo(nextProfile);
-      track("profile_saved", { completion: nextCompletion.score }).catch(() => {});
+      track("profile_saved", {
+        ...getActivationJourneyProps(),
+        completion: nextCompletion.score,
+      }).catch(() => {});
       toast.success(
         nextCompletion.isComplete
           ? "Profilo completo. Ora puoi scoprire persone."
           : `Profilo salvato: ${nextCompletion.score}% completo.`
       );
 
-      if (!previousCompletion.isComplete && nextCompletion.isComplete) {
-        track("activation_completed").catch(() => {});
+      if (!completionTrackedRef.current && nextCompletion.isComplete) {
+        completionTrackedRef.current = true;
+        Promise.all([
+          track("profile_completed", getActivationJourneyProps()),
+          track("activation_completed", getActivationJourneyProps()),
+        ]).catch(() => {});
         navigate("/scopri-profili");
       }
-    } catch (error) {
-      console.error("ProfilePage save error:", error);
+    } catch {
+      track("profile_save_failed", {
+        ...getActivationJourneyProps(),
+        stage: "unexpected",
+      }).catch(() => {});
       toast.error("Errore temporaneo durante il salvataggio.");
     } finally {
       setSaving(false);
@@ -503,6 +544,12 @@ export default function ProfilePage() {
       <h2 style={titleStyle}>
         👤 Il tuo profilo {isPremium && <span style={premiumBadgeAnim}>🌟</span>}
       </h2>
+
+      {location.state?.reason === "profile_required" ? (
+        <p role="status" style={profileRequiredNoticeStyle}>
+          Completa nome, bio, interessi e almeno una foto prima di entrare in Scopri persone.
+        </p>
+      ) : null}
 
       <PremiumStatusBox
         ruolo={profilo?.ruolo}
@@ -623,6 +670,15 @@ const containerStyle = {
 const titleStyle = {
   color: "#f08fc0",
   textShadow: "0 0 10px #f08fc0",
+};
+
+const profileRequiredNoticeStyle = {
+  padding: "0.9rem 1rem",
+  borderRadius: "14px",
+  border: "1px solid rgba(240,143,192,0.32)",
+  background: "rgba(240,143,192,0.1)",
+  color: "#ffe4f2",
+  lineHeight: 1.55,
 };
 
 const fieldLabelStyle = {

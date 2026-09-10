@@ -122,23 +122,43 @@ async function getSafeUserId() {
 }
 
 export async function track(name, props = {}) {
-  if (!hasAnalyticsConsent()) return;
+  if (!hasAnalyticsConsent()) return false;
 
   const safeName = normalizeEventName(name);
-  if (!safeName) return;
+  if (!safeName) return false;
 
   const safeProps = sanitizeProps(props);
   const safePath = sanitizePath();
   const uid = await getSafeUserId();
 
   try {
-    await supabase.from("events").insert({
+    const { error } = await supabase.from("events").insert({
       name: safeName,
       props: safeProps,
       path: safePath,
       user_id: uid,
     });
+
+    if (error) {
+      window.dispatchEvent(
+        new CustomEvent("lm360:analytics-delivery-failed", {
+          detail: { event: safeName },
+        })
+      );
+      return false;
+    }
+
+    return true;
   } catch {
-    // No console logging: analytics must never leak PII or secrets.
+    try {
+      window.dispatchEvent(
+        new CustomEvent("lm360:analytics-delivery-failed", {
+          detail: { event: safeName },
+        })
+      );
+    } catch {
+      // No console logging: analytics must never leak PII or secrets.
+    }
+    return false;
   }
 }
