@@ -97,7 +97,7 @@ export default function LoginPage() {
   }, [emailConfirmationLanded, location.state]);
 
   const isDisabled = useMemo(() => {
-    return submitting || !email.trim() || !password.trim();
+    return submitting || !email.trim() || !password;
   }, [submitting, email, password]);
 
   const normalizedEmail = useMemo(() => {
@@ -114,7 +114,7 @@ export default function LoginPage() {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
-        password: password.trim(),
+        password,
       });
 
       if (error) {

@@ -50,11 +50,12 @@ export default function RegisterPage() {
   const [submitted, setSubmitted] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const formStartedRef = useRef(false);
+  const submittingRef = useRef(false);
   const resendingRef = useRef(false);
   const navigate = useNavigate();
 
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
-  const passwordReady = password.length >= 8;
+  const passwordReady = password.length >= 8 && /\S/.test(password);
   const formReady = isEmailValid(normalizedEmail) && passwordReady && acceptedLegal;
 
   useEffect(() => {
@@ -107,6 +108,7 @@ export default function RegisterPage() {
 
   async function handleRegister(event) {
     event.preventDefault();
+    if (submittingRef.current) return;
     setStatusMessage("");
 
     if (!isEmailValid(normalizedEmail)) {
@@ -130,6 +132,7 @@ export default function RegisterPage() {
       return;
     }
 
+    submittingRef.current = true;
     setLoading(true);
 
     try {
@@ -181,6 +184,7 @@ export default function RegisterPage() {
       setStatusMessage(message);
       toast.error(message);
     } finally {
+      submittingRef.current = false;
       setLoading(false);
     }
   }

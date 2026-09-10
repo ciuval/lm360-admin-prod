@@ -9,6 +9,7 @@ import ProfileCompletionCard from "../components/profile/ProfileCompletionCard";
 import { calculateProfileCompletion } from "../lib/profileCompletion";
 import { track } from "../lib/analytics.js";
 import { getActivationJourneyProps } from "../lib/activationJourney.js";
+import { validateProfilePhoto } from "../lib/profilePhotoValidation.js";
 
 function normalizeRole(value) {
   return String(value || "").trim().toLowerCase();
@@ -244,6 +245,21 @@ export default function ProfilePage() {
 
     const availableSlots = Math.max(0, 5 - photos.length);
     const filesToUse = files.slice(0, availableSlots);
+    const invalidType = filesToUse.some((file) => validateProfilePhoto(file).reason === "type");
+    const invalidSize = filesToUse.some((file) => validateProfilePhoto(file).reason === "size");
+
+    if (invalidType || invalidSize) {
+      const message = invalidType
+        ? "Carica solo file immagine validi."
+        : "Ogni foto deve pesare al massimo 5 MB.";
+      track("profile_photo_failed", {
+        ...getActivationJourneyProps(),
+        stage: invalidType ? "validation_type" : "validation_size",
+      }).catch(() => {});
+      toast.error(message);
+      event.target.value = "";
+      return;
+    }
 
     try {
       setUploading(true);

@@ -5,7 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { track } from "../lib/analytics.js";
 import { getActivationJourneyProps } from "../lib/activationJourney.js";
-import { calculateProfileCompletion } from "../lib/profileCompletion.js";
+import { buildDiscoverableProfiles } from "../lib/publicProfiles.js";
 
 function normalizeRole(value) {
   return String(value || "").trim().toLowerCase();
@@ -41,6 +41,10 @@ function toInterestArray(value) {
   }
 
   return [];
+}
+
+function isUniqueViolation(error) {
+  return String(error?.code || "") === "23505";
 }
 
 export default function PublicProfilesPage() {
@@ -115,11 +119,21 @@ export default function PublicProfilesPage() {
           setMatches(matchedIds);
         }
 
-        const { data: profiliData, error: profiliError } = await supabase
-          .from("profili")
-          .select("id, nome, bio, foto_url, avatar_url, interessi, premium, premium_fine, ruolo, status_account")
-          .eq("status_account", "attivo")
-          .order("nome", { ascending: true });
+        const [profilesResult, photosResult] = await Promise.all([
+          supabase
+            .from("profili")
+            .select("id, nome, bio, foto_url, avatar_url, interessi, premium, premium_fine, ruolo, status_account")
+            .eq("status_account", "attivo")
+            .order("nome", { ascending: true }),
+          supabase
+            .from("profili_foto")
+            .select("profilo_id, foto_url, ordine, is_primary")
+            .eq("is_primary", true)
+            .order("ordine", { ascending: true }),
+        ]);
+
+        const { data: profiliData, error: profiliError } = profilesResult;
+        const { data: photoRows, error: photosError } = photosResult;
 
         if (!alive) return;
 
@@ -133,11 +147,18 @@ export default function PublicProfilesPage() {
           return;
         }
 
-        const otherProfiles = (profiliData || []).filter(
-          (profilo) => profilo.id !== currentUserId
-        );
-        const pubblici = otherProfiles.filter((profilo) =>
-          calculateProfileCompletion({ profile: profilo }).isComplete
+        if (photosError) {
+          track("discovery_load_failed", {
+            ...getActivationJourneyProps(),
+            stage: "photos",
+          }).catch(() => {});
+        }
+
+        const otherProfiles = (profiliData || []).filter((profilo) => profilo.id !== currentUserId);
+        const pubblici = buildDiscoverableProfiles(
+          profiliData || [],
+          photosError ? [] : photoRows || [],
+          currentUserId
         );
         setProfili(pubblici);
         track("discovery_opened", {
@@ -178,7 +199,7 @@ export default function PublicProfilesPage() {
 
     likingIdsRef.current.add(profiloId);
     setLikingIds((current) => new Set(current).add(profiloId));
-    const isFirstLike = hasExistingLikes === false;
+    let isFirstLike = hasExistingLikes === false;
 
     try {
       const { error } = await supabase.from("likes").insert([
@@ -189,6 +210,13 @@ export default function PublicProfilesPage() {
       ]);
 
       if (error) {
+        if (isUniqueViolation(error)) {
+          setLikes((prev) => (prev.includes(profiloId) ? prev : [...prev, profiloId]));
+          setHasExistingLikes(true);
+          track("like_duplicate_ignored", getActivationJourneyProps()).catch(() => {});
+          return;
+        }
+
         track("like_failed", getActivationJourneyProps()).catch(() => {});
         toast.error("Impossibile salvare il like.");
         return;
@@ -197,6 +225,19 @@ export default function PublicProfilesPage() {
       setLikes((prev) => [...prev, profiloId]);
       setHasExistingLikes(true);
       track("like_sent", getActivationJourneyProps()).catch(() => {});
+
+      if (hasExistingLikes === null) {
+        const { count, error: countError } = await supabase
+          .from("likes")
+          .select("user_to", { count: "exact", head: true })
+          .eq("user_from", userId);
+
+        if (countError) {
+          track("first_like_check_failed", getActivationJourneyProps()).catch(() => {});
+        } else {
+          isFirstLike = count === 1;
+        }
+      }
 
       if (isFirstLike) {
         track("first_like_sent", getActivationJourneyProps()).catch(() => {});

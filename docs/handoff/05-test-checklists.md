@@ -44,6 +44,8 @@
 - `discovery_opened`
 - `like_sent`
 - `first_like_sent` — soltanto se non esistevano like precedenti
+- `first_like_check_failed` — soltanto se non è possibile determinare il primo like
+- `like_duplicate_ignored` — richiesta duplicata resa innocua
 
 Gli eventi del percorso condividono `flow` e `signup_elapsed_seconds`. `flow` è casuale,
 non contiene email o identificatori account e scade dopo sette giorni.

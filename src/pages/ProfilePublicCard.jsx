@@ -8,21 +8,34 @@ export default function ProfilePublicCard() {
   const [profilo, setProfilo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isMatch, setIsMatch] = useState(false);
-  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       const { data: session } = await supabase.auth.getSession();
       const myId = session?.session?.user?.id;
-      setUserId(myId);
 
-      const { data, error } = await supabase
-        .from("profili")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const [{ data, error }, { data: photoRows }] = await Promise.all([
+        supabase
+          .from("profili")
+          .select("id, nome, bio, interessi, foto_url, avatar_url, ruolo, status_account")
+          .eq("id", id)
+          .eq("status_account", "attivo")
+          .maybeSingle(),
+        supabase
+          .from("profili_foto")
+          .select("foto_url, ordine, is_primary")
+          .eq("profilo_id", id)
+          .order("is_primary", { ascending: false })
+          .order("ordine", { ascending: true })
+          .limit(1),
+      ]);
 
-      if (!error) setProfilo(data);
+      if (!error && data) {
+        setProfilo({
+          ...data,
+          foto_url: data.foto_url || data.avatar_url || photoRows?.[0]?.foto_url || "",
+        });
+      }
 
       if (myId && id) {
         const pair = [myId, id].sort();
@@ -58,10 +71,10 @@ export default function ProfilePublicCard() {
         {isMatch && <span style={badgeStyle}>💘 Match!</span>}
       </h2>
 
-      {profilo.foto_url && (
+      {(profilo.foto_url || profilo.avatar_url) && (
         <img
-          src={profilo.foto_url}
-          alt="Avatar"
+          src={profilo.foto_url || profilo.avatar_url}
+          alt={`Foto di ${profilo.nome || "questo profilo"}`}
           style={{ width: "150px", borderRadius: "8px", marginBottom: "1rem" }}
         />
       )}
@@ -124,4 +137,3 @@ const chatBtnStyle = {
   cursor: "pointer",
   boxShadow: "0 0 10px #f08fc0",
 };
-
