@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import toast, { Toaster } from "react-hot-toast";
+import { track } from "../lib/analytics.js";
 
 export default function ChatBox() {
   const { id: destinatarioId } = useParams();
@@ -10,8 +11,9 @@ export default function ChatBox() {
   const [input, setInput] = useState("");
   const [messaggi, setMessaggi] = useState([]);
   const [chatAbilitata, setChatAbilitata] = useState(false);
+  const [verificaAccesso, setVerificaAccesso] = useState(true);
   const [altraPersonaStaScrivendo, setAltraPersonaStaScrivendo] = useState(false);
-  const [premiumDestinatario, setPremiumDestinatario] = useState(false);
+  const [destinatarioNome, setDestinatarioNome] = useState("questa persona");
   const scrollRef = useRef(null);
   const typingTimeout = useRef(null);
 
@@ -34,8 +36,13 @@ export default function ChatBox() {
         .eq("user_b", pair[1])
         .eq("score", 100)
         .maybeSingle();
-      setChatAbilitata(!!match);
-      if (match) {
+      const { data: roomCompatibility } = await supabase
+        .rpc("get_stanza_compatibility", { target_user_id: destinatarioId })
+        .maybeSingle();
+      const roomCanOpen = Boolean(roomCompatibility?.opens);
+      const allowed = Boolean(match) && roomCanOpen;
+      setChatAbilitata(allowed);
+      if (allowed) {
         await supabase
           .from("messaggi")
           .update({ letto: true })
@@ -45,12 +52,13 @@ export default function ChatBox() {
       }
       const { data: profilo } = await supabase
         .from("profili")
-        .select("premium")
+        .select("nome")
         .eq("id", destinatarioId)
         .maybeSingle();
-      setPremiumDestinatario(profilo?.premium || false);
+      setDestinatarioNome(profilo?.nome || "questa persona");
+      setVerificaAccesso(false);
     };
-    checkMatchAndRead();
+    checkMatchAndRead().catch(() => setVerificaAccesso(false));
   }, [session, destinatarioId]);
 
   useEffect(() => {
@@ -58,7 +66,7 @@ export default function ChatBox() {
     const caricaMessaggi = async () => {
       const { data } = await supabase
         .from("messaggi")
-        .select("*")
+        .select("id, mittente_id, destinatario_id, contenuto, letto, timestamp")
         .or(`mittente_id.eq.${session.user.id},destinatario_id.eq.${session.user.id}`)
         .order("timestamp", { ascending: true });
       const filtrati = (data || []).filter(
@@ -103,13 +111,16 @@ export default function ChatBox() {
   }, [session, destinatarioId, chatAbilitata]);
 
   const inviaMessaggio = async () => {
-    if (!input.trim()) return;
-    await supabase.from("messaggi").insert({
-      mittente_id: session.user.id,
-      destinatario_id: destinatarioId,
-      contenuto: input.trim(),
-      letto: false,
+    if (!session?.user?.id || !destinatarioId || !chatAbilitata || !input.trim()) return;
+    const { data: sent, error } = await supabase.rpc("send_stanza_message", {
+      target_user_id: destinatarioId,
+      message_content: input.trim(),
     });
+    if (error || !sent) {
+      toast.error("Il messaggio non è stato inviato. Riprova.");
+      return;
+    }
+    track("room_message_sent").catch(() => {});
     setInput("");
     updateTypingStatus(false);
     setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
@@ -143,11 +154,18 @@ export default function ChatBox() {
       `}</style>
       <Toaster position="top-right" />
       <h2 style={{ ...chatTitle }} className="chat-title">
-        💬 Chat con utente {destinatarioId.slice(0, 6)}
-        {premiumDestinatario && <span style={badgePremium}> 🌟 Premium</span>}
+        💬 Stanza con {destinatarioNome}
       </h2>
 
-      <div style={chatBox} className="chat-box">
+      {verificaAccesso ? (
+        <div role="status" style={closedStyle}>Verifica della Stanza 360 in corso…</div>
+      ) : !chatAbilitata ? (
+        <div role="status" style={closedStyle}>
+          La conversazione resta chiusa: servono almeno 50% di compatibilità e interesse reciproco. Nessun pagamento può aprirla.
+        </div>
+      ) : null}
+
+      <div style={chatBox} className="chat-box" aria-label={`Conversazione con ${destinatarioNome}`}>
         {Object.entries(messaggiPerData).map(([giorno, messaggiDelGiorno]) => (
           <div key={giorno}>
             <div style={{ textAlign: "center", color: "#999", margin: "0.5rem 0" }}>📅 {giorno}</div>
@@ -157,7 +175,7 @@ export default function ChatBox() {
                 style={{
                   ...msgStyle,
                   alignSelf: msg.mittente_id === session?.user?.id ? "flex-end" : "flex-start",
-                  backgroundColor: premiumDestinatario ? "#ffd70033" : msg.mittente_id === session?.user?.id ? "#1e88e5" : "#333",
+                  backgroundColor: msg.mittente_id === session?.user?.id ? "#1e88e5" : "#333",
                   marginBottom: "0.6rem",
                   padding: "0.7rem 1rem",
                   border: msg.letto ? "1px solid #0f0" : "1px solid #444",
@@ -197,8 +215,9 @@ export default function ChatBox() {
           placeholder="Scrivi un messaggio..."
           style={{ ...inputStyle, fontSize: "1.05rem" }}
           className="chat-input"
+          disabled={!chatAbilitata}
         />
-        <button onClick={inviaMessaggio} style={sendBtn}>📤</button>
+        <button onClick={inviaMessaggio} style={sendBtn} disabled={!chatAbilitata} aria-label="Invia messaggio">📤</button>
       </div>
     </div>
   );
@@ -217,15 +236,7 @@ const chatTitle = {
   color: "#f08fc0",
 };
 
-const badgePremium = {
-  backgroundColor: "#ffd700",
-  color: "#000",
-  padding: "0.3rem 0.6rem",
-  borderRadius: "6px",
-  marginLeft: "0.5rem",
-  fontWeight: "bold",
-  fontSize: "0.8rem"
-};
+const closedStyle = { marginBottom:"1rem", padding:"1rem", borderRadius:14, border:"1px solid rgba(240,143,192,.35)", background:"rgba(240,143,192,.1)", color:"#ffd6ea", lineHeight:1.6 };
 
 const chatBox = {
   display: "flex",

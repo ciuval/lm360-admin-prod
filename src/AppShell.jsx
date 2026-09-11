@@ -92,8 +92,14 @@ function getCurrentSection(pathname, isAuthed, tier) {
   }
   if (pathname.startsWith("/profilo")) {
     return {
-      label: "Profilo",
-      helper: "Qui gestisci presenza, dati e stato del tuo account.",
+      label: "La mia stanza",
+      helper: "Qui racconti ciò che porti e ciò che sapresti riconoscere in un'altra persona.",
+    };
+  }
+  if (pathname.startsWith("/stanza")) {
+    return {
+      label: "Stanza 360",
+      helper: "La porta si apre solo con compatibilità reale e interesse reciproco.",
     };
   }
   if (pathname.startsWith("/scopri-profili")) {
@@ -413,7 +419,7 @@ export default function AppShell({ children }) {
 
               {isAuthed ? (
                 <>
-                  <ShellLink to="/profilo">Profilo</ShellLink>
+                  <ShellLink to="/profilo">La mia stanza</ShellLink>
                   {showAdminLink ? <ShellLink to="/admin">Regia</ShellLink> : null}
                 </>
               ) : null}

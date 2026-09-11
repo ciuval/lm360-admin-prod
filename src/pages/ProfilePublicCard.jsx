@@ -8,11 +8,13 @@ export default function ProfilePublicCard() {
   const [profilo, setProfilo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isMatch, setIsMatch] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       const { data: session } = await supabase.auth.getSession();
       const myId = session?.session?.user?.id;
+      setUserId(myId || null);
 
       const [{ data, error }, { data: photoRows }] = await Promise.all([
         supabase
@@ -57,10 +59,6 @@ export default function ProfilePublicCard() {
     if (id) fetchData();
   }, [id]);
 
-  const vaiAllaChat = () => {
-    navigate(`/chat/${id}`);
-  };
-
   if (loading) return <p style={textStyle}>⏳ Caricamento...</p>;
   if (!profilo) return <p style={textStyle}>❌ Profilo non trovato.</p>;
 
@@ -84,9 +82,15 @@ export default function ProfilePublicCard() {
       <p><strong>Interessi:</strong> {profilo.interessi || "Nessuno"}</p>
       <p><strong>Ruolo:</strong> {profilo.ruolo || "utente"}</p>
 
+      {userId && userId !== id && !isMatch && (
+        <button onClick={() => navigate(`/stanza/${id}`)} style={roomBtnStyle}>
+          Confronta le nostre Stanze
+        </button>
+      )}
+
       {isMatch && (
-        <button onClick={vaiAllaChat} style={chatBtnStyle}>
-          💬 Chatta ora
+        <button onClick={() => navigate(`/stanza/${id}`)} style={chatBtnStyle}>
+          Apri Stanza 360
         </button>
       )}
     </div>
@@ -136,4 +140,11 @@ const chatBtnStyle = {
   fontSize: "1rem",
   cursor: "pointer",
   boxShadow: "0 0 10px #f08fc0",
+};
+
+const roomBtnStyle = {
+  ...chatBtnStyle,
+  display: "block",
+  background: "linear-gradient(135deg, #ffd6ea, #f08fc0)",
+  color: "#170c13",
 };

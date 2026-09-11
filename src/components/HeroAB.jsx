@@ -6,29 +6,29 @@ import { track } from "../lib/analytics";
 
 const copies = {
   A: {
-    h: "Trova chi è davvero compatibile (100/100).",
+    h: "Una coincidenza reale può aprire una porta.",
     s: "Chat solo con match reciproci — zero perdite di tempo.",
     cta: "Inizia ora",
   },
   B: {
-    h: "Match perfetti, conversazioni reali.",
-    s: "Completa il profilo, sblocca lo score 100 e scrivi subito.",
+    h: "Coincidenze sincere, conversazioni reali.",
+    s: "Completa la tua Stanza, supera insieme il 50% e scegliete entrambi se parlare.",
     cta: "Crea il profilo",
   },
   C: {
     h: "Più affinità, meno swipe.",
-    s: "Algoritmo trasparente, chat solo a compatibilità 100/100.",
+    s: "Compatibilità spiegabile da 50% e chat solo dopo interesse reciproco.",
     cta: "Scopri i match",
   },
   D: {
     h: "Incontri di qualità, non di quantità.",
-    s: "Profilo al completo → più match reali → più chat.",
+    s: "Raccontati con cura, scopri le affinità e scegli senza fretta.",
     cta: "Completa il profilo",
   },
   E: {
-    h: "Premium quando serve davvero.",
-    s: "Filtri pro, boost visibilità e chat prioritarie.",
-    cta: "Prova Premium",
+    h: "Le regole sono uguali per tutti.",
+    s: "Il pagamento non compra compatibilità, visibilità o accesso alle persone.",
+    cta: "Scopri come funziona",
   },
 };
 

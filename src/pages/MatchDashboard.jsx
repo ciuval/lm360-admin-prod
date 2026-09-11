@@ -4,12 +4,11 @@ import { Link } from "react-router-dom";
 
 export default function MatchDashboard() {
   const [matchList, setMatchList] = useState([]);
-  const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMatches = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.id) {
         setMatchList([]);
         setLoading(false);
@@ -17,13 +16,6 @@ export default function MatchDashboard() {
       }
 
       const id = session.user.id;
-      setUserId(id);
-
-      if (!id) {
-        console.warn("❌ Nessun utente loggato");
-        setLoading(false);
-        return;
-      }
 
       const { data: matches, error: matchErr } = await supabase
         .from("match_scores")
@@ -33,7 +25,6 @@ export default function MatchDashboard() {
         .order("score", { ascending: false });
 
       if (matchErr) {
-        console.error("Errore caricamento match:", matchErr);
         setLoading(false);
         return;
       }
@@ -52,7 +43,6 @@ export default function MatchDashboard() {
         .in("id", ids);
 
       if (profiliErr) {
-        console.error("Errore caricamento profili:", profiliErr);
         setLoading(false);
         return;
       }
@@ -60,10 +50,7 @@ export default function MatchDashboard() {
       const uniti = matches
         .map((m) => {
           const otherId = m.user_a === id ? m.user_b : m.user_a;
-          return {
-            score: m.score,
-            profilo: profili.find((p) => p.id === otherId),
-          };
+          return { profilo: profili.find((p) => p.id === otherId) };
         })
         .filter((m) => m.profilo);
 
@@ -103,7 +90,7 @@ export default function MatchDashboard() {
           vicini.
         </p>
         <a
-          href="#/scopri"
+          href="#/scopri-profili"
           style={{
             display: "inline-block",
             marginTop: 12,
@@ -117,7 +104,7 @@ export default function MatchDashboard() {
       </section>
       ) : (
         <ul style={listStyle}>
-          {matchList.map(({ score, profilo }) => (
+          {matchList.map(({ profilo }) => (
             <li key={profilo.id} style={itemStyle}>
               <Link to={`/profilo/${profilo.id}`} style={linkStyle}>
                 <img
@@ -129,12 +116,12 @@ export default function MatchDashboard() {
                   <strong>{profilo.nome}, {profilo.eta}</strong>
                   <p>{profilo.bio?.slice(0, 80)}{profilo.bio?.length > 80 ? "..." : ""}</p>
                   <p style={{ fontSize: "0.9rem", color: "#aaa" }}>🎯 {profilo.interessi}</p>
-                  <span style={{ color: "#f08fc0" }}>💘 Match Score: {score}%</span>
+                  <span style={{ color: "#f08fc0" }}>💘 Interesse reciproco</span>
                 </div>
               </Link>
 
-              <Link to={`/chat/${profilo.id}`} style={chatBtn}>
-                💬 Chatta
+              <Link to={`/stanza/${profilo.id}`} style={chatBtn}>
+                Apri Stanza 360
               </Link>
             </li>
           ))}

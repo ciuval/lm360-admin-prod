@@ -10,6 +10,7 @@ import { calculateProfileCompletion } from "../lib/profileCompletion";
 import { track } from "../lib/analytics.js";
 import { getActivationJourneyProps } from "../lib/activationJourney.js";
 import { validateProfilePhoto } from "../lib/profilePhotoValidation.js";
+import Stanza360Card from "../components/profile/Stanza360Card.jsx";
 
 function normalizeRole(value) {
   return String(value || "").trim().toLowerCase();
@@ -558,7 +559,7 @@ export default function ProfilePage() {
       `}</style>
 
       <h2 style={titleStyle}>
-        👤 Il tuo profilo {isPremium && <span style={premiumBadgeAnim}>🌟</span>}
+        La mia stanza {isPremium && <span style={premiumBadgeAnim}>🌟</span>}
       </h2>
 
       {location.state?.reason === "profile_required" ? (
@@ -591,17 +592,13 @@ export default function ProfilePage() {
         </p>
       )}
 
-      {!isPremium && (
-        <button style={paywallBtn} onClick={() => navigate("/premium")}>
-          💎 Diventa Premium
-        </button>
-      )}
-
       <ProfileCompletionCard
         completion={profileCompletion}
         onPrimaryAction={handleProfileCompletionAction}
         disabled={loading || saving || uploading}
       />
+
+      {userId && <Stanza360Card userId={userId} />}
 
       <ProfilePhotoGallery
         photos={photos}
@@ -725,19 +722,6 @@ const premiumBadgeAnim = {
   display: "inline-block",
   marginLeft: "0.5rem",
   animation: "shimmer 2s infinite",
-};
-
-const paywallBtn = {
-  backgroundColor: "#f08fc0",
-  color: "#fff",
-  padding: "0.7rem 1.4rem",
-  border: "none",
-  borderRadius: "6px",
-  fontWeight: "bold",
-  fontSize: "1rem",
-  cursor: "pointer",
-  marginBottom: "1rem",
-  boxShadow: "0 0 10px #f08fc0",
 };
 
 const saveBtn = {

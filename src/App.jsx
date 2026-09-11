@@ -19,6 +19,8 @@ import WelcomePage from "./pages/WelcomePage.jsx";
 import Premium from "./pages/Premium.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import ProfilePublicCard from "./pages/ProfilePublicCard.jsx";
+import Stanza360Page from "./pages/Stanza360Page.jsx";
+import ChatBox from "./pages/ChatBox.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
 /* ======================================================
@@ -138,6 +140,8 @@ export default function App() {
                   </RequireAuth>
                 }
               />
+              <Route path="/stanza/:id" element={<RequireAuth><Stanza360Page /></RequireAuth>} />
+              <Route path="/chat/:id" element={<RequireAuth><ChatBox /></RequireAuth>} />
 
 
         <Route
