@@ -28,6 +28,8 @@
 8. Compilare nome, bio di almeno 20 caratteri, interessi e foto; salvare.
 9. Verificare il redirect automatico a `#/scopri-profili`.
 10. Premere rapidamente due volte “Mi piace”: deve essere registrato un solo like.
+11. Account free con profilo completo: “Scopri” conferma che il profilo è visibile, non mostra paywall e permette ricerca, filtro interessi e like.
+12. Stato vuoto: non invita a completare un profilo già completo; offre anteprima pubblica e modifica profilo.
 
 ## Eventi attesi, solo con consenso analytics
 

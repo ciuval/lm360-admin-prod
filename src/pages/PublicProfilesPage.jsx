@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { track } from "../lib/analytics.js";
@@ -49,7 +49,6 @@ function isUniqueViolation(error) {
 
 export default function PublicProfilesPage() {
   const [profili, setProfili] = useState([]);
-  const [myProfile, setMyProfile] = useState(null);
   const [userId, setUserId] = useState(null);
   const [likes, setLikes] = useState([]);
   const [matches, setMatches] = useState([]);
@@ -59,7 +58,6 @@ export default function PublicProfilesPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [filtroInteresse, setFiltroInteresse] = useState("");
-  const navigate = useNavigate();
 
   useEffect(() => {
     let alive = true;
@@ -78,15 +76,6 @@ export default function PublicProfilesPage() {
         setUserId(currentUserId);
 
         if (currentUserId) {
-          const { data: myProfileData } = await supabase
-            .from("profili")
-            .select("id, nome, ruolo, premium, premium_fine, status_account")
-            .eq("id", currentUserId)
-            .maybeSingle();
-
-          if (!alive) return;
-          setMyProfile(myProfileData || null);
-
           const { data: likeData, error: likeError } = await supabase
             .from("likes")
             .select("user_to")
@@ -187,10 +176,6 @@ export default function PublicProfilesPage() {
       alive = false;
     };
   }, []);
-
-  const isUserPremium = useMemo(() => {
-    return hasPremiumAccess(myProfile);
-  }, [myProfile]);
 
   const handleLike = async (profiloId) => {
     if (!userId || userId === profiloId) return;
@@ -340,14 +325,15 @@ export default function PublicProfilesPage() {
         Guarda un profilo, leggi ciò che racconta e scegli con intenzione.
       </p>
 
-      {!isUserPremium && (
-        <div style={promoBox}>
-          <p>🔒 Attiva l'accesso Premium per usare i filtri avanzati.</p>
-          <button style={promoBtn} onClick={() => navigate("/premium")}>
-            🌟 Passa a Premium
-          </button>
+      <section role="status" aria-label="Stato del profilo" style={profileVisibleBox}>
+        <span aria-hidden="true" style={profileVisibleIcon}>✓</span>
+        <div>
+          <strong style={profileVisibleTitle}>Il tuo profilo gratuito è completo e visibile.</strong>
+          <p style={profileVisibleText}>
+            Puoi scoprire persone, inviare like e creare match. Nessun abbonamento richiesto.
+          </p>
         </div>
-      )}
+      </section>
 
       <input
         type="text"
@@ -360,19 +346,9 @@ export default function PublicProfilesPage() {
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
         <select
           value={filtroInteresse}
-          onChange={(e) => {
-            if (!isUserPremium) {
-              toast("🔐 Solo per utenti premium");
-              return;
-            }
-            setFiltroInteresse(e.target.value);
-          }}
-          disabled={!isUserPremium}
-          style={{
-            ...dropdownStyle,
-            opacity: !isUserPremium ? 0.5 : 1,
-            cursor: !isUserPremium ? "not-allowed" : "pointer",
-          }}
+          onChange={(e) => setFiltroInteresse(e.target.value)}
+          aria-label="Filtra per interesse"
+          style={dropdownStyle}
         >
           <option value="">Tutti gli interessi</option>
           {interessiUnici.map((interesse) => (
@@ -399,14 +375,14 @@ export default function PublicProfilesPage() {
             }}
           >
             <p style={{ margin: "0 0 0.5rem", fontWeight: 800 }}>
-              Scopri è pronto: al momento non ci sono profili reali da mostrare.
+              Il tuo profilo c’è. Stiamo aspettando le altre persone.
             </p>
             <p style={{ margin: 0, opacity: 0.82 }}>
-              Non è un errore. Completa il tuo profilo e torna qui: quando saranno disponibili
-              altre persone, capiranno subito meglio chi sei.
+              Non devi acquistare Premium. Il tuo profilo è già visibile e pronto a ricevere
+              interazioni quando arriveranno altri profili completi.
             </p>
-            <a
-              href="#/profilo"
+            <Link
+              to={`/profilo/${userId}`}
               style={{
                 display: "inline-block",
                 marginTop: 12,
@@ -415,8 +391,21 @@ export default function PublicProfilesPage() {
                 textDecoration: "none",
               }}
             >
-              Completa il profilo
-            </a>
+              Guarda il mio profilo pubblico
+            </Link>
+            <Link
+              to="/profilo"
+              style={{
+                display: "inline-block",
+                marginTop: 12,
+                marginLeft: 18,
+                color: "#d8d8e2",
+                fontWeight: 700,
+                textDecoration: "none",
+              }}
+            >
+              Modifica il profilo
+            </Link>
           </section>
       ) : (
         <ul style={listStyle}>
@@ -526,25 +515,32 @@ const dropdownStyle = {
   fontSize: "1rem",
 };
 
-const promoBox = {
-  backgroundColor: "#1a1a1a",
-  padding: "1rem",
-  borderRadius: "8px",
-  border: "1px dashed #f08fc0",
+const profileVisibleBox = {
+  display: "grid",
+  gridTemplateColumns: "42px 1fr",
+  gap: "0.9rem",
+  alignItems: "center",
   marginBottom: "1rem",
-  textAlign: "center",
+  padding: "1rem",
+  border: "1px solid rgba(134, 239, 172, 0.3)",
+  borderRadius: "16px",
+  background: "linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(255, 255, 255, 0.035))",
 };
 
-const promoBtn = {
-  marginTop: "0.5rem",
-  padding: "0.5rem 1.2rem",
-  backgroundColor: "#f08fc0",
-  border: "none",
-  borderRadius: "6px",
-  fontWeight: "bold",
-  color: "#000",
-  cursor: "pointer",
+const profileVisibleIcon = {
+  width: 42,
+  height: 42,
+  display: "grid",
+  placeItems: "center",
+  borderRadius: "50%",
+  backgroundColor: "#86efac",
+  color: "#07120b",
+  fontWeight: 900,
+  fontSize: "1.2rem",
 };
+
+const profileVisibleTitle = { color: "#dcfce7", lineHeight: 1.4 };
+const profileVisibleText = { margin: "0.25rem 0 0", color: "#d8d8e2", lineHeight: 1.5 };
 
 const listStyle = {
   listStyle: "none",
