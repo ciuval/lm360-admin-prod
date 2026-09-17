@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 /* ======================================================
@@ -80,6 +80,7 @@ import {
   Visitatori,
 } from "./pages/OperationalPages.jsx";
 import LibroDaZeroLoveMatch360 from "./pages/LibroDaZeroLoveMatch360.jsx";
+import LibroPage from "./pages/LibroPage.jsx";
 
 export default function App() {
   return (
@@ -243,6 +244,7 @@ export default function App() {
 <Route path="/visitatori" element={<RequireAdmin><Visitatori /></RequireAdmin>} />
 <Route path="/log-admin" element={<RequireAdmin><LogAdmin /></RequireAdmin>} />
 <Route path="/log-stats" element={<RequireAdmin><LogStats /></RequireAdmin>} />
+              <Route path="/libro" element={<LibroPage />} />
               <Route path="/libro/da-zero-a-lovematch360" element={<LibroDaZeroLoveMatch360 />} />
 
               {/* ======================================================

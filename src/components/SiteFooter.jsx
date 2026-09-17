@@ -31,7 +31,7 @@ const linkGroups = [
     links: [
       { label: "Articoli e idee", href: "#/scopri" },
       { label: "YouTube News", href: "#/youtube-news" },
-      { label: "Libro", href: "#/libro/da-zero-a-lovematch360" },
+      { label: "Libro", href: "#/libro" },
       { label: "Metodo", href: "#/playbook" },
     ],
   },

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link } from "react-router-dom";
 
 const articleSlug = "/scopri/matematica-nu-este-o-opinie";
@@ -120,7 +120,7 @@ export function MatematicaNuEsteOpiniePage() {
           <Link to="/scopri" className="btn secondary">
             {"\u00cenapoi la mesaje"}
           </Link>
-          <Link to="/libro/da-zero-a-lovematch360" className="btn ghost">
+          <Link to="/libro" className="btn ghost">
             Vezi cartea
           </Link>
         </div>
@@ -158,7 +158,7 @@ export default function ScopriEditoriale() {
           <Link to={articleSlug} className="btn primary">
             Apri il primo messaggio
           </Link>
-          <Link to="/libro/da-zero-a-lovematch360" className="btn secondary">
+          <Link to="/libro" className="btn secondary">
             Vai al libro
           </Link>
           <Link to="/youtube-news" className="btn secondary">
