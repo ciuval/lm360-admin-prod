@@ -1,21 +1,12 @@
-﻿{
-    "$schema":  "https://openapi.vercel.sh/vercel.json",
-    "trailingSlash":  false,
-    "redirects":  [
-                      {
-                          "source":  "/libro/",
-                          "destination":  "/libro",
-                          "permanent":  true
-                      }
-                  ],
-    "rewrites":  [
-                     {
-                         "source":  "/libro",
-                         "destination":  "/libro.html"
-                     },
-                     {
-                         "source":  "/(.*)",
-                         "destination":  "/index.html"
-                     }
-                 ]
+{
+  "rewrites": [
+    {
+      "source": "/libro",
+      "destination": "/libro.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
