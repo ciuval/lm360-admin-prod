@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/libro/",
+      "destination": "/libro",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/libro",
