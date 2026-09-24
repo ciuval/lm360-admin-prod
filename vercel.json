@@ -1,6 +1,11 @@
 {
   "redirects": [
     {
+      "source": "/libro.html",
+      "destination": "/libro",
+      "permanent": true
+    },
+    {
       "source": "/libro/",
       "destination": "/libro",
       "permanent": true
