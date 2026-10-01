@@ -6,6 +6,11 @@ by changing a button alone.
 
 ## Registration and user data
 
+The former public `testRLSClient.js` contained a fixed test login. Rotate its
+password or disable the test account: removing it from the latest commit does
+not remove it from repository history. Run the script only with disposable
+`RLS_TEST_EMAIL` and `RLS_TEST_PASSWORD` environment variables.
+
 1. Check Supabase Auth settings: confirmed email required, allowed redirect
    URLs restricted to owned HTTPS domains, password rules and abuse controls.
 2. Test RLS as an anonymous user, a normal member, a different member and an
