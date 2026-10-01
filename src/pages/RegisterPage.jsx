@@ -27,7 +27,7 @@ function normalizeSignupError(error) {
   }
 
   if (message.includes("password") || code.includes("password")) {
-    return "La password non rispetta i requisiti minimi. Usa almeno 8 caratteri.";
+    return "La password non rispetta i requisiti minimi. Usa almeno 12 caratteri.";
   }
 
   if (message.includes("email")) {
@@ -45,6 +45,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [adultAttested, setAdultAttested] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -55,8 +56,8 @@ export default function RegisterPage() {
   const navigate = useNavigate();
 
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
-  const passwordReady = password.length >= 8 && /\S/.test(password);
-  const formReady = isEmailValid(normalizedEmail) && passwordReady && acceptedLegal;
+  const passwordReady = password.length >= 12 && /\S/.test(password);
+  const formReady = isEmailValid(normalizedEmail) && passwordReady && acceptedLegal && adultAttested;
 
   useEffect(() => {
     const journey = startActivationJourney();
@@ -119,14 +120,21 @@ export default function RegisterPage() {
     }
 
     if (!passwordReady) {
-      const message = "La password deve contenere almeno 8 caratteri.";
+      const message = "La password deve contenere almeno 12 caratteri.";
       setStatusMessage(message);
       toast.error(message);
       return;
     }
 
     if (!acceptedLegal) {
-      const message = "Per creare l'account devi accettare Termini e Privacy.";
+      const message = "Per creare l'account devi accettare i Termini e leggere la Privacy.";
+      setStatusMessage(message);
+      toast.error(message);
+      return;
+    }
+
+    if (!adultAttested) {
+      const message = "Per creare un account devi avere almeno 18 anni.";
       setStatusMessage(message);
       toast.error(message);
       return;
@@ -145,7 +153,8 @@ export default function RegisterPage() {
             privacy_acknowledged: true,
             terms_accepted: true,
             legal_accepted_at: new Date().toISOString(),
-            legal_version: "v1",
+            legal_version: "v2",
+            adult_attested: true,
             source: "register_page_v2",
           },
         },
@@ -164,10 +173,10 @@ export default function RegisterPage() {
 
       track("registration_submitted", {
         ...getActivationJourneyProps(),
-        immediate_access: Boolean(data?.session),
+        immediate_access: Boolean(data?.session?.user?.email_confirmed_at),
       }).catch(() => {});
 
-      if (data?.session) {
+      if (data?.session?.user?.email_confirmed_at) {
         toast.success("Account creato. Ora costruiamo il tuo profilo.");
         navigate("/profilo", { replace: true });
         return;
@@ -282,7 +291,7 @@ export default function RegisterPage() {
                 setPassword(event.target.value);
               }}
               required
-              minLength={8}
+              minLength={12}
               aria-describedby="register-password-help"
               style={inputStyle}
             />
@@ -290,7 +299,7 @@ export default function RegisterPage() {
               id="register-password-help"
               style={{ ...helpStyle, color: password ? (passwordReady ? "#9cf2bd" : "#ffd0e5") : helpStyle.color }}
             >
-              {password ? (passwordReady ? "Lunghezza pronta." : `Ancora ${8 - password.length} caratteri.`) : "Usa almeno 8 caratteri."}
+              {password ? (passwordReady ? "Lunghezza pronta." : `Ancora ${Math.max(0, 12 - password.length)} caratteri.`) : "Usa almeno 12 caratteri."}
             </small>
           </div>
 
@@ -326,6 +335,19 @@ export default function RegisterPage() {
                 Privacy
               </Link>.
             </span>
+          </label>
+
+          <label style={checkboxRowStyle}>
+            <input
+              type="checkbox"
+              checked={adultAttested}
+              onChange={(event) => {
+                markFormStarted();
+                setAdultAttested(event.target.checked);
+              }}
+              style={checkboxStyle}
+            />
+            <span>Dichiaro di avere almeno 18 anni.</span>
           </label>
 
           <p id="register-status" role="status" aria-live="polite" style={statusStyle}>

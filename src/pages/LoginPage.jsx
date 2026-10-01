@@ -55,8 +55,8 @@ export default function LoginPage() {
 
     let alive = true;
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!alive || !data?.session?.user) return;
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (!alive || error || !data?.user?.email_confirmed_at) return;
 
       track("email_confirmed", {
         ...getActivationJourneyProps(),
@@ -82,7 +82,7 @@ export default function LoginPage() {
 
   const guardNotice = useMemo(() => {
     if (emailConfirmationLanded) {
-      return "Email confermata. Accedi e completa il profilo: sei a un passo da Scopri persone.";
+      return "Se hai confermato l’email, accedi per completare il profilo.";
     }
 
     if (location.state?.reason === "premium_required") {
@@ -112,7 +112,7 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
         password,
       });
@@ -128,7 +128,7 @@ export default function LoginPage() {
         return;
       }
 
-      if (emailConfirmationLanded) {
+      if (emailConfirmationLanded && data?.user?.email_confirmed_at) {
         track("email_confirmed", {
           ...getActivationJourneyProps(),
           access: "password",

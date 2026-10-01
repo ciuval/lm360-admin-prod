@@ -1,25 +1,10 @@
-// ✅ File: /api/get-prices.js
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-export default async function handler(req, res) {
+// The former public catalog queried the live Stripe account with a secret key.
+// Reopen only after a server-owned, reviewed price catalog is in place.
+export default function handler(req, res) {
+  res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") {
-    return res.status(405).end("Metodo non consentito");
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Metodo non consentito." });
   }
-
-  try {
-    const prices = await stripe.prices.list({ limit: 100 });
-    const filtered = prices.data.map((price) => ({
-      id: price.id,
-      nickname: price.nickname,
-      currency: price.currency,
-      unit_amount: price.unit_amount,
-      product: price.product,
-    }));
-    res.status(200).json(filtered);
-  } catch (err) {
-    console.error("Errore get-prices:", err.message);
-    res.status(500).json({ error: "Errore durante il recupero dei prezzi Stripe." });
-  }
+  return res.status(503).json({ error: "Prezzi temporaneamente non disponibili." });
 }

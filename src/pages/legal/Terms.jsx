@@ -126,7 +126,8 @@ export default function TermsPage() {
         <p style={styles.p}>
           L’utente è responsabile delle informazioni inserite nel proprio account,
           dell’uso corretto delle funzionalità disponibili e del rispetto delle regole
-          di comportamento applicabili alla piattaforma.
+          di comportamento applicabili alla piattaforma. La registrazione è riservata
+          a persone che hanno compiuto 18 anni.
         </p>
       </section>
 
