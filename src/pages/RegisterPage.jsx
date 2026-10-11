@@ -7,6 +7,7 @@ import {
   startActivationJourney,
 } from "../lib/activationJourney.js";
 import toast from "react-hot-toast";
+import { getPasswordFeedback, normalizeSignupError } from "../lib/signupFeedback.js";
 
 const reservedEmails = new Set([
   "test@example.com",
@@ -16,29 +17,6 @@ const reservedEmails = new Set([
 
 function isEmailValid(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && !reservedEmails.has(value);
-}
-
-function normalizeSignupError(error) {
-  const message = String(error?.message || "").toLowerCase();
-  const code = String(error?.code || "").toLowerCase();
-
-  if (message.includes("already registered") || message.includes("already exists")) {
-    return "Questo indirizzo email risulta già registrato. Accedi oppure usa un altro indirizzo.";
-  }
-
-  if (message.includes("password") || code.includes("password")) {
-    return "La password non rispetta i requisiti minimi. Usa almeno 12 caratteri.";
-  }
-
-  if (message.includes("email")) {
-    return "Controlla che l'indirizzo email sia corretto.";
-  }
-
-  if (message.includes("signup") || code.includes("signup_disabled")) {
-    return "La registrazione via email non è disponibile in questo momento.";
-  }
-
-  return "Registrazione non completata. Riprova tra poco.";
 }
 
 export default function RegisterPage() {
@@ -56,7 +34,8 @@ export default function RegisterPage() {
   const navigate = useNavigate();
 
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
-  const passwordReady = password.length >= 12 && /\S/.test(password);
+  const passwordFeedback = getPasswordFeedback(password);
+  const passwordReady = passwordFeedback.ready;
   const formReady = isEmailValid(normalizedEmail) && passwordReady && acceptedLegal && adultAttested;
 
   useEffect(() => {
@@ -120,7 +99,7 @@ export default function RegisterPage() {
     }
 
     if (!passwordReady) {
-      const message = "La password deve contenere almeno 12 caratteri.";
+      const message = passwordFeedback.message;
       setStatusMessage(message);
       toast.error(message);
       return;
@@ -284,7 +263,7 @@ export default function RegisterPage() {
               name="password"
               type="password"
               autoComplete="new-password"
-              placeholder="Almeno 8 caratteri"
+              placeholder="Almeno 12 caratteri, lettere e numeri"
               value={password}
               onChange={(event) => {
                 markFormStarted();
@@ -299,7 +278,7 @@ export default function RegisterPage() {
               id="register-password-help"
               style={{ ...helpStyle, color: password ? (passwordReady ? "#9cf2bd" : "#ffd0e5") : helpStyle.color }}
             >
-              {password ? (passwordReady ? "Lunghezza pronta." : `Ancora ${Math.max(0, 12 - password.length)} caratteri.`) : "Usa almeno 12 caratteri."}
+              {passwordFeedback.message}
             </small>
           </div>
 
