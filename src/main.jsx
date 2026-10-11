@@ -1,62 +1,18 @@
-import "./styles/tokens.css";
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom/client";
-import { HashRouter } from "react-router-dom";
-import { Analytics } from "@vercel/analytics/react";
-import { Toaster } from "react-hot-toast";
-import App from "./App.jsx";
-import ErrorBoundary from "./components/ErrorBoundary";
-import CmpBanner from "./components/CmpBanner.jsx";
-
-const ANALYTICS_CONSENT_KEY = "cmp.analytics";
-const ANALYTICS_CONSENT_EVENT = "lm360:analytics-consent";
-
-function readAnalyticsConsent() {
+import { readRecoveryURL, RECOVERY_PATH } from './lib/recoveryFlow.js';
+const incoming = readRecoveryURL(window.location.href);
+const failed = () => {
+  const root = document.getElementById('root');
+  root.textContent = 'Pagina non disponibile. Ricarica la pagina oppure torna al login. ';
+  const link = document.createElement('a'); link.href = '/#/login'; link.textContent = 'Torna ad Accedi'; root.append(link);
+};
+if (incoming.active) {
+  // Tokens remain only in memory; do not import the normal app/analytics on recovery pages.
   try {
-    return localStorage.getItem(ANALYTICS_CONSENT_KEY) === "true";
-  } catch {
-    return false;
-  }
+    window.history.replaceState(null, '', RECOVERY_PATH);
+    const meta = document.createElement('meta'); meta.name = 'referrer'; meta.content = 'no-referrer'; document.head.append(meta);
+    document.querySelector('meta[name="robots"]')?.setAttribute('content', 'noindex, nofollow');
+    import('./pages/RecoveryPage.jsx').then(m => m.mountRecovery(incoming)).catch(failed);
+  } catch { failed(); }
+} else {
+  import('./application.jsx').catch(failed);
 }
-
-function ConsentAwareAnalytics() {
-  const [enabled, setEnabled] = useState(readAnalyticsConsent);
-
-  useEffect(() => {
-    const syncConsent = () => {
-      setEnabled(readAnalyticsConsent());
-    };
-
-    window.addEventListener(ANALYTICS_CONSENT_EVENT, syncConsent);
-    window.addEventListener("storage", syncConsent);
-
-    syncConsent();
-
-    return () => {
-      window.removeEventListener(ANALYTICS_CONSENT_EVENT, syncConsent);
-      window.removeEventListener("storage", syncConsent);
-    };
-  }, []);
-
-  if (!enabled) return null;
-
-  return <Analytics />;
-}
-
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <HashRouter>
-        <App />
-        <CmpBanner />
-        <ConsentAwareAnalytics />
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            duration: 4500,
-          }}
-        />
-      </HashRouter>
-    </ErrorBoundary>
-  </React.StrictMode>
-);

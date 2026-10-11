@@ -1,41 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { loginMessage, safeDestination } from "../lib/recoveryFlow.js";
+import "../styles/recovery.css";
 import toast from "react-hot-toast";
 import { supabase } from "../lib/supabaseClient";
 import { getActivationJourneyProps } from "../lib/activationJourney.js";
 import { track } from "../lib/analytics.js";
 
-function normalizeAuthError(error) {
-  const code = String(error?.code || "").toLowerCase();
-  const message = String(error?.message || "").toLowerCase();
-  const status = Number(error?.status || 0);
-
-  if (
-    code === "email_not_confirmed" ||
-    message.includes("email not confirmed")
-  ) {
-    return "Controlla la tua email prima di accedere.";
-  }
-
-  if (
-    code === "invalid_credentials" ||
-    message.includes("invalid login credentials") ||
-    message.includes("invalid email or password") ||
-    status === 400
-  ) {
-    return "Email o password non valide.";
-  }
-
-  if (
-    message.includes("too many requests") ||
-    message.includes("rate limit") ||
-    status === 429
-  ) {
-    return "Troppi tentativi. Riprova tra poco.";
-  }
-
-  return "Errore temporaneo di accesso. Riprova.";
-}
+const normalizeAuthError = loginMessage;
 
 export default function LoginPage() {
   const location = useLocation();
@@ -45,6 +17,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const loginLock = useRef(false);
   const confirmationTrackedRef = useRef(false);
   const emailConfirmationLanded = new URLSearchParams(location.search).get("verified") === "1";
 
@@ -77,7 +51,7 @@ export default function LoginPage() {
 
   const redirectTo = useMemo(() => {
     const from = location.state?.from;
-    return typeof from === "string" && from.trim() ? from : "/profilo";
+    return safeDestination(from);
   }, [location.search, location.state]);
 
   const guardNotice = useMemo(() => {
@@ -106,7 +80,8 @@ export default function LoginPage() {
 
   const handleLogin = async (event) => {
     event.preventDefault();
-    if (isDisabled) return;
+    if (isDisabled || loginLock.current) return;
+    loginLock.current = true;
 
     setAuthError("");
     setSubmitting(true);
@@ -150,12 +125,13 @@ export default function LoginPage() {
       setAuthError(uiMessage);
       toast.error(uiMessage);
     } finally {
+      loginLock.current = false;
       setSubmitting(false);
     }
   };
 
   return (
-    <main style={pageStyle}>
+    <main className="lm-login" style={pageStyle}>
       <section style={cardStyle} aria-labelledby="login-title">
         <header style={headerStyle}>
           <div aria-hidden="true" style={iconStyle}>
@@ -213,7 +189,7 @@ export default function LoginPage() {
           <input
             id="login-password"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             placeholder="La tua password"
             value={password}
@@ -225,6 +201,11 @@ export default function LoginPage() {
             disabled={submitting}
           />
 
+          <div className="recovery-links">
+            <button type="button" disabled={submitting} aria-controls="login-password" aria-pressed={showPassword} onClick={() => setShowPassword(value => !value)}>{showPassword ? "Nascondi password" : "Mostra password"}</button>
+            <a href="/recupero-password">Password dimenticata?</a>
+            <Link to="/contatti">Problemi di accesso?</Link>
+          </div>
           <p style={helpStyle}>
             Usa un account attivo con credenziali valide. Se sei nuovo, puoi registrarti da qui.
           </p>
