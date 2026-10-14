@@ -204,7 +204,7 @@ export default function FacebookLike({ userId }) {
             Segnaposto del feed. Le funzioni sopra si sbloccheranno/mostreranno UI aggiuntive quando “attive”.
           </p>
 
-          {/* UI extra (placeholder) mostrata SOLO quando la funzione è attiva */}
+          {/* UI extra mostrata solo quando la funzione è attiva */}
           {featuresEnabled.stories && (
             <div style={{ marginTop: 12, padding: 10, borderRadius: 8, background: "#212121", border: "1px solid #333" }}>
               <b>📚 Stories</b>
@@ -222,14 +222,14 @@ export default function FacebookLike({ userId }) {
           {featuresEnabled.live && (
             <div style={{ marginTop: 12, padding: 10, borderRadius: 8, background: "#212121", border: "1px solid #333" }}>
               <b>🔴 Live</b>
-              <p style={{ opacity: .85, marginTop: 6 }}>Sezione per live streaming (placeholder).</p>
+              <p style={{ opacity: .85, marginTop: 6 }}>Live streaming: sezione in revisione controllata, visibile solo quando sarà pronta.</p>
             </div>
           )}
 
           {featuresEnabled.marketplace && (
             <div style={{ marginTop: 12, padding: 10, borderRadius: 8, background: "#212121", border: "1px solid #333" }}>
               <b>🛍️ Marketplace</b>
-              <p style={{ opacity: .85, marginTop: 6 }}>Vetrina annunci/oggetti in vendita (placeholder).</p>
+              <p style={{ opacity: .85, marginTop: 6 }}>Vetrina annunci: funzione in revisione controllata. Nessun annuncio viene pubblicato da qui.</p>
             </div>
           )}
 
