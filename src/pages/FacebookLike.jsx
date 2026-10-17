@@ -53,7 +53,11 @@ export default function FacebookLike({ userId }) {
 
   // Premium: in dev puoi forzare con VITE_FORCE_PREMIUM=true
   useEffect(() => {
-    const FORCE = String(import.meta.env.VITE_FORCE_PREMIUM || "").toLowerCase() === "true";
+    const FORCE =
+      import.meta.env.DEV === true &&
+      typeof window !== "undefined" &&
+      ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname) &&
+      String(import.meta.env.VITE_FORCE_PREMIUM || "").toLowerCase() === "true";
     let ignore = false;
     async function load() {
       if (FORCE) { setIsPremium(true); return; }

@@ -21,7 +21,11 @@ async function prereqAtLeastOnePost(userId) {
 export default function VideoPage({ userId }) {
   const [isPremium, setIsPremium] = useState(false);
   useEffect(() => {
-    const FORCE = String(import.meta.env.VITE_FORCE_PREMIUM || "").toLowerCase() === "true";
+    const FORCE =
+      import.meta.env.DEV === true &&
+      typeof window !== "undefined" &&
+      ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname) &&
+      String(import.meta.env.VITE_FORCE_PREMIUM || "").toLowerCase() === "true";
     if (FORCE) { setIsPremium(true); return; }
     (async () => {
       if (!userId) { setIsPremium(false); return; }
