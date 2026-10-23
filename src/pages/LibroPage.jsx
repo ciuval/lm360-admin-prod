@@ -12,6 +12,7 @@ const links = {
 const editions = [
   {
     eyebrow: "Edizione italiana",
+    lang: "it",
     title: "Da Zero a LoveMatch360",
     subtitle: "Come creare un progetto sito internet indipendente con AI e strumenti moderni",
     description:
@@ -19,11 +20,12 @@ const editions = [
     meta: ["Italiano", "Kindle", "Copertina flessibile"],
     primaryLabel: "Kindle su Amazon.it",
     primaryHref: links.itKindle,
-    secondaryLabel: "Paperback su Amazon.it",
+    secondaryLabel: "Cartaceo su Amazon.it",
     secondaryHref: links.itPaperback,
   },
   {
     eyebrow: "English edition",
+    lang: "en",
     title: "From Zero to LoveMatch360",
     subtitle: "How to Create an Independent Website Project with AI and Modern Tools",
     description:
@@ -37,10 +39,10 @@ const editions = [
 ];
 
 const learningPoints = [
-  "Trasformare un’idea confusa in una direzione chiara.",
-  "Usare ChatGPT come assistente, non come pilota automatico.",
-  "Pubblicare un sito con metodo: GitHub, Vercel, controlli e smoke test.",
-  "Collegare libro, sito e risorse senza promettere risultati garantiti.",
+  "Il metodo «una cosa alla volta»: organizzare il lavoro e verificare ogni passaggio.",
+  "Esempi di prompt per lavorare con ChatGPT e mantenere il controllo del progetto.",
+  "Il percorso per creare e pubblicare un sito: strumenti, prove e correzioni.",
+  "Checklist operative e preparazione alla pubblicazione del libro su Amazon KDP.",
 ];
 
 export default function LibroPage() {
@@ -48,7 +50,7 @@ export default function LibroPage() {
     document.title = "Libro LoveMatch360 | Da Zero a LoveMatch360";
 
     const description =
-      "Da Zero a LoveMatch360: libro italiano e inglese sul metodo per creare un progetto sito internet indipendente con AI e strumenti moderni.";
+      "Da Zero a LoveMatch360, di Valerius: una storia vera, esempi di prompt e checklist per creare un sito con AI e strumenti moderni. Leggi un estratto e scegli l’edizione.";
 
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
@@ -66,34 +68,62 @@ export default function LibroPage() {
       <section className="lm-book-hero" aria-label="Presentazione libro LoveMatch360">
         <p className="lm-book-kicker">Libri LoveMatch360</p>
         <h1 id="lm-book-title">Da Zero a LoveMatch360</h1>
+        <p className="lm-book-byline">
+          di <a href={links.authorCentral} target="_blank" rel="noreferrer">Valerius</a> · Storia vera e guida pratica
+        </p>
         <p className="lm-book-lead">
-          Il libro per chi vuole trasformare un’idea confusa in un progetto online reale:
-          una cosa alla volta, senza promesse facili.
+          Vuoi creare un sito e cerchi un punto da cui iniziare? Il libro racconta il
+          percorso di LoveMatch360: dall’idea alla pubblicazione, con ChatGPT, strumenti
+          moderni, controlli ed errori corretti lungo il cammino.
         </p>
 
         <div className="lm-book-hero-actions" aria-label="Azioni principali">
           <a className="lm-book-btn lm-book-btn-primary" href={links.itKindle} target="_blank" rel="noreferrer">
-            Acquista il Kindle italiano
+            eBook Kindle · Italiano
           </a>
           <a className="lm-book-btn lm-book-btn-secondary" href={links.itPaperback} target="_blank" rel="noreferrer">
-            Vedi paperback italiano
+            Cartaceo · Italiano
           </a>
+          <button
+            className="lm-book-btn lm-book-btn-ghost"
+            type="button"
+            onClick={() => document.getElementById("lm-book-excerpt-title")?.focus()}
+          >
+            Leggi un estratto
+          </button>
         </div>
 
         <p className="lm-book-note">
-          Nessun checkout interno. Gli acquisti avvengono solo su Amazon.
+          Acquisto su Amazon. Prezzo e disponibilità sono indicati nella pagina del formato scelto.
+        </p>
+      </section>
+
+      <section className="lm-book-section lm-book-excerpt" aria-labelledby="lm-book-excerpt-title">
+        <p className="lm-book-kicker">Leggi un estratto</p>
+        <h2 id="lm-book-excerpt-title" tabIndex={-1}>
+          Non serve partire perfetti. Serve partire ordinati.
+        </h2>
+        <blockquote>
+          <p>
+            Non tutti iniziano da una posizione comoda. A volte un progetto digitale nasce
+            dopo anni di fatica fisica, lavori pesanti e paura di non avere abbastanza tempo.
+            Proprio da lì può nascere il bisogno di costruire qualcosa di più ordinato.
+          </p>
+        </blockquote>
+        <p className="lm-book-source">
+          Da <cite>Da Zero a LoveMatch360</cite>, Parte I, capitolo 1: «Un punto di partenza umano».
         </p>
       </section>
 
       <section className="lm-book-grid" aria-label="Edizioni disponibili">
         {editions.map((edition) => (
-          <article className="lm-book-card" key={edition.title}>
+          <article className="lm-book-card" key={edition.title} lang={edition.lang}>
             <p className="lm-book-eyebrow">{edition.eyebrow}</p>
             <h2>{edition.title}</h2>
             <p className="lm-book-subtitle">{edition.subtitle}</p>
             <p>{edition.description}</p>
 
-            <ul className="lm-book-meta" aria-label={`Formati ${edition.title}`}>
+            <ul className="lm-book-meta" aria-label={`${edition.lang === "en" ? "Formats" : "Formati"} ${edition.title}`}>
               {edition.meta.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -132,8 +162,9 @@ export default function LibroPage() {
           <p className="lm-book-kicker">Per chi è</p>
           <h2 id="lm-book-reader-title">Per chi vuole partire senza sentirsi perso.</h2>
           <p>
-            È pensato per persone, professionisti e piccoli progetti che vogliono capire
-            come costruire una presenza digitale con più ordine, più controllo e meno rumore.
+            È pensato per chi ha un’idea di sito e vuole imparare a trasformarla in un
+            progetto con ordine. Il racconto si alterna a indicazioni pratiche, prompt
+            e checklist da adattare al proprio lavoro.
           </p>
         </div>
 
@@ -151,14 +182,14 @@ export default function LibroPage() {
           <p className="lm-book-kicker">Dopo il libro</p>
           <h2 id="lm-book-resources-title">Il sito continua il percorso.</h2>
           <p>
-            LoveMatch360 ospita aggiornamenti, pagine vive e risorse collegate. Alcuni contenuti
-            Premium potranno essere pubblicati secondo disponibilità e condizioni dell’offerta.
+            LoveMatch360 è il progetto da cui nasce questo percorso. Puoi visitare il sito
+            e conoscere l’autore per dare un contesto concreto a quello che leggi.
           </p>
         </div>
 
         <div className="lm-book-resource-actions">
-          <Link className="lm-book-btn lm-book-btn-secondary" to="/premium/libretti">
-            Apri area libretti
+          <Link className="lm-book-btn lm-book-btn-secondary" to="/">
+            Visita LoveMatch360
           </Link>
           <a className="lm-book-btn lm-book-btn-ghost" href={links.authorCentral} target="_blank" rel="noreferrer">
             Pagina autore
@@ -170,6 +201,11 @@ export default function LibroPage() {
 }
 
 const styles = `
+.lm-book-page,
+.lm-book-page * {
+  box-sizing: border-box;
+}
+
 .lm-book-page {
   color: #f7f3ff;
   background:
@@ -179,8 +215,20 @@ const styles = `
   padding: clamp(1.25rem, 2vw, 2rem);
 }
 
+.lm-book-page h1,
+.lm-book-page h2,
+.lm-book-page h3,
+.lm-book-page p {
+  overflow-wrap: anywhere;
+}
+
 .lm-book-page a:not(.lm-book-btn) {
   color: inherit;
+}
+
+.lm-book-page a:focus-visible {
+  outline: 3px solid rgba(255, 122, 195, 0.7);
+  outline-offset: 3px;
 }
 
 .lm-book-hero,
@@ -225,6 +273,32 @@ const styles = `
   line-height: 1.55;
 }
 
+.lm-book-byline {
+  margin: 1rem 0 0;
+  color: rgba(247, 243, 255, 0.84);
+  line-height: 1.6;
+}
+
+.lm-book-excerpt blockquote {
+  margin: 1.25rem 0 0;
+  padding-left: 1.25rem;
+  border-left: 3px solid #ff7ac3;
+}
+
+.lm-book-excerpt blockquote p {
+  max-width: 760px;
+  font-size: 1.1rem;
+}
+
+.lm-book-excerpt .lm-book-source {
+  font-size: 0.92rem;
+}
+
+.lm-book-excerpt h2:focus {
+  outline: 3px solid rgba(255, 122, 195, 0.7);
+  outline-offset: 6px;
+}
+
 .lm-book-hero-actions,
 .lm-book-card-actions,
 .lm-book-resource-actions {
@@ -241,8 +315,14 @@ const styles = `
   min-height: 44px;
   padding: 0.78rem 1rem;
   border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.35;
   font-weight: 800;
   text-decoration: none;
+  text-align: center;
+  cursor: pointer;
   transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
@@ -264,6 +344,7 @@ const styles = `
 }
 .lm-book-page .lm-book-btn-ghost {
   border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.04);
   color: #f7f3ff;
 }
 
@@ -392,9 +473,15 @@ const styles = `
     border-radius: 1.4rem;
   }
 
+  .lm-book-hero h1 {
+    font-size: clamp(1.85rem, 7vw, 3.4rem);
+    line-height: 1.04;
+  }
+
   .lm-book-btn {
     width: 100%;
   }
 }
 `;
+
 

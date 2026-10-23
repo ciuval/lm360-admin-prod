@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Da Zero a LoveMatch360 | Libro ufficiale</title>
-  <meta name="description" content="Da Zero a LoveMatch360: libro italiano e inglese sul metodo per creare un progetto sito internet indipendente con AI e strumenti moderni.">
+  <meta name="description" content="Da Zero a LoveMatch360, di Valerius: una storia vera, esempi di prompt e checklist per creare un sito con AI e strumenti moderni. Leggi un estratto e scegli l’edizione.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://www.lovematch360.com/libro">
   <meta property="og:type" content="website">
@@ -18,6 +18,7 @@
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 18% 0%,rgba(255,114,198,.22),transparent 28rem),radial-gradient(circle at 82% 18%,rgba(118,77,255,.14),transparent 30rem),linear-gradient(180deg,#08090f 0%,#10101a 52%,#08090f 100%)}
     a{color:inherit}
+    a:focus-visible{outline:3px solid rgba(255,114,198,.72);outline-offset:3px}
     .page{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:28px 0 56px}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
     .brand{display:inline-flex;flex-direction:column;gap:2px;text-decoration:none}
@@ -38,6 +39,11 @@
     h1,h2,h3,p{overflow-wrap:anywhere}
     h1{max-width:820px;margin:0;font-size:clamp(2.55rem,8vw,6.3rem);line-height:.93;letter-spacing:-.075em}
     .lead{max-width:760px;margin:1.35rem 0 0;color:var(--muted);font-size:clamp(1.05rem,2vw,1.42rem);line-height:1.55}
+    .byline{margin:1rem 0 0;color:var(--muted);line-height:1.6}
+    .excerpt blockquote{margin:1.25rem 0 0;padding-left:1.25rem;border-left:3px solid var(--pink)}
+    .excerpt blockquote p{max-width:760px;font-size:1.1rem}
+    .excerpt .source{font-size:.92rem}
+    .excerpt h2:focus{outline:3px solid rgba(255,114,198,.72);outline-offset:6px}
     .actions{margin-top:1.35rem}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
     .card,.section{border-radius:24px;padding:clamp(1.25rem,3vw,2rem)}
@@ -53,7 +59,7 @@
     .split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:16px;align-items:stretch}
     .trust{border:1px solid var(--line);border-radius:18px;padding:1.15rem;background:rgba(0,0,0,.24)}
     footer{margin-top:28px;font-size:.92rem;text-align:center}
-    @media(max-width:780px){.topbar{align-items:flex-start;flex-direction:column}.grid,.points,.split{grid-template-columns:1fr}.nav{justify-content:flex-start}.hero{border-radius:24px}.btn{width:100%}}
+    @media(max-width:780px){.topbar{align-items:flex-start;flex-direction:column}.grid,.points,.split{grid-template-columns:1fr}.nav{justify-content:flex-start}.hero{border-radius:24px}.hero h1{font-size:clamp(1.85rem,7vw,3.4rem);line-height:1.04}.btn{width:100%}}
   </style>
 </head>
 <body>
@@ -65,7 +71,7 @@
       </a>
       <nav class="nav" aria-label="Navigazione essenziale">
         <a href="https://www.lovematch360.com">Sito</a>
-        <a href="https://www.lovematch360.com/#/premium/libretti">Risorse</a>
+        <a href="#inside-title">Nel libro</a>
         <a href="https://www.amazon.com/author/valeriuslovematch360" rel="noreferrer">Autore</a>
       </nav>
     </header>
@@ -73,12 +79,23 @@
     <section class="hero" aria-label="Presentazione del libro">
       <p class="kicker">Libri LoveMatch360</p>
       <h1 id="book-title">Da Zero a LoveMatch360</h1>
-      <p class="lead">Il libro per chi vuole trasformare un’idea confusa in un progetto online reale: una cosa alla volta, senza promesse facili.</p>
+      <p class="byline">di <a href="https://www.amazon.com/author/valeriuslovematch360" rel="noreferrer">Valerius</a> · Storia vera e guida pratica</p>
+      <p class="lead">Vuoi creare un sito e cerchi un punto da cui iniziare? Il libro racconta il percorso di LoveMatch360: dall’idea alla pubblicazione, con ChatGPT, strumenti moderni, controlli ed errori corretti lungo il cammino.</p>
       <div class="actions" aria-label="Acquisto su Amazon">
-        <a class="btn btn-primary" href="https://www.amazon.it/dp/B0H5Q93YDZ" rel="noreferrer">Acquista il Kindle italiano</a>
-        <a class="btn btn-secondary" href="https://www.amazon.it/dp/B0H5QJD66Z" rel="noreferrer">Vedi paperback italiano</a>
+        <a class="btn btn-primary" href="https://www.amazon.it/dp/B0H5Q93YDZ" rel="noreferrer">eBook Kindle · Italiano</a>
+        <a class="btn btn-secondary" href="https://www.amazon.it/dp/B0H5QJD66Z" rel="noreferrer">Cartaceo · Italiano</a>
+        <a class="btn btn-ghost" href="#excerpt-title">Leggi un estratto</a>
       </div>
-      <p class="note">Nessun checkout interno. Gli acquisti avvengono solo su Amazon.</p>
+      <p class="note">Acquisto su Amazon. Prezzo e disponibilità sono indicati nella pagina del formato scelto.</p>
+    </section>
+
+    <section class="section excerpt" aria-labelledby="excerpt-title">
+      <p class="kicker">Leggi un estratto</p>
+      <h2 id="excerpt-title" tabindex="-1">Non serve partire perfetti. Serve partire ordinati.</h2>
+      <blockquote>
+        <p>Non tutti iniziano da una posizione comoda. A volte un progetto digitale nasce dopo anni di fatica fisica, lavori pesanti e paura di non avere abbastanza tempo. Proprio da lì può nascere il bisogno di costruire qualcosa di più ordinato.</p>
+      </blockquote>
+      <p class="source">Da <cite>Da Zero a LoveMatch360</cite>, Parte I, capitolo 1: «Un punto di partenza umano».</p>
     </section>
 
     <section class="grid" aria-label="Edizioni disponibili">
@@ -94,11 +111,11 @@
         </ul>
         <div class="actions">
           <a class="btn btn-primary" href="https://www.amazon.it/dp/B0H5Q93YDZ" rel="noreferrer">Kindle su Amazon.it</a>
-          <a class="btn btn-ghost" href="https://www.amazon.it/dp/B0H5QJD66Z" rel="noreferrer">Paperback su Amazon.it</a>
+          <a class="btn btn-ghost" href="https://www.amazon.it/dp/B0H5QJD66Z" rel="noreferrer">Cartaceo su Amazon.it</a>
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" lang="en">
         <p class="kicker">English edition</p>
         <h2>From Zero to LoveMatch360</h2>
         <p class="subtitle">How to Create an Independent Website Project with AI and Modern Tools</p>
@@ -119,10 +136,10 @@
       <p class="kicker">Cosa trovi dentro</p>
       <h2 id="inside-title">Metodo, prove, errori corretti e una direzione.</h2>
       <div class="points">
-        <article class="point"><span aria-hidden="true">1</span><p>Trasformare un’idea confusa in una direzione chiara.</p></article>
-        <article class="point"><span aria-hidden="true">2</span><p>Usare ChatGPT come assistente, non come pilota automatico.</p></article>
-        <article class="point"><span aria-hidden="true">3</span><p>Pubblicare un sito con metodo: GitHub, Vercel, controlli e smoke test.</p></article>
-        <article class="point"><span aria-hidden="true">4</span><p>Collegare libro, sito e risorse senza promettere risultati garantiti.</p></article>
+        <article class="point"><span aria-hidden="true">1</span><p>Il metodo «una cosa alla volta»: organizzare il lavoro e verificare ogni passaggio.</p></article>
+        <article class="point"><span aria-hidden="true">2</span><p>Esempi di prompt per lavorare con ChatGPT e mantenere il controllo del progetto.</p></article>
+        <article class="point"><span aria-hidden="true">3</span><p>Il percorso per creare e pubblicare un sito: strumenti, prove e correzioni.</p></article>
+        <article class="point"><span aria-hidden="true">4</span><p>Checklist operative e preparazione alla pubblicazione del libro su Amazon KDP.</p></article>
       </div>
     </section>
 
@@ -130,7 +147,7 @@
       <div>
         <p class="kicker">Per chi è</p>
         <h2 id="reader-title">Per chi vuole partire senza sentirsi perso.</h2>
-        <p>È pensato per persone, professionisti e piccoli progetti che vogliono capire come costruire una presenza digitale con più ordine, più controllo e meno rumore.</p>
+        <p>È pensato per chi ha un’idea di sito e vuole imparare a trasformarla in un progetto con ordine. Il racconto si alterna a indicazioni pratiche, prompt e checklist da adattare al proprio lavoro.</p>
       </div>
       <aside class="trust" aria-label="Nota etica">
         <h3>Cosa non promette</h3>
@@ -142,10 +159,10 @@
       <div>
         <p class="kicker">Dopo il libro</p>
         <h2 id="after-title">Il sito continua il percorso.</h2>
-        <p>LoveMatch360 ospita aggiornamenti, pagine vive e risorse collegate. Alcuni contenuti Premium potranno essere pubblicati secondo disponibilità e condizioni dell’offerta.</p>
+        <p>LoveMatch360 è il progetto da cui nasce questo percorso. Puoi visitare il sito e conoscere l’autore per dare un contesto concreto a quello che leggi.</p>
       </div>
       <div class="actions" aria-label="Risorse collegate">
-        <a class="btn btn-secondary" href="https://www.lovematch360.com/#/premium/libretti">Apri area libretti</a>
+        <a class="btn btn-secondary" href="https://www.lovematch360.com">Visita LoveMatch360</a>
         <a class="btn btn-ghost" href="https://www.amazon.com/author/valeriuslovematch360" rel="noreferrer">Pagina autore</a>
       </div>
     </section>
@@ -154,3 +171,4 @@
   </main>
 </body>
 </html>
+
