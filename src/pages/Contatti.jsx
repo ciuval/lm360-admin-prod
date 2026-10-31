@@ -29,6 +29,7 @@ export default function Contatti() {
         },
       ]}
       quickLinks={[
+        { label: "Regole di uso (AUP)", href: "#/aup", text: "Divieti, segnalazioni e riesame delle decisioni." },
         { label: "FAQ", href: "#/faq", text: "Risposte rapide e stato del servizio." },
         { label: "Sicurezza", href: "#/sicurezza", text: "Regole per accesso e protezione." },
         { label: "Privacy", href: "#/privacy", text: "Dati, consenso e fiducia." },

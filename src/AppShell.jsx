@@ -264,6 +264,7 @@ function getCurrentSection(pathname, isAuthed, tier) {
     pathname.startsWith("/cookie") ||
     pathname.startsWith("/cookies") ||
     pathname.startsWith("/terms") ||
+    pathname.startsWith("/aup") ||
     pathname.startsWith("/refunds") ||
     pathname.startsWith("/termini") ||
     pathname.startsWith("/rimborsi")

@@ -56,6 +56,7 @@ const linkGroups = [
       { label: "Privacy", href: "#/privacy" },
       { label: "Cookie", href: "#/cookies" },
       { label: "Termini", href: "#/terms" },
+      { label: "Regole di uso (AUP)", href: "#/aup" },
       { label: "Rimborsi", href: "#/refunds" },
       { label: "Termini IT", href: "#/termini" },
       { label: "Rimborsi IT", href: "#/rimborsi" },

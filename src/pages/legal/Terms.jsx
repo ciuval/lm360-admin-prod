@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import AupPolicy from "./AupPolicy.jsx";
+
 export default function TermsPage() {
   const styles = {
     page: {
@@ -102,9 +105,10 @@ export default function TermsPage() {
           Termini e Condizioni
         </h1>
         <p style={styles.intro}>
-          Questa pagina riassume in forma sintetica le principali condizioni di utilizzo
-          di LoveMatch360. Il testo completo ufficiale può essere reinserito dalla
-          versione canonica senza modificare la struttura della pagina.
+          Questi Termini disciplinano l’uso di LoveMatch360. Le regole di uso
+          accettabile (AUP) nella sezione 3 ne sono parte integrante e si applicano
+          a tutti gli account, anche con accesso premium. Per le regole di
+          comportamento, la sezione 3 specifica gli obblighi generali dei Termini.
         </p>
       </header>
 
@@ -135,19 +139,10 @@ export default function TermsPage() {
         <h2 id="terms-section-3" style={styles.h2}>
           3. Uso consentito della piattaforma
         </h2>
-        <ul style={styles.ul}>
-          <li style={styles.li}>
-            È richiesto un utilizzo lecito, corretto e non lesivo dei diritti altrui.
-          </li>
-          <li style={styles.li}>
-            Non è consentito usare il servizio per finalità abusive, fraudolente o
-            contrarie alla normativa applicabile.
-          </li>
-          <li style={styles.li}>
-            Contenuti, messaggi e informazioni condivise devono rispettare il contesto
-            della piattaforma e gli standard minimi di sicurezza e rispetto reciproco.
-          </li>
-        </ul>
+        <p style={styles.p}>
+          <Link to="/aup" style={styles.contactLink}>Apri la AUP in una pagina dedicata</Link>.
+        </p>
+        <AupPolicy />
       </section>
 
       <section style={styles.section} aria-labelledby="terms-section-4">
@@ -156,9 +151,10 @@ export default function TermsPage() {
         </h2>
         <p style={styles.p}>
           L’accesso ad alcune funzioni può dipendere dallo stato dell’account, dal
-          livello di abilitazione disponibile e dalle policy interne di sicurezza. In
-          presenza di violazioni, anomalie o uso improprio, il servizio può limitare,
-          sospendere o interrompere l’accesso nei limiti consentiti.
+          livello di abilitazione disponibile e dalle policy interne di sicurezza.
+          Le misure per violazioni, i criteri di proporzionalità e le modalità
+          per chiedere un riesame sono descritti nella AUP della sezione 3.
+          Restano ferme le tutele e i rimedi previsti dalla legge.
         </p>
       </section>
 
