@@ -1,6 +1,36 @@
 {
   "redirects": [
     {
+      "source": "/legal/termini.html",
+      "destination": "/legal/termini",
+      "permanent": true
+    },
+    {
+      "source": "/legal/termini/",
+      "destination": "/legal/termini",
+      "permanent": true
+    },
+    {
+      "source": "/legal/uso-accettabile.html",
+      "destination": "/legal/uso-accettabile",
+      "permanent": true
+    },
+    {
+      "source": "/legal/uso-accettabile/",
+      "destination": "/legal/uso-accettabile",
+      "permanent": true
+    },
+    {
+      "source": "/legal/richieste-autorita.html",
+      "destination": "/legal/richieste-autorita",
+      "permanent": true
+    },
+    {
+      "source": "/legal/richieste-autorita/",
+      "destination": "/legal/richieste-autorita",
+      "permanent": true
+    },
+    {
       "source": "/libro.html",
       "destination": "/libro",
       "permanent": true
@@ -60,6 +90,18 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/legal/termini",
+      "destination": "/legal/termini.html"
+    },
+    {
+      "source": "/legal/uso-accettabile",
+      "destination": "/legal/uso-accettabile.html"
+    },
+    {
+      "source": "/legal/richieste-autorita",
+      "destination": "/legal/richieste-autorita.html"
+    },
     {
       "source": "/libro",
       "destination": "/libro.html"

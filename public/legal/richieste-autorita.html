@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, follow">
+  <meta name="description" content="Punto di contatto e procedura per richieste legittime di informazioni, conservazione o intervento sul servizio.">
+  <title>Protocollo per le richieste delle autorità | LoveMatch360</title>
+  <link rel="canonical" href="https://www.lovematch360.com/legal/richieste-autorita">
+  <style>
+.legal-standalone {
+  margin: 0;
+  padding: clamp(1rem, 4vw, 3rem) 1rem;
+  background: #080c13;
+  color: #edf2fa;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.legal-document,
+.legal-document * {
+  box-sizing: border-box;
+}
+
+.legal-document {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: clamp(1.125rem, 3vw, 2.5rem);
+  border: 1px solid #344154;
+  border-radius: 18px;
+  background: #101722;
+  color: #edf2fa;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.legal-document h1,
+.legal-document h2 {
+  color: #ffffff;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.legal-document h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  letter-spacing: -0.025em;
+}
+
+.legal-document h2 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+}
+
+.legal-document p {
+  margin: 0 0 1rem;
+}
+
+.legal-document ul {
+  margin: 0 0 1rem;
+  padding-left: 1.3rem;
+}
+
+.legal-document li + li {
+  margin-top: 0.65rem;
+}
+
+.legal-document a,
+.legal-document__toc button {
+  color: #ffd7ea;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+.legal-document a:hover,
+.legal-document__toc button:hover {
+  color: #ffffff;
+  text-decoration-thickness: 2px;
+}
+
+.legal-document a:focus-visible,
+.legal-document button:focus-visible {
+  outline: 3px solid #a5d6ff;
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+.legal-document h2:focus {
+  outline: 2px solid #a5d6ff;
+  outline-offset: 5px;
+}
+
+.legal-document__eyebrow {
+  color: #ffc4df;
+  font-size: 0.8rem;
+  font-weight: 750;
+  letter-spacing: 0.065em;
+  text-transform: uppercase;
+}
+
+.legal-document__description {
+  margin-top: 1.2rem !important;
+  max-width: 72ch;
+  color: #dce5f2;
+}
+
+.legal-document__version,
+.legal-document__edition {
+  font-size: 0.95rem;
+  color: #c3cfe0;
+}
+
+.legal-document__navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  padding: 1.25rem 0;
+  margin-bottom: 1.25rem;
+  border-top: 1px solid #344154;
+  border-bottom: 1px solid #344154;
+}
+
+.legal-document__navigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #536177;
+  border-radius: 8px;
+  background: #192333;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.legal-document__navigation a[aria-current="page"] {
+  border-color: #f0a2c9;
+  background: #382537;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.legal-document__toc {
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  background: #192333;
+}
+
+.legal-document__toc h2 {
+  font-size: 1.1rem;
+}
+
+.legal-document__toc ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.legal-document__toc li + li {
+  margin-top: 0.15rem;
+}
+
+.legal-document__toc a,
+.legal-document__toc button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.3rem 0;
+  text-align: left;
+  font: inherit;
+  line-height: 1.5;
+}
+
+.legal-document__toc button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.legal-document__section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #344154;
+}
+
+.legal-document__section h2 {
+  scroll-margin-top: 1.5rem;
+}
+
+.legal-document__links {
+  list-style: none;
+  padding-left: 0 !important;
+}
+
+.legal-document__links a {
+  display: inline-block;
+  padding: 0.3rem 0;
+}
+
+.legal-document__footer {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #536177;
+  font-size: 0.9rem;
+  color: #c3cfe0;
+}
+
+@media (max-width: 720px) {
+  .lm360-shell:has(.legal-document) > header {
+    position: static !important;
+  }
+}
+
+@media print {
+  @page { margin: 18mm; }
+
+  html:has(.legal-document),
+  body:has(.legal-document),
+  #root:has(.legal-document),
+  .lm360-shell:has(.legal-document),
+  .legal-standalone {
+    min-height: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .legal-standalone,
+  .lm360-shell:has(.legal-document) > main {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  .lm360-shell:has(.legal-document) > header,
+  .lm360-shell:has(.legal-document) > footer,
+  #root:has(.legal-document) > :not(.lm360-shell),
+  .legal-document__navigation,
+  .legal-document__edition,
+  .legal-document__toc,
+  .legal-document__footer > a {
+    display: none !important;
+  }
+
+  .legal-document {
+    max-width: none;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+    color: #000000;
+    font-size: 10.5pt;
+    line-height: 1.5;
+  }
+
+  .legal-document h1,
+  .legal-document h2,
+  .legal-document p,
+  .legal-document a { color: #000000; }
+
+  .legal-document h1 { font-size: 22pt; }
+  .legal-document h2 { font-size: 14pt; break-after: avoid-page; }
+  .legal-document p,
+  .legal-document li { orphans: 3; widows: 3; }
+  .legal-document__section,
+  .legal-document__footer { border-color: #777777; }
+  .legal-document__section { margin-top: 1.2rem; padding-top: 1rem; }
+}
+  </style>
+</head>
+<body class="legal-standalone">
+  <main><article class="legal-document" aria-labelledby="legal-authorities-title"><header class="legal-document__header"><p class="legal-document__eyebrow">LoveMatch360 · Regole e trasparenza</p><h1 id="legal-authorities-title">Protocollo per le richieste delle autorità</h1><p class="legal-document__description">Punto di contatto e procedura per richieste legittime di informazioni, conservazione o intervento sul servizio.</p><p class="legal-document__version">Versione del <time dateTime="2026-10-31">31 ottobre 2026</time></p></header><nav class="legal-document__navigation" aria-label="Documenti e contatti"><a href="/legal/termini">Termini e condizioni di LoveMatch360</a><a href="/legal/uso-accettabile">Policy di utilizzo accettabile (AUP)</a><a href="/legal/richieste-autorita" aria-current="page">Protocollo per le richieste delle autorità</a><a href="/#/privacy">Privacy</a><a href="/#/contatti">Contatti</a></nav><nav class="legal-document__toc" aria-labelledby="legal-authorities-index"><h2 id="legal-authorities-index">In questa pagina</h2><ul><li><a href="#legal-authorities-contatto">1. Ambito e punto di contatto</a></li><li><a href="#legal-authorities-contenuto-richiesta">2. Elementi necessari alla valutazione</a></li><li><a href="#legal-authorities-verifica">3. Verifica della richiesta</a></li><li><a href="#legal-authorities-dati">4. Dati e misure che possono essere oggetto di risposta</a></li><li><a href="#legal-authorities-conservazione">5. Ordini di conservazione</a></li><li><a href="#legal-authorities-ue-estero">6. Richieste europee e da paesi terzi</a></li><li><a href="#legal-authorities-emergenze">7. Pericolo immediato e segnalazioni obbligatorie</a></li><li><a href="#legal-authorities-riservatezza">8. Riservatezza, informazione e tracciabilità</a></li></ul></nav><section class="legal-document__section" aria-labelledby="legal-authorities-contatto"><h2 id="legal-authorities-contatto" tabindex="-1">1. Ambito e punto di contatto</h2><p>Il gestore di LoveMatch360 è Valeriu Ciubotaru. Le autorità giudiziarie, di polizia e le altre autorità competenti possono contattare il gestore all’indirizzo info@lovematch360.com per richieste relative al servizio. Le segnalazioni ordinarie degli utenti vanno invece inviate a servizioclienti@lovematch360.com secondo la AUP.</p><p>Il recapito del gestore è Via Errico Giachino 24, 10149 Torino (TO), Italia. Per il punto di contatto sono accettate comunicazioni in italiano e inglese. Per gli atti regolati da specifici strumenti nazionali o dell’Unione europea restano applicabili le rispettive regole su destinatari, canali, lingue e traduzioni.</p><p>Questo indirizzo email ordinario facilita il contatto e non sostituisce le forme di notificazione, i destinatari designati o i sistemi di trasmissione imposti dalla legge. Il presente protocollo non modifica i poteri delle autorità né crea un diritto generale di accesso ai dati degli utenti.</p><ul class="legal-document__links"><li><a href="mailto:info@lovematch360.com?subject=Richiesta%20autorit%C3%A0%20-%20LoveMatch360">Contatta il gestore per una richiesta ufficiale</a></li></ul></section><section class="legal-document__section" aria-labelledby="legal-authorities-contenuto-richiesta"><h2 id="legal-authorities-contenuto-richiesta" tabindex="-1">2. Elementi necessari alla valutazione</h2><p>La richiesta deve permettere di verificare chi la presenta, il suo fondamento e il suo ambito. Si richiedono, quando pertinenti allo strumento utilizzato, i seguenti elementi. Restano prevalenti i contenuti e i modelli obbligatori previsti dalla legge.</p><ul><li>Denominazione dell’autorità, nome e funzione del referente e recapiti istituzionali verificabili tramite una fonte indipendente.</li><li>Riferimento del procedimento o dell’atto, base giuridica, competenza e copia dell’ordine o del provvedimento quando richiesto.</li><li>Identificativi sufficienti a individuare l’account, il contenuto o l’evento, senza richiedere ricerche indiscriminate su tutti gli utenti.</li><li>Categorie di dati o misure richieste, periodo temporale, finalità e motivi della necessità della richiesta.</li><li>Termine applicabile, eventuale urgenza motivata e relativi fatti, obblighi di segretezza o divieti di informare l’interessato.</li><li>Canale istituzionale o sicuro proposto per la risposta e riferimenti per risolvere dubbi o richieste di integrazione.</li></ul></section><section class="legal-document__section" aria-labelledby="legal-authorities-verifica"><h2 id="legal-authorities-verifica" tabindex="-1">3. Verifica della richiesta</h2><p>Il gestore verifica autenticità, provenienza, competenza, validità dell’atto e ambito della richiesta. Un’email, un logo o un documento allegato non sono sufficienti, da soli, a provare l’identità del richiedente.</p><p>Sono valutati necessità, proporzionalità, dati effettivamente disponibili e salvaguardie applicabili. Se la richiesta è ambigua, incompleta o eccessivamente ampia, vengono chiesti chiarimenti o una delimitazione, nei limiti compatibili con i termini legali e con le eventuali procedure di opposizione previste.</p><p>Se necessario, il gestore richiede assistenza legale o tecnica autorizzata. Le richieste non vengono evase automaticamente attraverso questo sito o sulla sola base di una dichiarazione di urgenza.</p></section><section class="legal-document__section" aria-labelledby="legal-authorities-dati"><h2 id="legal-authorities-dati" tabindex="-1">4. Dati e misure che possono essere oggetto di risposta</h2><p>La risposta riguarda soltanto i dati effettivamente in possesso o sotto il controllo del gestore e giuridicamente comunicabili. A seconda dell’account e delle funzioni usate, possono rientrare dati di registrazione, dati del profilo, contenuti caricati, interazioni o messaggi pertinenti e dati tecnici realmente disponibili. Questo elenco non attesta che ogni categoria sia conservata per ogni utente o per un periodo prefissato.</p><p>Non vengono promessi il recupero di dati mai raccolti o già cancellati, una conservazione permanente, l’accesso a informazioni detenute esclusivamente da soggetti terzi o capacità di intercettazione non disponibili. Le eventuali richieste a fornitori autonomi seguono i rispettivi strumenti legali.</p><p>Prima della comunicazione sono esclusi i dati estranei all’atto e sono verificati destinatario, contenuto e modalità di trasferimento. Per informazioni sensibili viene utilizzato un canale adeguato al rischio e concordato con un referente verificato.</p></section><section class="legal-document__section" aria-labelledby="legal-authorities-conservazione"><h2 id="legal-authorities-conservazione" tabindex="-1">5. Ordini di conservazione</h2><p>Un ordine di conservazione valido viene esaminato per individuare dati, periodo e durata richiesti e le misure necessarie a preservare soltanto quanto rientra nell’atto. L’ordine di conservare non autorizza automaticamente a comunicare i dati.</p><p>Sono documentati fondamento, ambito, accessi autorizzati e scadenza della misura, con gli eventuali rinnovi o cessazioni. Alla cessazione del vincolo si applicano le regole di conservazione pertinenti, senza trasformare la richiesta in una raccolta indiscriminata o indefinita di informazioni.</p></section><section class="legal-document__section" aria-labelledby="legal-authorities-ue-estero"><h2 id="legal-authorities-ue-estero" tabindex="-1">6. Richieste europee e da paesi terzi</h2><p>Le richieste provenienti da altri Stati sono valutate secondo gli strumenti nazionali, dell’Unione europea e internazionali applicabili. Quando ricorrono i presupposti, si applicano anche le regole sugli ordini europei di produzione e conservazione di prove elettroniche e i relativi destinatari, canali, termini e rimedi.</p><p>Una richiesta proveniente da un’autorità di un paese terzo non costituisce, da sola, una base sufficiente per comunicare o trasferire dati personali. Occorre valutare la base giuridica del trattamento, le condizioni del capo V del GDPR, l’articolo 48 e gli eventuali accordi o altri presupposti applicabili.</p><p>I termini imposti da un atto valido o dalla legge prevalgono sui tempi ordinari di assistenza. L’assenza di un servizio email di emergenza non sospende gli obblighi legali applicabili.</p></section><section class="legal-document__section" aria-labelledby="legal-authorities-emergenze"><h2 id="legal-authorities-emergenze" tabindex="-1">7. Pericolo immediato e segnalazioni obbligatorie</h2><p>In caso di pericolo immediato per la vita o la sicurezza, gli utenti devono rivolgersi ai servizi di emergenza, in Italia il 112. Le caselle LoveMatch360 non sono un pronto intervento e non garantiscono reperibilità continuativa.</p><p>Un’autorità che presenta una richiesta urgente deve indicare il rischio concreto, gli elementi che lo giustificano e un recapito istituzionale rapidamente verificabile. Il gestore valuta con priorità la richiesta e i presupposti per le misure legalmente consentite o dovute.</p><p>Quando ricorrono i presupposti degli obblighi di segnalazione previsti dalla legge, inclusi quelli relativi a sospetti di reati che minacciano la vita o la sicurezza delle persone, il gestore informa senza indebito ritardo le autorità competenti e trasmette le informazioni pertinenti secondo le regole applicabili.</p></section><section class="legal-document__section" aria-labelledby="legal-authorities-riservatezza"><h2 id="legal-authorities-riservatezza" tabindex="-1">8. Riservatezza, informazione e tracciabilità</h2><p>L’accesso alle richieste e ai dati coinvolti è limitato alle persone autorizzate che ne hanno necessità. Vengono documentati la richiesta, le verifiche, il fondamento della decisione, le misure adottate e i dati eventualmente comunicati, evitando copie o diffusione non necessarie.</p><p>L’utente è informato quando la normativa lo richiede o lo consente, tenendo conto di eventuali divieti validi, delle esigenze dell’indagine e della tutela delle persone. Il protocollo non promette un avviso preventivo in ogni caso e non attribuisce segretezza automatica a qualsiasi richiesta.</p><p>La documentazione è conservata per il periodo giustificato da obblighi applicabili e necessità documentate, con riesame dei vincoli e accessi protetti. Per le informazioni generali sul trattamento e per i diritti degli interessati si rimanda all’Informativa Privacy.</p><ul class="legal-document__links"><li><a href="/#/privacy">Informativa Privacy</a></li><li><a href="/legal/uso-accettabile">Segnalazioni degli utenti e AUP</a></li></ul></section><footer class="legal-document__footer"><p>LoveMatch360 · Protocollo per le richieste delle autorità · 31 ottobre 2026</p><a href="/">Torna al sito</a></footer></article></main>
+</body>
+</html>
