@@ -35,6 +35,7 @@ export default function Sicurezza() {
         },
       ]}
       quickLinks={[
+        { label: "Regole di uso (AUP)", href: "#/aup", text: "Divieti, segnalazioni e riesame delle decisioni." },
         { label: "Privacy", href: "#/privacy", text: "Dati e consenso." },
         { label: "Cookie", href: "#/cookies", text: "Alias cookie e cookies." },
         { label: "Contatti", href: "#/contatti", text: "Supporto senza segreti." },
