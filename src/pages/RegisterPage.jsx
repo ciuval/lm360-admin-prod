@@ -8,6 +8,7 @@ import {
 } from "../lib/activationJourney.js";
 import toast from "react-hot-toast";
 import { getPasswordFeedback, normalizeSignupError } from "../lib/signupFeedback.js";
+import { LEGAL_VERSION } from "../content/legalDocuments.js";
 
 const reservedEmails = new Set([
   "test@example.com",
@@ -132,7 +133,7 @@ export default function RegisterPage() {
             privacy_acknowledged: true,
             terms_accepted: true,
             legal_accepted_at: new Date().toISOString(),
-            legal_version: "v2",
+            legal_version: LEGAL_VERSION,
             adult_attested: true,
             source: "register_page_v2",
           },
@@ -302,6 +303,16 @@ export default function RegisterPage() {
                 style={linkStyle}
               >
                 Termini
+              </Link>{" "}
+              e la{" "}
+              <Link
+                to="/uso-accettabile"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Policy di utilizzo accettabile (si apre in una nuova scheda)"
+                style={linkStyle}
+              >
+                Policy di utilizzo accettabile
               </Link>{" "}
               e confermo di aver letto la{" "}
               <Link

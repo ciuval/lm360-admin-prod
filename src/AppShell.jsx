@@ -266,6 +266,8 @@ function getCurrentSection(pathname, isAuthed, tier) {
     pathname.startsWith("/terms") ||
     pathname.startsWith("/refunds") ||
     pathname.startsWith("/termini") ||
+    pathname.startsWith("/uso-accettabile") ||
+    pathname.startsWith("/richieste-autorita") ||
     pathname.startsWith("/rimborsi")
   ) {
     return {
@@ -370,7 +372,7 @@ export default function AppShell({ children }) {
   }
 
   return (
-    <div style={shellStyle}>
+    <div className="lm360-shell" style={shellStyle}>
       <header style={headerStyle}>
         <div style={headerInnerStyle}>
           <div style={topRowStyle}>

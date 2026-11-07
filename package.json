@@ -8,6 +8,9 @@
   },
   "scripts": {
     "dev": "vite",
+    "build:legal": "node scripts/build-legal.mjs",
+    "check:legal": "node scripts/build-legal.mjs --check",
+    "prebuild": "npm run build:legal",
     "build": "vite build",
     "test": "node --test tests/*.test.js",
     "preview": "vite preview",

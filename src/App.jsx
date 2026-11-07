@@ -61,6 +61,8 @@ import QuantumPage from "./pages/QuantumPage.jsx";
 import Privacy from "./pages/legal/Privacy.jsx";
 import Cookie from "./pages/legal/Cookie.jsx";
 import Terms from "./pages/legal/Terms.jsx";
+import AcceptableUse from "./pages/legal/AcceptableUse.jsx";
+import Authorities from "./pages/legal/Authorities.jsx";
 import Refunds from "./pages/legal/Refunds.jsx";
 import Contatti from "./pages/Contatti.jsx";
 import FAQ from "./pages/FAQ.jsx";
@@ -228,6 +230,8 @@ export default function App() {
               <Route path="/terms" element={<Terms />} />
               <Route path="/refunds" element={<Refunds />} />
 <Route path="/termini" element={<Terms />} />
+              <Route path="/uso-accettabile" element={<AcceptableUse />} />
+              <Route path="/richieste-autorita" element={<Authorities />} />
 <Route path="/rimborsi" element={<Refunds />} />
 <Route path="/contatti" element={<Contatti />} />
 <Route path="/faq" element={<FAQ />} />
