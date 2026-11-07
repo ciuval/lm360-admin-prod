@@ -39,6 +39,11 @@
       "source": "/libro/",
       "destination": "/libro",
       "permanent": true
+    },
+    {
+      "source": "/manifesto-sicurezza/",
+      "destination": "/manifesto-sicurezza",
+      "permanent": true
     }
   ],
   "headers": [
@@ -90,6 +95,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/manifesto-sicurezza",
+      "destination": "/manifesto-sicurezza.html"
+    },
     {
       "source": "/legal/termini",
       "destination": "/legal/termini.html"
