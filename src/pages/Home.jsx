@@ -428,6 +428,12 @@ export default function Home() {
         </aside>
       </section>
 
+      <aside aria-label="Impegno per la sicurezza digitale" style={{ marginTop: 20, padding: "20px 24px", border: "1px solid rgba(240,143,192,.35)", borderRadius: 20, background: "rgba(240,143,192,.075)" }}>
+        <strong style={{ display: "block", color: "#ffd6ea", fontSize: "1.1rem" }}>La sicurezza delle nuove generazioni ci riguarda tutti.</strong>
+        <p style={{ margin: "8px 0 12px", color: "rgba(248,250,252,.82)", lineHeight: 1.6 }}>Scopri il nostro impegno pubblico per una tecnologia più responsabile e rispettosa.</p>
+        <a href="/manifesto-sicurezza" style={{ color: "#ffd6ea", fontWeight: 800, textUnderlineOffset: 4 }}>Leggi il Manifesto per la sicurezza digitale</a>
+      </aside>
+
       <section className="lm-home-section" aria-labelledby="journey-title">
         <div className="lm-home-section-head">
           <h2 id="journey-title">Non più swipe. Un percorso.</h2>
