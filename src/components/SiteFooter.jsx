@@ -53,6 +53,7 @@ const linkGroups = [
       { label: "Contatti", href: "#/contatti" },
       { label: "FAQ", href: "#/faq" },
       { label: "Sicurezza", href: "#/sicurezza" },
+      { label: "Manifesto per la sicurezza digitale", href: "/manifesto-sicurezza" },
       { label: "Privacy", href: "#/privacy" },
       { label: "Cookie", href: "#/cookies" },
       { label: "Termini", href: "#/terms" },
