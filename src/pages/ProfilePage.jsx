@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { persistProfile } from "../lib/persistProfile.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import PremiumStatusBox from "../components/PremiumStatusBox";
@@ -61,6 +62,7 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
 
   const [profilo, setProfilo] = useState(null);
+  const [profileExists, setProfileExists] = useState(false);
   const [userId, setUserId] = useState(null);
   const [userEmail, setUserEmail] = useState("");
 
@@ -102,6 +104,7 @@ export default function ProfilePage() {
           setUserId(null);
           setUserEmail("");
           setProfilo(null);
+          setProfileExists(false);
           setName("");
           setBio("");
           setInterests("");
@@ -140,6 +143,7 @@ export default function ProfilePage() {
         };
 
         setProfilo(safeProfile);
+        setProfileExists(Boolean(profileData));
         setName(safeProfile.nome || "");
         setBio(safeProfile.bio || "");
         setInterests(
@@ -194,40 +198,6 @@ export default function ProfilePage() {
   }, []);
 
   const isPremium = useMemo(() => hasCommercialPremium(profilo), [profilo]);
-
-  const ensureProfileRow = async () => {
-    if (!userId) {
-      throw new Error("Utente non autenticato.");
-    }
-
-    const payload = {
-      id: userId,
-      email: profilo?.email || userEmail || "",
-      nome: name.trim(),
-      bio: bio.trim(),
-      interessi: interests.trim(),
-      updated_at: new Date().toISOString(),
-    };
-
-    const { data, error } = await supabase
-      .from("profili")
-      .upsert(payload, { onConflict: "id" })
-      .select("id, nome, email, bio, interessi, foto_url, avatar_url, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account")
-      .maybeSingle();
-
-    if (error) {
-      throw error;
-    }
-
-    const nextProfile = data || {
-      ...(profilo || {}),
-      ...payload,
-    };
-
-    setProfilo(nextProfile);
-
-    return nextProfile;
-  };
 
   const handleAddPhoto = () => {
     const input = document.getElementById("profile-photo-input");
@@ -452,34 +422,24 @@ export default function ProfilePage() {
 
       const primaryPhoto = photos.find((item) => item.isPrimary)?.url || null;
 
-      const payload = {
-        id: userId,
-        email: profilo?.email || userEmail || "",
-        nome: name.trim(),
-        bio: bio.trim(),
-        interessi: interests.trim(),
-        foto_url: primaryPhoto,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { data, error } = await supabase
-        .from("profili")
-        .upsert(payload, { onConflict: "id" })
-        .select(
-          "id, nome, email, bio, interessi, foto_url, avatar_url, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account"
-        )
-        .maybeSingle();
-
-      if (error) {
+      let nextProfile;
+      try {
+        nextProfile = await persistProfile(supabase, {
+          userId,
+          profileExists,
+          email: userEmail,
+          name,
+          bio,
+          interests,
+          photoUrl: primaryPhoto,
+        });
+      } catch {
         track("profile_save_failed", getActivationJourneyProps()).catch(() => {});
         toast.error("Impossibile salvare il profilo.");
         return;
       }
 
-      const nextProfile = data || {
-        ...(profilo || {}),
-        ...payload,
-      };
+      setProfileExists(true);
 
       const nextCompletion = calculateProfileCompletion({
         profile: nextProfile,
