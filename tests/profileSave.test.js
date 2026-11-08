@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { persistProfile } from "../src/lib/persistProfile.js";
+import { persistProfile, syncPrimaryProfilePhoto } from "../src/lib/persistProfile.js";
 
 function fakeClient(result = { data: { id: "test-id" }, error: null }) {
   const calls = [];
@@ -85,5 +85,32 @@ test("nessuna riga restituita genera un errore, non un falso successo", async ()
   await assert.rejects(
     persistProfile(client, { ...form, profileExists: true }),
     /non confermato/
+  );
+});
+
+
+test("sincronizzazione foto aggiorna solo il riferimento sul profilo", async () => {
+  const { client, calls } = fakeClient({ data: { id: "test-id", foto_url: "data:image/png;base64,dGVzdA==" }, error: null });
+  const data = await syncPrimaryProfilePhoto(client, {
+    userId: "test-id",
+    photoUrl: "data:image/png;base64,dGVzdA==",
+  });
+  assert.equal(data.id, "test-id");
+  assert.equal(calls[1][0], "update");
+  assert.deepEqual(Object.keys(calls[1][1]).sort(), ["foto_url", "updated_at"].sort());
+  assert.deepEqual(calls[2], ["eq", "id", "test-id"]);
+});
+
+test("rimozione dell'ultima foto azzera il riferimento principale", async () => {
+  const { client, calls } = fakeClient({ data: { id: "test-id", foto_url: null }, error: null });
+  await syncPrimaryProfilePhoto(client, { userId: "test-id", photoUrl: null });
+  assert.equal(calls[1][1].foto_url, null);
+});
+
+test("sincronizzazione foto segnala errori RLS, senza falso successo", async () => {
+  const { client } = fakeClient({ data: null, error: { code: "42501" } });
+  await assert.rejects(
+    syncPrimaryProfilePhoto(client, { userId: "test-id", photoUrl: null }),
+    (error) => error.code === "42501"
   );
 });
