@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { persistProfile } from "../lib/persistProfile.js";
+import { persistProfile, syncPrimaryProfilePhoto } from "../lib/persistProfile.js";
 import { useLocation, useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import PremiumStatusBox from "../components/PremiumStatusBox";
 import StoricoAbbonamenti from "../components/StoricoAbbonamenti";
 import ProfilePhotoGallery from "../components/profile/ProfilePhotoGallery";
@@ -235,13 +235,23 @@ export default function ProfilePage() {
     try {
       setUploading(true);
 
-      await ensureProfileRow();
-
-
+      // Alcuni account creati da Supabase Auth non hanno ancora una riga in profili.
+      // Non usare upsert: le autorizzazioni di UPDATE non permettono di riscrivere id.
+      if (!profileExists) {
+        const created = await persistProfile(supabase, {
+          userId,
+          profileExists: false,
+          email: userEmail,
+          name,
+          bio,
+          interests,
+          photoUrl: profilo?.foto_url || null,
+        });
+        setProfilo(created);
+        setProfileExists(true);
+      }
 
       const currentPhotos = [...photos];
-
-
       const rowsToInsert = [];
 
       for (const file of filesToUse) {
@@ -288,7 +298,16 @@ export default function ProfilePage() {
 
       const normalized = normalizePhotos(refreshed || []);
       setPhotos(normalized);
-      toast.success("📸 Foto caricate");
+
+      const primaryUrl = normalized.find((item) => item.isPrimary)?.url || null;
+      try {
+        await syncPrimaryProfilePhoto(supabase, { userId, photoUrl: primaryUrl });
+        setProfilo((current) => ({ ...(current || {}), foto_url: primaryUrl }));
+      } catch {
+        toast.error("Foto caricate, ma non sincronizzate col profilo. Riprova il salvataggio.");
+        return;
+      }
+      toast.success("Foto caricate e sincronizzate.");
     } catch {
       track("profile_photo_failed", {
         ...getActivationJourneyProps(),
@@ -336,8 +355,12 @@ export default function ProfilePage() {
 
       if (refreshError) throw refreshError;
 
-      setPhotos(normalizePhotos(refreshed || []));
-      toast.success("✨ Foto principale aggiornata");
+      const normalized = normalizePhotos(refreshed || []);
+      setPhotos(normalized);
+      const primaryUrl = normalized.find((item) => item.isPrimary)?.url || null;
+      await syncPrimaryProfilePhoto(supabase, { userId, photoUrl: primaryUrl });
+      setProfilo((current) => ({ ...(current || {}), foto_url: primaryUrl }));
+      toast.success("Foto principale aggiornata.");
     } catch {
       track("profile_photo_failed", {
         ...getActivationJourneyProps(),
@@ -398,7 +421,10 @@ export default function ProfilePage() {
 
       const normalized = normalizePhotos(compacted || []);
       setPhotos(normalized);
-      toast.success("🗑️ Foto rimossa");
+      const primaryUrl = normalized.find((item) => item.isPrimary)?.url || null;
+      await syncPrimaryProfilePhoto(supabase, { userId, photoUrl: primaryUrl });
+      setProfilo((current) => ({ ...(current || {}), foto_url: primaryUrl }));
+      toast.success("Foto rimossa.");
     } catch {
       track("profile_photo_failed", {
         ...getActivationJourneyProps(),
@@ -420,7 +446,7 @@ export default function ProfilePage() {
     try {
       setSaving(true);
 
-      const primaryPhoto = photos.find((item) => item.isPrimary)?.url || null;
+      const primaryPhoto = photos.find((item) => item.isPrimary)?.url || profilo?.foto_url || null;
 
       let nextProfile;
       try {
@@ -451,10 +477,11 @@ export default function ProfilePage() {
         ...getActivationJourneyProps(),
         completion: nextCompletion.score,
       }).catch(() => {});
+      const missing = nextCompletion.missingItems.map((item) => item.label.toLowerCase()).join(", ");
       toast.success(
         nextCompletion.isComplete
           ? "Profilo completo. Ora puoi scoprire persone."
-          : `Profilo salvato: ${nextCompletion.score}% completo.`
+          : `Modifiche salvate. Profilo al ${nextCompletion.score}%. Mancano: ${missing}.`
       );
 
       if (!completionTrackedRef.current && nextCompletion.isComplete) {
@@ -501,7 +528,6 @@ export default function ProfilePage() {
 
   return (
     <div style={containerStyle}>
-      <Toaster position="top-right" />
 
       <style>{`
         @media (max-width: 600px) {
