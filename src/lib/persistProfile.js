@@ -41,3 +41,20 @@ export async function persistProfile(client, {
   if (!data) throw new Error("Salvataggio profilo non confermato.");
   return data;
 }
+
+
+/** Mantiene la foto principale visibile anche fuori dalla galleria. */
+export async function syncPrimaryProfilePhoto(client, { userId, photoUrl }) {
+  if (!userId) throw new Error("Utente non autenticato.");
+
+  const { data, error } = await client
+    .from("profili")
+    .update({ foto_url: photoUrl || null, updated_at: new Date().toISOString() })
+    .eq("id", userId)
+    .select("id, foto_url")
+    .single();
+
+  if (error) throw error;
+  if (!data) throw new Error("Foto principale non sincronizzata.");
+  return data;
+}
