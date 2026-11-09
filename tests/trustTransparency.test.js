@@ -17,6 +17,7 @@ test("Sicurezza distingue 18+ autodichiarato da identita verificata", async () =
   assert.match(page, /Età dichiarata, non identità verificata/);
   assert.match(page, /non equivalgono a una verifica documentale/);
   assert.match(page, /Nuovi acquisti Premium sospesi/);
+  assert.match(page, /autorizzazioni dei messaggi sono ancora in revisione tecnica/);
 });
 
 test("Contatti spiega come segnalare senza condividere credenziali", async () => {
@@ -39,6 +40,7 @@ test("FAQ chiarisce regole, limiti, segnalazioni e pagamenti sospesi", async () 
     assert.match(page.toLowerCase(), new RegExp(item.toLowerCase().replace("nessuna verifica", "verifica documentale")));
   }
   assert.match(page, /mailto:servizioclienti@lovematch360\.com/);
+  assert.match(page, /verifica delle autorizzazioni sul backend è ancora in corso/);
 });
 
 test("Footer usa dichiarazioni verificabili e non certificazioni inesistenti", async () => {
@@ -46,6 +48,8 @@ test("Footer usa dichiarazioni verificabili e non certificazioni inesistenti", a
   assert.match(footer, /18\+ con autodichiarazione/);
   assert.match(footer, /Segnalazioni via email/);
   assert.match(footer, /Nuovi acquisti Premium sospesi/);
+  assert.match(footer, /Nessun credito chat per messaggio/);
+  assert.doesNotMatch(footer, /Match solo reciproci/);
   assert.doesNotMatch(footer, /"Privacy rispettata"/);
   assert.doesNotMatch(footer, /"Contatti puliti"/);
 });
