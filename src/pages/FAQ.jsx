@@ -30,7 +30,7 @@ export default function FAQ() {
         {
           label: "Match",
           title: "Quando posso conversare?",
-          text: "L'interesse deve essere reciproco per diventare un match. Un match non garantisce una risposta, un incontro o la compatibilità reale tra due persone.",
+          text: "Il percorso è progettato per mostrare un match quando l'interesse è reciproco. La verifica delle autorizzazioni sul backend è ancora in corso. Un match non garantisce una risposta, un incontro o la compatibilità reale tra due persone.",
           actions: [{ label: "Vai ai match", href: "#/match" }, { label: "Come funziona", href: "#/come-funziona" }],
         },
         {
