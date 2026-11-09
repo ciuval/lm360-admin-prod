@@ -27,7 +27,7 @@ export default function Sicurezza() {
         {
           label: "Account",
           title: "Accessi e conversazioni",
-          text: "Il profilo personale richiede l'accesso. Per entrare in Scopri persone occorrono nome, bio, interessi e almeno una foto. La chat segue le regole di interazione reciproca. Un match non certifica l'identità di nessuno.",
+          text: "Il profilo personale richiede l'accesso. Per entrare in Scopri persone occorrono nome, bio, interessi e almeno una foto. Il percorso di scoperta è progettato attorno all'interesse reciproco. Le autorizzazioni dei messaggi sono ancora in revisione tecnica; un match non certifica l'identità di nessuno.",
           actions: [
             { label: "Come funziona", href: "#/come-funziona" },
             { label: "Profilo", href: "#/profilo" },
@@ -56,7 +56,7 @@ export default function Sicurezza() {
         },
       ]}
       quickLinks={[
-        { label: "Segnalazioni e contatti", href: "#/contatti", text: "Canale di assistenza disponibile senza account." },
+        { label: "Segnalazioni e contatti", href: "#/contatti", text: "Recapito di assistenza accessibile senza account." },
         { label: "Policy di utilizzo", href: "#/uso-accettabile", text: "Comportamenti vietati e procedura di segnalazione." },
         { label: "Termini", href: "#/termini", text: "Requisiti, limiti del servizio e diritti." },
         { label: "Privacy", href: "#/privacy", text: "Informazioni sul trattamento dei dati." },
