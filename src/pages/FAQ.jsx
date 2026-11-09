@@ -12,25 +12,25 @@ export default function FAQ() {
         {
           label: "Registrazione",
           title: "Come comincio?",
-          text: "Crea un account con email e password, conferma l'email quando richiesto e completa nome, bio, interessi e almeno una foto. Un profilo e completo solo quando tutti e quattro i requisiti sono soddisfatti.",
+          text: "Crea un account con email e password, conferma l'email quando richiesto e completa nome, bio, interessi e almeno una foto. Un profilo è completo solo quando tutti e quattro i requisiti sono soddisfatti.",
           actions: [{ label: "Registrati", href: "#/register" }, { label: "Profilo", href: "#/profilo" }],
         },
         {
           label: "Eta",
           title: "Le persone sono verificate?",
-          text: "Per registrarsi bisogna dichiarare almeno 18 anni. Questa autodichiarazione e la conferma email non sono una verifica documentale dell'identita o dell'eta. Non presentiamo gli altri profili come identita certificate.",
+          text: "Per registrarsi bisogna dichiarare di avere almeno 18 anni. Questa autodichiarazione e la conferma email non sono una verifica documentale dell'identità o dell'età. Non presentiamo gli altri profili come identità certificate.",
           actions: [{ label: "Sicurezza", href: "#/sicurezza" }, { label: "Termini", href: "#/termini" }],
         },
         {
           label: "Scoperta",
-          title: "Perche potrei vedere pochi profili?",
+          title: "Perché potrei vedere pochi profili?",
           text: "Scopri persone mostra i profili disponibili che soddisfano i requisiti del percorso. Non inventiamo utenti per riempire la lista e non promettiamo un numero minimo di persone o di incontri.",
           actions: [{ label: "Scopri persone", href: "#/scopri-profili" }],
         },
         {
           label: "Match",
           title: "Quando posso conversare?",
-          text: "L'interesse deve essere reciproco per diventare un match. Un match non garantisce una risposta, un incontro o la compatibilita reale tra due persone.",
+          text: "L'interesse deve essere reciproco per diventare un match. Un match non garantisce una risposta, un incontro o la compatibilità reale tra due persone.",
           actions: [{ label: "Vai ai match", href: "#/match" }, { label: "Come funziona", href: "#/come-funziona" }],
         },
         {
@@ -42,13 +42,13 @@ export default function FAQ() {
         {
           label: "Premium",
           title: "Devo pagare per usare il sito?",
-          text: "I nuovi acquisti Premium sono attualmente sospesi. Le pagine Premium e checkout non avviano nuovi acquisti. Non e previsto l'acquisto di crediti per leggere o inviare ogni singolo messaggio.",
+          text: "I nuovi acquisti Premium sono attualmente sospesi. Le pagine Premium e checkout non avviano nuovi acquisti. Non è previsto l'acquisto di crediti per leggere o inviare ogni singolo messaggio.",
           actions: [{ label: "Stato Premium", href: "#/premium" }],
         },
         {
           label: "Dati",
           title: "Come chiedo la chiusura del mio account?",
-          text: "Invia la richiesta a servizioclienti@lovematch360.com. Il supporto dovra verificarla e gestirla nel rispetto degli obblighi applicabili; non e promessa una cancellazione automatica immediata.",
+          text: "Invia la richiesta a servizioclienti@lovematch360.com. Il supporto dovra verificarla e gestirla nel rispetto degli obblighi applicabili; non è promessa una cancellazione automatica immediata.",
           actions: [{ label: "Contatti", href: "#/contatti" }, { label: "Privacy", href: "#/privacy" }],
         },
       ]}
