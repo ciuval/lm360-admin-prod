@@ -5,14 +5,14 @@ export default function Sicurezza() {
     <InfoPageTemplate
       eyebrow="Sicurezza e fiducia"
       title="La fiducia comincia dalla trasparenza."
-      lead="LoveMatch360 aiuta le persone a conoscersi, ma non garantisce l'identita degli altri utenti, la sincerita di un profilo o un incontro sicuro. Qui trovi le regole, i limiti attuali e un contatto umano per chiedere aiuto."
+      lead="LoveMatch360 aiuta le persone a conoscersi, ma non garantisce l'identità degli altri utenti, la sincerità di un profilo o un incontro sicuro. Qui trovi le regole, i limiti attuali e un contatto umano per chiedere aiuto."
       cta={{ label: "Segnala un problema", href: "mailto:servizioclienti@lovematch360.com" }}
       secondaryCta={{ label: "Leggi le regole d'uso", href: "#/uso-accettabile" }}
       sections={[
         {
           label: "Segnalazioni",
           title: "Molestie, truffe o profili sospetti",
-          text: "Scrivi a servizioclienti@lovematch360.com con una breve descrizione, il riferimento al profilo o al contenuto e, se possibile, la data. Non inviare password, codici, documenti d'identita o numeri completi di carte. Le segnalazioni passano per email: non promettiamo il monitoraggio automatico di ogni conversazione.",
+          text: "Scrivi a servizioclienti@lovematch360.com con una breve descrizione, il riferimento al profilo o al contenuto e, se possibile, la data. Non inviare password, codici, documenti d'identità o numeri completi di carte. Le segnalazioni passano per email: non promettiamo il monitoraggio automatico di ogni conversazione.",
           actions: [
             { label: "Scrivi all'assistenza", href: "mailto:servizioclienti@lovematch360.com" },
             { label: "Policy di utilizzo", href: "#/uso-accettabile" },
@@ -20,14 +20,14 @@ export default function Sicurezza() {
         },
         {
           label: "18+",
-          title: "Eta dichiarata, non identita verificata",
-          text: "Per registrarsi e necessario dichiarare di avere almeno 18 anni. La conferma dell'email e questa dichiarazione non equivalgono a una verifica documentale dell'eta o dell'identita. Se sospetti la presenza di un minore, contatta l'assistenza.",
+          title: "Età dichiarata, non identita verificata",
+          text: "Per registrarsi è necessario dichiarare di avere almeno 18 anni. La conferma dell'email e questa dichiarazione non equivalgono a una verifica documentale dell'età o dell'identità. Se sospetti la presenza di un minore, contatta l'assistenza.",
           actions: [{ label: "Termini", href: "#/termini" }],
         },
         {
           label: "Account",
           title: "Accessi e conversazioni",
-          text: "Il profilo personale richiede l'accesso. Per entrare in Scopri persone occorrono nome, bio, interessi e almeno una foto. La chat segue le regole di interazione reciproca. Un match non certifica l'identita di nessuno.",
+          text: "Il profilo personale richiede l'accesso. Per entrare in Scopri persone occorrono nome, bio, interessi e almeno una foto. La chat segue le regole di interazione reciproca. Un match non certifica l'identità di nessuno.",
           actions: [
             { label: "Come funziona", href: "#/come-funziona" },
             { label: "Profilo", href: "#/profilo" },
@@ -42,7 +42,7 @@ export default function Sicurezza() {
         {
           label: "Privacy",
           title: "Richieste su account e dati",
-          text: "Per chiedere la chiusura dell'account, informazioni sui dati o esercitare un diritto privacy usa il contatto di assistenza. Una richiesta via email non equivale a una cancellazione automatica: il supporto dovra verificare e gestire il caso.",
+          text: "Per chiedere la chiusura dell'account, informazioni sui dati o esercitare un diritto privacy usa il contatto di assistenza. Una richiesta via email non equivale a una cancellazione automatica: il supporto dovrà verificare e gestire il caso.",
           actions: [
             { label: "Privacy", href: "#/privacy" },
             { label: "Scrivi all'assistenza", href: "mailto:servizioclienti@lovematch360.com" },
