@@ -71,7 +71,7 @@ const statusItems = [
   "Segnalazioni via email",
   "Regole e contatti pubblici",
   "Nuovi acquisti Premium sospesi",
-  "Match solo reciproci",
+  "Nessun credito chat per messaggio",
 ];
 
 export default function SiteFooter() {
