@@ -20,7 +20,7 @@ export default function Sicurezza() {
         },
         {
           label: "18+",
-          title: "Età dichiarata, non identita verificata",
+          title: "Età dichiarata, non identità verificata",
           text: "Per registrarsi è necessario dichiarare di avere almeno 18 anni. La conferma dell'email e questa dichiarazione non equivalgono a una verifica documentale dell'età o dell'identità. Se sospetti la presenza di un minore, contatta l'assistenza.",
           actions: [{ label: "Termini", href: "#/termini" }],
         },
