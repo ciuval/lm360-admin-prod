@@ -1,0 +1,38 @@
+name: Verify LoveMatch360 PR
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install from lockfile
+        run: npm ci
+
+      - name: Build static legal pages
+        run: npm run build:legal
+
+      - name: Run regression tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Verify legal documents
+        run: npm run check:legal
