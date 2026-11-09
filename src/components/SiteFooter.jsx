@@ -67,11 +67,11 @@ const linkGroups = [
 ];
 
 const statusItems = [
-  "Sito vivo",
-  "Crescita con calma",
-  "Privacy rispettata",
-  "Contatti puliti",
-  "Nessun invio email dal browser",
+  "18+ con autodichiarazione",
+  "Segnalazioni via email",
+  "Regole e contatti pubblici",
+  "Nuovi acquisti Premium sospesi",
+  "Match solo reciproci",
 ];
 
 export default function SiteFooter() {
