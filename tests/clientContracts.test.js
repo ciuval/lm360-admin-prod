@@ -4,6 +4,15 @@ import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
+test("Like usa user_id coerente con le policy RLS e non si fida di user_from", async () => {
+  const page = await read("src/pages/PublicProfilesPage.jsx");
+  assert.match(page, /user_id: userId/);
+  assert.match(page, /user_from: userId/);
+  assert.match(page, /user_to: profiloId/);
+  assert.match(page, /\.eq\("user_id", profiloId\)/);
+  assert.doesNotMatch(page, /\.eq\("user_from",/);
+});
+
 test("Scopri non scrive match_scores direttamente dal browser", async () => {
   const page = await read("src/pages/PublicProfilesPage.jsx");
   assert.doesNotMatch(page, /from\(["']match_scores["']\)\.upsert\s*\(/);
