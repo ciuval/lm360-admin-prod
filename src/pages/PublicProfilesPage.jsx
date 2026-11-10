@@ -79,7 +79,7 @@ export default function PublicProfilesPage() {
           const { data: likeData, error: likeError } = await supabase
             .from("likes")
             .select("user_to")
-            .eq("user_from", currentUserId);
+            .eq("user_id", currentUserId);
 
           if (!alive) return;
           if (likeError) {
@@ -189,6 +189,7 @@ export default function PublicProfilesPage() {
     try {
       const { error } = await supabase.from("likes").insert([
         {
+          user_id: userId,
           user_from: userId,
           user_to: profiloId,
         },
@@ -215,7 +216,7 @@ export default function PublicProfilesPage() {
         const { count, error: countError } = await supabase
           .from("likes")
           .select("user_to", { count: "exact", head: true })
-          .eq("user_from", userId);
+          .eq("user_id", userId);
 
         if (countError) {
           track("first_like_check_failed", getActivationJourneyProps()).catch(() => {});
@@ -230,8 +231,8 @@ export default function PublicProfilesPage() {
 
       const { data: likeBack, error: likeBackError } = await supabase
         .from("likes")
-        .select("user_from, user_to")
-        .eq("user_from", profiloId)
+        .select("user_id, user_to")
+        .eq("user_id", profiloId)
         .eq("user_to", userId)
         .maybeSingle();
 
