@@ -9,8 +9,9 @@ test("Like usa user_id coerente con le policy RLS e non si fida di user_from", a
   assert.match(page, /user_id: userId/);
   assert.match(page, /user_from: userId/);
   assert.match(page, /user_to: profiloId/);
-  assert.match(page, /\.eq\("user_id", profiloId\)/);
   assert.doesNotMatch(page, /\.eq\("user_from",/);
+  assert.doesNotMatch(page, /const \{ data: likeBack/);
+  assert.doesNotMatch(page, /\.eq\("user_id", profiloId\)/);
 });
 
 test("Scopri non scrive match_scores direttamente dal browser", async () => {
