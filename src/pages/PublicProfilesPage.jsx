@@ -244,27 +244,28 @@ export default function PublicProfilesPage() {
 
       const pair = [userId, profiloId].sort();
 
-      const { error: matchError } = await supabase.from("match_scores").upsert(
-        [
-          {
-            user_a: pair[0],
-            user_b: pair[1],
-            score: 100,
-            matched_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ],
-        { onConflict: "user_a,user_b" }
-      );
+      // I match sono confermati dal backend, mai creati direttamente dal browser.
+      const { data: confirmedMatch, error: matchError } = await supabase
+        .from("match_scores")
+        .select("user_a, user_b, score")
+        .eq("user_a", pair[0])
+        .eq("user_b", pair[1])
+        .eq("score", 100)
+        .maybeSingle();
 
       if (matchError) {
-        track("match_create_failed", getActivationJourneyProps()).catch(() => {});
-        toast.error("Like salvato, ma il match non è stato registrato.");
+        track("match_check_failed", getActivationJourneyProps()).catch(() => {});
+        toast("Like salvato. La verifica del match non è disponibile.");
         return;
       }
 
-      track("match_created", getActivationJourneyProps()).catch(() => {});
-      toast.success("💘 Match reciproco trovato!");
+      if (!confirmedMatch) {
+        toast.success("Like salvato. Il match non è ancora confermato.");
+        return;
+      }
+
+      track("match_confirmed", getActivationJourneyProps()).catch(() => {});
+      toast.success("💘 Match reciproco confermato!");
       setMatches((prev) => [...prev, profiloId]);
     } catch {
       track("like_failed", {
@@ -328,9 +329,9 @@ export default function PublicProfilesPage() {
       <section role="status" aria-label="Stato del profilo" style={profileVisibleBox}>
         <span aria-hidden="true" style={profileVisibleIcon}>✓</span>
         <div>
-          <strong style={profileVisibleTitle}>Il tuo profilo gratuito è completo e visibile.</strong>
+          <strong style={profileVisibleTitle}>Il tuo profilo soddisfa i requisiti per entrare in Scopri.</strong>
           <p style={profileVisibleText}>
-            Puoi scoprire persone, inviare like e creare match. Nessun abbonamento richiesto.
+            La disponibilità e la visibilità dei profili dipendono anche dalle autorizzazioni del servizio. Nessun abbonamento richiesto.
           </p>
         </div>
       </section>
@@ -375,11 +376,11 @@ export default function PublicProfilesPage() {
             }}
           >
             <p style={{ margin: "0 0 0.5rem", fontWeight: 800 }}>
-              Il tuo profilo c’è. Stiamo aspettando le altre persone.
+              Nessun profilo disponibile in questo momento.
             </p>
             <p style={{ margin: 0, opacity: 0.82 }}>
-              Non devi acquistare Premium. Il tuo profilo è già visibile e pronto a ricevere
-              interazioni quando arriveranno altri profili completi.
+              Non serve acquistare Premium. Se non vedi altri profili, la causa può essere la disponibilità
+              degli utenti o una limitazione temporanea del servizio.
             </p>
             <Link
               to={`/profilo/${userId}`}
