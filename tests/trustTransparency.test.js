@@ -60,3 +60,12 @@ test("Le pagine esistono nel router senza aggiungere nuove route", async () => {
     assert.ok(app.includes(`path="${route}"`), `Route mancante: ${route}`);
   }
 });
+
+test("Premium non invita ad acquistare durante la sospensione", async () => {
+  const page = await read("src/pages/Premium.jsx");
+  assert.match(page, /I nuovi acquisti Premium sono sospesi/);
+  assert.match(page, /Nessun nuovo pagamento o abbonamento/);
+  assert.doesNotMatch(page, /primaryLabel: "Attiva Premium"/);
+  assert.doesNotMatch(page, /navigate\("\/attiva-premium"\)/);
+  assert.match(page, /primaryLabel: "Vai al profilo"/);
+});
