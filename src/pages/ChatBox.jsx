@@ -12,6 +12,7 @@ export default function ChatBox() {
   const [messaggi, setMessaggi] = useState([]);
   const [chatAbilitata, setChatAbilitata] = useState(false);
   const [verificaAccesso, setVerificaAccesso] = useState(true);
+  const [availabilityError, setAvailabilityError] = useState(false);
   const [altraPersonaStaScrivendo, setAltraPersonaStaScrivendo] = useState(false);
   const [destinatarioNome, setDestinatarioNome] = useState("questa persona");
   const scrollRef = useRef(null);
@@ -29,16 +30,23 @@ export default function ChatBox() {
       const myId = session.user.id;
       const pair = [myId, destinatarioId].sort();
 
-      const { data: match } = await supabase
+      setAvailabilityError(false);
+      const { data: match, error: matchError } = await supabase
         .from("match_scores")
         .select("user_a, user_b, score")
         .eq("user_a", pair[0])
         .eq("user_b", pair[1])
         .eq("score", 100)
         .maybeSingle();
-      const { data: roomCompatibility } = await supabase
+      const { data: roomCompatibility, error: roomError } = await supabase
         .rpc("get_stanza_compatibility", { target_user_id: destinatarioId })
         .maybeSingle();
+      if (matchError || roomError) {
+        setChatAbilitata(false);
+        setAvailabilityError(true);
+        setVerificaAccesso(false);
+        return;
+      }
       const roomCanOpen = Boolean(roomCompatibility?.opens);
       const allowed = Boolean(match) && roomCanOpen;
       setChatAbilitata(allowed);
@@ -58,7 +66,11 @@ export default function ChatBox() {
       setDestinatarioNome(profilo?.nome || "questa persona");
       setVerificaAccesso(false);
     };
-    checkMatchAndRead().catch(() => setVerificaAccesso(false));
+    checkMatchAndRead().catch(() => {
+      setChatAbilitata(false);
+      setAvailabilityError(true);
+      setVerificaAccesso(false);
+    });
   }, [session, destinatarioId]);
 
   useEffect(() => {
@@ -66,9 +78,9 @@ export default function ChatBox() {
     const caricaMessaggi = async () => {
       const { data } = await supabase
         .from("messaggi")
-        .select("id, mittente_id, destinatario_id, contenuto, letto, timestamp")
+        .select("id, mittente_id, destinatario_id, testo, letto, inviato_il")
         .or(`mittente_id.eq.${session.user.id},destinatario_id.eq.${session.user.id}`)
-        .order("timestamp", { ascending: true });
+        .order("inviato_il", { ascending: true });
       const filtrati = (data || []).filter(
         (msg) =>
           (msg.mittente_id === session.user.id && msg.destinatario_id === destinatarioId) ||
@@ -137,7 +149,7 @@ export default function ChatBox() {
   };
 
   const messaggiPerData = messaggi.reduce((acc, msg) => {
-    const giorno = new Date(msg.timestamp).toLocaleDateString();
+    const giorno = new Date(msg.inviato_il).toLocaleDateString();
     if (!acc[giorno]) acc[giorno] = [];
     acc[giorno].push(msg);
     return acc;
@@ -159,6 +171,10 @@ export default function ChatBox() {
 
       {verificaAccesso ? (
         <div role="status" style={closedStyle}>Verifica della Stanza 360 in corso…</div>
+      ) : availabilityError ? (
+        <div role="alert" style={closedStyle}>
+          Non possiamo verificare l’accesso alla Stanza 360 in questo momento. La chat resta chiusa per sicurezza.
+        </div>
       ) : !chatAbilitata ? (
         <div role="status" style={closedStyle}>
           La conversazione resta chiusa: servono almeno 50% di compatibilità e interesse reciproco. Nessun pagamento può aprirla.
@@ -181,12 +197,12 @@ export default function ChatBox() {
                   border: msg.letto ? "1px solid #0f0" : "1px solid #444",
                 }}
                 title={msg.letto && msg.mittente_id === session.user.id
-                  ? `Messaggio letto alle ${new Date(msg.timestamp).toLocaleTimeString()}`
+                  ? `Messaggio letto alle ${new Date(msg.inviato_il).toLocaleTimeString()}`
                   : undefined}
               >
-                <div>{msg.contenuto}</div>
+                <div>{msg.testo}</div>
                 <div style={{ fontSize: "0.75rem", color: "#bbb", marginTop: "0.3rem" }}>
-                  🕓 {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  🕓 {new Date(msg.inviato_il).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   {msg.mittente_id === session.user.id && msg.letto && " ✅"}
                 </div>
               </div>
