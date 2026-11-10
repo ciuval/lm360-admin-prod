@@ -229,19 +229,9 @@ export default function PublicProfilesPage() {
         track("first_like_sent", getActivationJourneyProps()).catch(() => {});
       }
 
-      const { data: likeBack, error: likeBackError } = await supabase
-        .from("likes")
-        .select("user_id, user_to")
-        .eq("user_id", profiloId)
-        .eq("user_to", userId)
-        .maybeSingle();
-
-      if (likeBackError) {
-        track("match_check_failed", getActivationJourneyProps()).catch(() => {});
-        return;
-      }
-
-      if (!likeBack || matches.includes(profiloId)) return;
+      // Non leggiamo il like ricevuto: è un dato privato dell'altra persona.
+      // Solo il backend può confermare se la coppia è reciprocamente interessata.
+      if (matches.includes(profiloId)) return;
 
       const pair = [userId, profiloId].sort();
 
