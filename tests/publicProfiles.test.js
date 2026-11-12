@@ -7,6 +7,8 @@ const completeProfile = {
   nome: "Vale",
   bio: "Una bio abbastanza lunga per essere riconoscibile.",
   interessi: "design",
+  status_account: "attivo",
+  profilo_pubblico: true,
 };
 
 test("a gallery-only photo keeps a complete profile discoverable", () => {
@@ -31,4 +33,25 @@ test("discovery excludes the current user and incomplete profiles", () => {
   );
 
   assert.deepEqual(result, []);
+});
+
+test("profili senza consenso esplicito non entrano in Scopri", () => {
+  const photo = [{ profilo_id: "profile-2", foto_url: "foto", is_primary: true }];
+  for (const consent of [false, null, undefined]) {
+    const rows = buildDiscoverableProfiles(
+      [{ ...completeProfile, profilo_pubblico: consent }],
+      photo,
+      "profile-1"
+    );
+    assert.deepEqual(rows, []);
+  }
+});
+
+test("il consenso non supera una sospensione account", () => {
+  const rows = buildDiscoverableProfiles(
+    [{ ...completeProfile, status_account: "sospeso" }],
+    [{ profilo_id: "profile-2", foto_url: "foto" }],
+    "profile-1"
+  );
+  assert.deepEqual(rows, []);
 });
