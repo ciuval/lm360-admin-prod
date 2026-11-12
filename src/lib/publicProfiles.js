@@ -22,7 +22,7 @@ export function buildDiscoverableProfiles(profiles = [], photoRows = [], current
   }
 
   return profiles
-    .filter((profile) => profile?.id && profile.id !== currentUserId)
+    .filter((profile) => profile?.id && profile.id !== currentUserId && profile.profilo_pubblico === true && profile.status_account === "attivo")
     .map((profile) => {
       const galleryPhoto = firstGalleryPhoto(photosByProfile.get(profile.id));
       return {
