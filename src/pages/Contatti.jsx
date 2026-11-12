@@ -3,35 +3,47 @@ import InfoPageTemplate from "./InfoPageTemplate.jsx";
 export default function Contatti() {
   return (
     <InfoPageTemplate
-      eyebrow="Contatti"
-      title="Parla con LoveMatch360."
-      lead="Pagina viva per assistenza, informazioni e segnalazioni. Qui trovi i percorsi corretti senza esporre password, token o dati non necessari."
-      cta={{ label: "Scrivi a servizioclienti", href: "mailto:servizioclienti@lovematch360.com" }}
-      secondaryCta={{ label: "Leggi FAQ", href: "#/faq" }}
+      eyebrow="Contatti e segnalazioni"
+      title="Un contatto chiaro, quando hai bisogno."
+      lead="Per richieste sull'account, segnalazioni o chiarimenti puoi scrivere all'assistenza anche senza registrarti. Non inviare password, token, documenti d'identità o dati completi della carta."
+      cta={{ label: "Scrivi all'assistenza", href: "mailto:servizioclienti@lovematch360.com" }}
+      secondaryCta={{ label: "Sicurezza e fiducia", href: "#/sicurezza" }}
       sections={[
         {
           label: "Assistenza",
-          title: "Supporto account e richieste utenti",
-          text: "Per account, accesso, stati e richieste operative usa servizioclienti@lovematch360.com. Descrivi il problema in modo chiaro e senza segreti.",
-          actions: [{ label: "Apri FAQ", href: "#/faq" }, { label: "Sicurezza", href: "#/sicurezza" }],
+          title: "Account e richieste sui dati",
+          text: "Per problemi di accesso, chiusura dell'account, richieste privacy o chiarimenti su un addebito scrivi a servizioclienti@lovematch360.com. Descrivi la richiesta senza comunicare credenziali o dettagli finanziari completi.",
+          actions: [
+            { label: "Apri Privacy", href: "#/privacy" },
+            { label: "Leggi FAQ", href: "#/faq" },
+          ],
+        },
+        {
+          label: "Segnalazioni",
+          title: "Comportamenti e contenuti da segnalare",
+          text: "Per molestie, impersonificazione, possibili truffe o sospetta presenza di minori, indica la natura del problema, il profilo o contenuto coinvolto e una data indicativa. Non inoltrare materiale illecito o immagini intime non necessarie. Le segnalazioni sono ricevute via email; non è disponibile un servizio di emergenza.",
+          actions: [
+            { label: "Invia segnalazione", href: "mailto:servizioclienti@lovematch360.com" },
+            { label: "Regole di utilizzo", href: "#/uso-accettabile" },
+          ],
         },
         {
           label: "Informazioni",
-          title: "Informazioni generali",
-          text: "Per comunicazioni generali puoi usare info@lovematch360.com. Per richieste operative resta preferibile servizioclienti.",
-          actions: [{ label: "Come funziona", href: "#/come-funziona" }, { label: "Chi siamo", href: "#/chi-siamo" }],
+          title: "Domande generali e attività professionali",
+          text: "Per informazioni generali e richieste sui servizi web puoi usare info@lovematch360.com. Le eventuali attività professionali sono distinte dal servizio di incontri e non comportano l'attivazione automatica di un abbonamento Premium.",
+          actions: [{ label: "Servizi per attivita locali", href: "#/sito-clienti-locali" }],
         },
         {
-          label: "Percorso",
-          title: "Prima orientati, poi scrivi",
-          text: "Molti dubbi si risolvono passando da FAQ, sicurezza e funzioni. Se il problema resta, contatta il supporto con una nota precisa.",
-          actions: [{ label: "Funzioni", href: "#/funzioni" }, { label: "Profilo", href: "#/profilo" }],
+          label: "Emergenze",
+          title: "Un'email non sostituisce i soccorsi",
+          text: "Se una persona è in pericolo immediato contatta le autorita o i servizi di emergenza competenti. Non fare affidamento su una risposta immediata alle email: non viene promessa un'assistenza continuativa 24 ore su 24.",
+          actions: [{ label: "Consigli di sicurezza", href: "#/sicurezza" }],
         },
       ]}
       quickLinks={[
-        { label: "FAQ", href: "#/faq", text: "Risposte rapide e stato del servizio." },
-        { label: "Sicurezza", href: "#/sicurezza", text: "Regole per accesso e protezione." },
-        { label: "Privacy", href: "#/privacy", text: "Dati, consenso e fiducia." },
+        { label: "Sicurezza", href: "#/sicurezza", text: "Precauzioni e limiti del servizio." },
+        { label: "FAQ", href: "#/faq", text: "Risposte alle domande più frequenti." },
+        { label: "Privacy", href: "#/privacy", text: "Diritti sui dati e contatto." },
       ]}
     />
   );

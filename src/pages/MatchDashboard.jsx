@@ -5,9 +5,11 @@ import { Link } from "react-router-dom";
 export default function MatchDashboard() {
   const [matchList, setMatchList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     const fetchMatches = async () => {
+      setLoadError(false);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.id) {
         setMatchList([]);
@@ -25,6 +27,7 @@ export default function MatchDashboard() {
         .order("score", { ascending: false });
 
       if (matchErr) {
+        setLoadError(true);
         setLoading(false);
         return;
       }
@@ -39,10 +42,11 @@ export default function MatchDashboard() {
 
       const { data: profili, error: profiliErr } = await supabase
         .from("profili")
-        .select("id, nome, eta, bio, interessi, foto_url")
+.select("id, nome, bio, interessi, foto_url")
         .in("id", ids);
 
       if (profiliErr) {
+        setLoadError(true);
         setLoading(false);
         return;
       }
@@ -54,6 +58,7 @@ export default function MatchDashboard() {
         })
         .filter((m) => m.profilo);
 
+      if (uniti.length === 0) setLoadError(true);
       setMatchList(uniti);
       setLoading(false);
     };
@@ -66,7 +71,11 @@ export default function MatchDashboard() {
       <h2 style={titleStyle}>💘 Match Trovati</h2>
 
       {loading ? (
-        <p>⏳ Caricamento...</p>
+        <p role="status">⏳ Caricamento...</p>
+      ) : loadError ? (
+        <p role="alert" style={{ color: "#ffd6ea" }}>
+          Non riusciamo a mostrare i match in questo momento. Riprova più tardi.
+        </p>
       ) : matchList.length === 0 ? (
         <section
         aria-label="Nessun match ancora"
@@ -113,7 +122,7 @@ export default function MatchDashboard() {
                   style={avatarStyle}
                 />
                 <div>
-                  <strong>{profilo.nome}, {profilo.eta}</strong>
+                  <strong>{profilo.nome || "Profilo"}</strong>
                   <p>{profilo.bio?.slice(0, 80)}{profilo.bio?.length > 80 ? "..." : ""}</p>
                   <p style={{ fontSize: "0.9rem", color: "#aaa" }}>🎯 {profilo.interessi}</p>
                   <span style={{ color: "#f08fc0" }}>💘 Interesse reciproco</span>
