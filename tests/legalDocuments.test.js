@@ -90,3 +90,20 @@ test("canonical legal URLs resolve to existing static documents before the SPA f
     });
   }
 });
+
+test("public trust links use server-rendered legal documents, not SPA-only paths", async () => {
+  for (const path of [
+    "src/components/SiteFooter.jsx",
+    "src/pages/Sicurezza.jsx",
+    "src/pages/FAQ.jsx",
+  ]) {
+    const content = await read(path);
+    assert.match(content, /\/legal\/termini/);
+    assert.match(content, /\/legal\/uso-accettabile/);
+    assert.doesNotMatch(content, /href: ["']#\/(terms|termini|uso-accettabile)["']/);
+  }
+  const footer = await read("src/components/SiteFooter.jsx");
+  const contacts = await read("src/pages/Contatti.jsx");
+  assert.match(footer, /\/legal\/richieste-autorita/);
+  assert.match(contacts, /\/legal\/uso-accettabile/);
+});
