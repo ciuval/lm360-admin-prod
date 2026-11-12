@@ -16,13 +16,16 @@ export default function ProfilePublicCard() {
       const myId = session?.session?.user?.id;
       setUserId(myId || null);
 
+      const ownProfile = Boolean(myId && id && myId === id);
+      let profileQuery = supabase
+        .from("profili")
+        .select("id, nome, bio, interessi, foto_url, avatar_url, ruolo, status_account, profilo_pubblico")
+        .eq("id", id)
+        .eq("status_account", "attivo");
+      if (!ownProfile) profileQuery = profileQuery.eq("profilo_pubblico", true);
+
       const [{ data, error }, { data: photoRows }] = await Promise.all([
-        supabase
-          .from("profili")
-          .select("id, nome, bio, interessi, foto_url, avatar_url, ruolo, status_account")
-          .eq("id", id)
-          .eq("status_account", "attivo")
-          .maybeSingle(),
+        profileQuery.maybeSingle(),
         supabase
           .from("profili_foto")
           .select("foto_url, ordine, is_primary")
@@ -65,7 +68,7 @@ export default function ProfilePublicCard() {
   return (
     <div style={containerStyle}>
       <h2 style={titleStyle}>
-        👤 Profilo Pubblico
+        👤 Profilo
         {isMatch && <span style={badgeStyle}>💘 Match!</span>}
       </h2>
 
