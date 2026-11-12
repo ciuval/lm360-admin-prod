@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadCurrentAccountTier } from "../lib/accountTier";
+import { loadHomeProfileStatus } from "../lib/homeProfileStatus.js";
+import { supabase } from "../lib/supabaseClient";
 import { track } from "../lib/analytics.js";
 
 const journey = [
@@ -21,19 +23,6 @@ const journey = [
   },
 ];
 
-function hasProfileSignal(profile) {
-  const interests = Array.isArray(profile?.interessi)
-    ? profile.interessi.filter(Boolean)
-    : String(profile?.interessi || "").trim();
-
-  return Boolean(
-    String(profile?.nome || "").trim() &&
-      String(profile?.bio || "").trim().length >= 20 &&
-      interests &&
-      (profile?.foto_url || profile?.avatar_url)
-  );
-}
-
 export default function Home() {
   const navigate = useNavigate();
   const [account, setAccount] = useState({
@@ -41,24 +30,29 @@ export default function Home() {
     isAuthed: false,
     tier: "free",
     profile: null,
+    profileReady: false,
+    profileCheckFailed: false,
   });
 
   useEffect(() => {
     let alive = true;
 
     loadCurrentAccountTier()
-      .then((result) => {
+      .then(async (result) => {
+        const status = await loadHomeProfileStatus(supabase, result);
         if (!alive) return;
         setAccount({
           loading: false,
           isAuthed: Boolean(result?.isAuthed),
           tier: result?.tier || "free",
           profile: result?.profile || null,
+          profileReady: status.ready,
+          profileCheckFailed: status.verificationFailed,
         });
       })
       .catch(() => {
         if (!alive) return;
-        setAccount({ loading: false, isAuthed: false, tier: "free", profile: null });
+        setAccount({ loading: false, isAuthed: false, tier: "free", profile: null, profileReady: false, profileCheckFailed: false });
       });
 
     return () => {
@@ -66,10 +60,7 @@ export default function Home() {
     };
   }, []);
 
-  const profileReady = useMemo(
-    () => hasProfileSignal(account.profile),
-    [account.profile]
-  );
+  const profileReady = account.profileReady;
 
   const displayName = String(account.profile?.nome || "").trim();
 
@@ -109,6 +100,19 @@ export default function Home() {
         primaryRoute: "/admin",
         secondary: "Prova Scopri persone",
         secondaryRoute: "/scopri-profili",
+      };
+    }
+
+    if (account.profileCheckFailed) {
+      return {
+        eyebrow: "Verifica del profilo",
+        title: "Il tuo spazio merita una verifica.",
+        description:
+          "Non riusciamo a verificare le foto del tuo profilo in questo momento. Apri il profilo per controllare i dati, senza ripetere la registrazione.",
+        primary: "Controlla il profilo",
+        primaryRoute: "/profilo",
+        secondary: "Vedi il percorso",
+        secondaryRoute: "/welcome",
       };
     }
 
