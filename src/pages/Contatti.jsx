@@ -24,7 +24,7 @@ export default function Contatti() {
           text: "Per molestie, impersonificazione, possibili truffe o sospetta presenza di minori, indica la natura del problema, il profilo o contenuto coinvolto e una data indicativa. Non inoltrare materiale illecito o immagini intime non necessarie. Le segnalazioni sono ricevute via email; non è disponibile un servizio di emergenza.",
           actions: [
             { label: "Invia segnalazione", href: "mailto:servizioclienti@lovematch360.com" },
-            { label: "Regole di utilizzo", href: "#/uso-accettabile" },
+            { label: "Regole di utilizzo", href: "/legal/uso-accettabile" },
           ],
         },
         {
