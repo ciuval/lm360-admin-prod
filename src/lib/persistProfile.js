@@ -3,7 +3,7 @@
  * Nessun tentativo di aggiornare id, email, ruoli, premium o billing.
  */
 export const PROFILE_PUBLIC_SELECT =
-  "id, nome, email, bio, interessi, foto_url, avatar_url, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account";
+  "id, nome, email, bio, interessi, foto_url, avatar_url, profilo_pubblico, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account";
 
 export async function persistProfile(client, {
   userId,
