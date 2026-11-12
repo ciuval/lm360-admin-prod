@@ -7,7 +7,7 @@ export default function Sicurezza() {
       title="La fiducia comincia dalla trasparenza."
       lead="LoveMatch360 aiuta le persone a conoscersi, ma non garantisce l'identità degli altri utenti, la sincerità di un profilo o un incontro sicuro. Qui trovi le regole, i limiti attuali e un contatto umano per chiedere aiuto."
       cta={{ label: "Segnala un problema", href: "mailto:servizioclienti@lovematch360.com" }}
-      secondaryCta={{ label: "Leggi le regole d'uso", href: "#/uso-accettabile" }}
+      secondaryCta={{ label: "Leggi le regole d'uso", href: "/legal/uso-accettabile" }}
       sections={[
         {
           label: "Segnalazioni",
@@ -15,14 +15,14 @@ export default function Sicurezza() {
           text: "Scrivi a servizioclienti@lovematch360.com con una breve descrizione, il riferimento al profilo o al contenuto e, se possibile, la data. Non inviare password, codici, documenti d'identità o numeri completi di carte. Le segnalazioni passano per email: non promettiamo il monitoraggio automatico di ogni conversazione.",
           actions: [
             { label: "Scrivi all'assistenza", href: "mailto:servizioclienti@lovematch360.com" },
-            { label: "Policy di utilizzo", href: "#/uso-accettabile" },
+            { label: "Policy di utilizzo", href: "/legal/uso-accettabile" },
           ],
         },
         {
           label: "18+",
           title: "Età dichiarata, non identità verificata",
           text: "Per registrarsi è necessario dichiarare di avere almeno 18 anni. La conferma dell'email e questa dichiarazione non equivalgono a una verifica documentale dell'età o dell'identità. Se sospetti la presenza di un minore, contatta l'assistenza.",
-          actions: [{ label: "Termini", href: "#/termini" }],
+          actions: [{ label: "Termini", href: "/legal/termini" }],
         },
         {
           label: "Account",
@@ -57,8 +57,8 @@ export default function Sicurezza() {
       ]}
       quickLinks={[
         { label: "Segnalazioni e contatti", href: "#/contatti", text: "Recapito di assistenza accessibile senza account." },
-        { label: "Policy di utilizzo", href: "#/uso-accettabile", text: "Comportamenti vietati e procedura di segnalazione." },
-        { label: "Termini", href: "#/termini", text: "Requisiti, limiti del servizio e diritti." },
+        { label: "Policy di utilizzo", href: "/legal/uso-accettabile", text: "Comportamenti vietati e procedura di segnalazione." },
+        { label: "Termini", href: "/legal/termini", text: "Requisiti, limiti del servizio e diritti." },
         { label: "Privacy", href: "#/privacy", text: "Informazioni sul trattamento dei dati." },
       ]}
     />
