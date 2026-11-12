@@ -19,7 +19,7 @@ export default function FAQ() {
           label: "Eta",
           title: "Le persone sono verificate?",
           text: "Per registrarsi bisogna dichiarare di avere almeno 18 anni. Questa autodichiarazione e la conferma email non sono una verifica documentale dell'identità o dell'età. Non presentiamo gli altri profili come identità certificate.",
-          actions: [{ label: "Sicurezza", href: "#/sicurezza" }, { label: "Termini", href: "#/termini" }],
+          actions: [{ label: "Sicurezza", href: "#/sicurezza" }, { label: "Termini", href: "/legal/termini" }],
         },
         {
           label: "Scoperta",
@@ -37,7 +37,7 @@ export default function FAQ() {
           label: "Segnalazioni",
           title: "Come segnalo un profilo o un abuso?",
           text: "Scrivi a servizioclienti@lovematch360.com indicando il problema e, se possibile, il riferimento al profilo o al contenuto. Non inviare password, codici o documenti personali. Non dichiariamo una moderazione automatica di ogni messaggio.",
-          actions: [{ label: "Segnala via email", href: "mailto:servizioclienti@lovematch360.com" }, { label: "Policy di utilizzo", href: "#/uso-accettabile" }],
+          actions: [{ label: "Segnala via email", href: "mailto:servizioclienti@lovematch360.com" }, { label: "Policy di utilizzo", href: "/legal/uso-accettabile" }],
         },
         {
           label: "Premium",
@@ -54,7 +54,7 @@ export default function FAQ() {
       ]}
       quickLinks={[
         { label: "Sicurezza", href: "#/sicurezza", text: "Consigli pratici e canale di segnalazione." },
-        { label: "Regole di utilizzo", href: "#/uso-accettabile", text: "Comportamenti consentiti e vietati." },
+        { label: "Regole di utilizzo", href: "/legal/uso-accettabile", text: "Comportamenti consentiti e vietati." },
         { label: "Contatti", href: "#/contatti", text: "Supporto e richieste senza account." },
       ]}
     />
