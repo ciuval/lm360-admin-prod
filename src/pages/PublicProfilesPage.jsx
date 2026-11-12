@@ -111,8 +111,9 @@ export default function PublicProfilesPage() {
         const [profilesResult, photosResult] = await Promise.all([
           supabase
             .from("profili")
-            .select("id, nome, bio, foto_url, avatar_url, interessi, premium, premium_fine, ruolo, status_account")
+            .select("id, nome, bio, foto_url, avatar_url, interessi, premium, premium_fine, ruolo, status_account, profilo_pubblico")
             .eq("status_account", "attivo")
+            .eq("profilo_pubblico", true)
             .order("nome", { ascending: true }),
           supabase
             .from("profili_foto")
