@@ -11,14 +11,14 @@ export default function ProfileCompletionCard({ completion, disabled = false, on
   };
 
   const title = safeCompletion.isComplete
-    ? "Profilo completo. Ora puoi farti trovare meglio."
+    ? "Profilo completo. La visibilità è una scelta separata."
     : "Profilo ancora da completare.";
 
   const missingLabels = (safeCompletion.missingItems || [])
     .map((item) => item.label.toLowerCase())
     .join(", ");
   const subtitle = safeCompletion.isComplete
-    ? "Hai le basi giuste per entrare in Scopri persone con più contesto."
+    ? "Puoi entrare in Scopri. Per rendere pubblico il profilo devi autorizzarlo nella sezione Visibilità."
     : `Hai completato ${safeCompletion.completedCount} requisiti su ${safeCompletion.totalCount}. Mancano: ${missingLabels}.`;
 
   const actionLabel = safeCompletion.isComplete ? "Vai a Scopri persone" : "Completa il prossimo passo del profilo";
