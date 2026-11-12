@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { persistProfile, syncPrimaryProfilePhoto } from "../lib/persistProfile.js";
+import { setProfileVisibility } from "../lib/profileVisibility.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import PremiumStatusBox from "../components/PremiumStatusBox";
@@ -60,6 +61,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [savingVisibility, setSavingVisibility] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
 
   const [profilo, setProfilo] = useState(null);
   const [profileExists, setProfileExists] = useState(false);
@@ -105,6 +108,7 @@ export default function ProfilePage() {
           setUserEmail("");
           setProfilo(null);
           setProfileExists(false);
+          setIsPublic(false);
           setName("");
           setBio("");
           setInterests("");
@@ -118,7 +122,7 @@ export default function ProfilePage() {
         const { data: profileData, error: profileError } = await supabase
           .from("profili")
           .select(
-            "id, nome, email, bio, interessi, foto_url, avatar_url, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account"
+            "id, nome, email, bio, interessi, foto_url, avatar_url, profilo_pubblico, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account"
           )
           .eq("id", user.id)
           .maybeSingle();
@@ -134,6 +138,7 @@ export default function ProfilePage() {
           interessi: "",
           foto_url: "",
           avatar_url: "",
+          profilo_pubblico: false,
           ruolo: "free",
           premium: false,
           premium_start: null,
@@ -144,6 +149,7 @@ export default function ProfilePage() {
 
         setProfilo(safeProfile);
         setProfileExists(Boolean(profileData));
+        setIsPublic(safeProfile.profilo_pubblico === true);
         setName(safeProfile.nome || "");
         setBio(safeProfile.bio || "");
         setInterests(
@@ -503,6 +509,31 @@ export default function ProfilePage() {
     }
   };
 
+  const handleVisibilityChange = async () => {
+    if (!userId || saving || uploading || savingVisibility) return;
+    const makePublic = !isPublic;
+
+    try {
+      setSavingVisibility(true);
+      const confirmed = await setProfileVisibility(supabase, { userId, makePublic });
+      setIsPublic(confirmed);
+      setProfilo((current) => ({ ...(current || {}), profilo_pubblico: confirmed }));
+      toast.success(
+        confirmed
+          ? "Hai autorizzato la visibilità del profilo. Sarà mostrato solo quando il servizio è abilitato."
+          : "Profilo nascosto. La tua scelta è stata salvata."
+      );
+    } catch (error) {
+      if (error?.message === "PROFILE_INCOMPLETE") {
+        toast.error("Salva prima nome, bio, interessi e almeno una foto.");
+      } else {
+        toast.error("Non è stato possibile aggiornare la visibilità. Nessuna modifica confermata.");
+      }
+    } finally {
+      setSavingVisibility(false);
+    }
+  };
+
   const handleProfileCompletionAction = () => {
     if (profileCompletion.isComplete) {
       navigate("/scopri-profili");
@@ -584,6 +615,37 @@ export default function ProfilePage() {
         disabled={loading || saving || uploading}
       />
 
+      <section aria-labelledby="profile-visibility-title" style={{
+        border: "1px solid rgba(240,143,192,0.3)",
+        borderRadius: 18,
+        padding: "1rem",
+        margin: "1.2rem 0",
+        background: "rgba(240,143,192,0.06)",
+      }}>
+        <h3 id="profile-visibility-title">Visibilità del profilo</h3>
+        <p role="status" aria-live="polite">
+          {isPublic
+            ? "Hai scelto di rendere visibile il profilo. La comparsa in Scopri dipende anche dalle verifiche e autorizzazioni del servizio."
+            : "Il profilo è privato. Non viene autorizzata la sua comparsa in Scopri persone."}
+        </p>
+        <button
+          type="button"
+          aria-pressed={isPublic}
+          onClick={handleVisibilityChange}
+          disabled={!userId || loading || saving || uploading || savingVisibility}
+          style={saveBtn}
+        >
+          {savingVisibility
+            ? "Salvataggio della scelta..."
+            : isPublic
+              ? "Nascondi il mio profilo"
+              : "Autorizza la visibilità del mio profilo"}
+        </button>
+        <p style={{ opacity: 0.8 }}>
+          Scelta facoltativa e revocabile. La registrazione non rende pubblico il profilo automaticamente.
+        </p>
+      </section>
+
       {userId && <Stanza360Card userId={userId} />}
 
       <ProfilePhotoGallery
@@ -645,7 +707,7 @@ export default function ProfilePage() {
         disabled={loading || saving}
       />
 
-      <button style={saveBtn} onClick={handleSave} disabled={loading || saving || uploading}>
+      <button style={saveBtn} onClick={handleSave} disabled={loading || saving || uploading || savingVisibility}>
         {saving ? "Salvataggio..." : uploading ? "Caricamento foto..." : "💾 Salva modifiche"}
       </button>
 
