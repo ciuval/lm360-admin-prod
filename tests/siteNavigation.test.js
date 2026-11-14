@@ -104,8 +104,8 @@ test("messaggi editoriali restano risorse, non la chat; testi leggibili", async 
     read("src/components/SiteFooter.jsx"),
     read("src/pages/MessaggiPage.jsx"),
   ]);
-  assert.match(footer, /label: "Messaggi da leggere", href: "#\\/messaggi"/);
-  assert.doesNotMatch(footer, /label: "Messaggi", href: "#\\/messaggi"/);
+  assert.ok(footer.includes('label: "Messaggi da leggere", href: "#/messaggi"'));
+  assert.ok(!footer.includes('label: "Messaggi", href: "#/messaggi"'));
   assert.doesNotMatch(editorial, /[ÃÂÈÄ�]|â€/);
   assert.match(editorial, /Il libro|libro/i);
 });
