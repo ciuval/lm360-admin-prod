@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const mods = import.meta.glob(
   ["./NotFoundPage.jsx","./PageNotFound.jsx","./FourOhFour.jsx"],
@@ -15,7 +16,8 @@ const NotFound = (mod && mod.default) || function NotFoundFallback() {
   return (
     <section style={{ padding: 24 }}>
       <h1>Pagina non trovata</h1>
-      <p>Qui non c’è niente. Ma puoi tornare a casa.</p>
+      <p>Questa pagina non esiste oppure il collegamento è cambiato.</p>
+      <Link to="/" style={{ color: "#ffd6ea", fontWeight: 800 }}>Torna alla Home</Link>
     </section>
   );
 };
