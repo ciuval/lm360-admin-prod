@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { persistProfile, syncPrimaryProfilePhoto } from "../lib/persistProfile.js";
+import { setProfileVisibility } from "../lib/profileVisibility.js";
 import { useLocation, useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import PremiumStatusBox from "../components/PremiumStatusBox";
 import StoricoAbbonamenti from "../components/StoricoAbbonamenti";
 import ProfilePhotoGallery from "../components/profile/ProfilePhotoGallery";
@@ -59,8 +61,11 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [savingVisibility, setSavingVisibility] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
 
   const [profilo, setProfilo] = useState(null);
+  const [profileExists, setProfileExists] = useState(false);
   const [userId, setUserId] = useState(null);
   const [userEmail, setUserEmail] = useState("");
 
@@ -102,6 +107,8 @@ export default function ProfilePage() {
           setUserId(null);
           setUserEmail("");
           setProfilo(null);
+          setProfileExists(false);
+          setIsPublic(false);
           setName("");
           setBio("");
           setInterests("");
@@ -115,7 +122,7 @@ export default function ProfilePage() {
         const { data: profileData, error: profileError } = await supabase
           .from("profili")
           .select(
-            "id, nome, email, bio, interessi, foto_url, avatar_url, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account"
+            "id, nome, email, bio, interessi, foto_url, avatar_url, profilo_pubblico, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account"
           )
           .eq("id", user.id)
           .maybeSingle();
@@ -131,6 +138,7 @@ export default function ProfilePage() {
           interessi: "",
           foto_url: "",
           avatar_url: "",
+          profilo_pubblico: false,
           ruolo: "free",
           premium: false,
           premium_start: null,
@@ -140,6 +148,8 @@ export default function ProfilePage() {
         };
 
         setProfilo(safeProfile);
+        setProfileExists(Boolean(profileData));
+        setIsPublic(safeProfile.profilo_pubblico === true);
         setName(safeProfile.nome || "");
         setBio(safeProfile.bio || "");
         setInterests(
@@ -195,40 +205,6 @@ export default function ProfilePage() {
 
   const isPremium = useMemo(() => hasCommercialPremium(profilo), [profilo]);
 
-  const ensureProfileRow = async () => {
-    if (!userId) {
-      throw new Error("Utente non autenticato.");
-    }
-
-    const payload = {
-      id: userId,
-      email: profilo?.email || userEmail || "",
-      nome: name.trim(),
-      bio: bio.trim(),
-      interessi: interests.trim(),
-      updated_at: new Date().toISOString(),
-    };
-
-    const { data, error } = await supabase
-      .from("profili")
-      .upsert(payload, { onConflict: "id" })
-      .select("id, nome, email, bio, interessi, foto_url, avatar_url, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account")
-      .maybeSingle();
-
-    if (error) {
-      throw error;
-    }
-
-    const nextProfile = data || {
-      ...(profilo || {}),
-      ...payload,
-    };
-
-    setProfilo(nextProfile);
-
-    return nextProfile;
-  };
-
   const handleAddPhoto = () => {
     const input = document.getElementById("profile-photo-input");
     input?.click();
@@ -265,13 +241,23 @@ export default function ProfilePage() {
     try {
       setUploading(true);
 
-      await ensureProfileRow();
-
-
+      // Alcuni account creati da Supabase Auth non hanno ancora una riga in profili.
+      // Non usare upsert: le autorizzazioni di UPDATE non permettono di riscrivere id.
+      if (!profileExists) {
+        const created = await persistProfile(supabase, {
+          userId,
+          profileExists: false,
+          email: userEmail,
+          name,
+          bio,
+          interests,
+          photoUrl: profilo?.foto_url || null,
+        });
+        setProfilo(created);
+        setProfileExists(true);
+      }
 
       const currentPhotos = [...photos];
-
-
       const rowsToInsert = [];
 
       for (const file of filesToUse) {
@@ -318,7 +304,16 @@ export default function ProfilePage() {
 
       const normalized = normalizePhotos(refreshed || []);
       setPhotos(normalized);
-      toast.success("📸 Foto caricate");
+
+      const primaryUrl = normalized.find((item) => item.isPrimary)?.url || null;
+      try {
+        await syncPrimaryProfilePhoto(supabase, { userId, photoUrl: primaryUrl });
+        setProfilo((current) => ({ ...(current || {}), foto_url: primaryUrl }));
+      } catch {
+        toast.error("Foto caricate, ma non sincronizzate col profilo. Riprova il salvataggio.");
+        return;
+      }
+      toast.success("Foto caricate e sincronizzate.");
     } catch {
       track("profile_photo_failed", {
         ...getActivationJourneyProps(),
@@ -366,8 +361,12 @@ export default function ProfilePage() {
 
       if (refreshError) throw refreshError;
 
-      setPhotos(normalizePhotos(refreshed || []));
-      toast.success("✨ Foto principale aggiornata");
+      const normalized = normalizePhotos(refreshed || []);
+      setPhotos(normalized);
+      const primaryUrl = normalized.find((item) => item.isPrimary)?.url || null;
+      await syncPrimaryProfilePhoto(supabase, { userId, photoUrl: primaryUrl });
+      setProfilo((current) => ({ ...(current || {}), foto_url: primaryUrl }));
+      toast.success("Foto principale aggiornata.");
     } catch {
       track("profile_photo_failed", {
         ...getActivationJourneyProps(),
@@ -428,7 +427,10 @@ export default function ProfilePage() {
 
       const normalized = normalizePhotos(compacted || []);
       setPhotos(normalized);
-      toast.success("🗑️ Foto rimossa");
+      const primaryUrl = normalized.find((item) => item.isPrimary)?.url || null;
+      await syncPrimaryProfilePhoto(supabase, { userId, photoUrl: primaryUrl });
+      setProfilo((current) => ({ ...(current || {}), foto_url: primaryUrl }));
+      toast.success("Foto rimossa.");
     } catch {
       track("profile_photo_failed", {
         ...getActivationJourneyProps(),
@@ -450,36 +452,26 @@ export default function ProfilePage() {
     try {
       setSaving(true);
 
-      const primaryPhoto = photos.find((item) => item.isPrimary)?.url || null;
+      const primaryPhoto = photos.find((item) => item.isPrimary)?.url || profilo?.foto_url || null;
 
-      const payload = {
-        id: userId,
-        email: profilo?.email || userEmail || "",
-        nome: name.trim(),
-        bio: bio.trim(),
-        interessi: interests.trim(),
-        foto_url: primaryPhoto,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { data, error } = await supabase
-        .from("profili")
-        .upsert(payload, { onConflict: "id" })
-        .select(
-          "id, nome, email, bio, interessi, foto_url, avatar_url, ruolo, premium, premium_start, premium_fine, tipo_abbonamento, status_account"
-        )
-        .maybeSingle();
-
-      if (error) {
+      let nextProfile;
+      try {
+        nextProfile = await persistProfile(supabase, {
+          userId,
+          profileExists,
+          email: userEmail,
+          name,
+          bio,
+          interests,
+          photoUrl: primaryPhoto,
+        });
+      } catch {
         track("profile_save_failed", getActivationJourneyProps()).catch(() => {});
         toast.error("Impossibile salvare il profilo.");
         return;
       }
 
-      const nextProfile = data || {
-        ...(profilo || {}),
-        ...payload,
-      };
+      setProfileExists(true);
 
       const nextCompletion = calculateProfileCompletion({
         profile: nextProfile,
@@ -491,10 +483,11 @@ export default function ProfilePage() {
         ...getActivationJourneyProps(),
         completion: nextCompletion.score,
       }).catch(() => {});
+      const missing = nextCompletion.missingItems.map((item) => item.label.toLowerCase()).join(", ");
       toast.success(
         nextCompletion.isComplete
           ? "Profilo completo. Ora puoi scoprire persone."
-          : `Profilo salvato: ${nextCompletion.score}% completo.`
+          : `Modifiche salvate. Profilo al ${nextCompletion.score}%. Mancano: ${missing}.`
       );
 
       if (!completionTrackedRef.current && nextCompletion.isComplete) {
@@ -513,6 +506,31 @@ export default function ProfilePage() {
       toast.error("Errore temporaneo durante il salvataggio.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleVisibilityChange = async () => {
+    if (!userId || saving || uploading || savingVisibility) return;
+    const makePublic = !isPublic;
+
+    try {
+      setSavingVisibility(true);
+      const confirmed = await setProfileVisibility(supabase, { userId, makePublic });
+      setIsPublic(confirmed);
+      setProfilo((current) => ({ ...(current || {}), profilo_pubblico: confirmed }));
+      toast.success(
+        confirmed
+          ? "Hai autorizzato la visibilità del profilo. Sarà mostrato solo quando il servizio è abilitato."
+          : "Profilo nascosto. La tua scelta è stata salvata."
+      );
+    } catch (error) {
+      if (error?.message === "PROFILE_INCOMPLETE") {
+        toast.error("Salva prima nome, bio, interessi e almeno una foto.");
+      } else {
+        toast.error("Non è stato possibile aggiornare la visibilità. Nessuna modifica confermata.");
+      }
+    } finally {
+      setSavingVisibility(false);
     }
   };
 
@@ -541,7 +559,6 @@ export default function ProfilePage() {
 
   return (
     <div style={containerStyle}>
-      <Toaster position="top-right" />
 
       <style>{`
         @media (max-width: 600px) {
@@ -597,6 +614,37 @@ export default function ProfilePage() {
         onPrimaryAction={handleProfileCompletionAction}
         disabled={loading || saving || uploading}
       />
+
+      <section aria-labelledby="profile-visibility-title" style={{
+        border: "1px solid rgba(240,143,192,0.3)",
+        borderRadius: 18,
+        padding: "1rem",
+        margin: "1.2rem 0",
+        background: "rgba(240,143,192,0.06)",
+      }}>
+        <h3 id="profile-visibility-title">Visibilità del profilo</h3>
+        <p role="status" aria-live="polite">
+          {isPublic
+            ? "Hai scelto di rendere visibile il profilo. La comparsa in Scopri dipende anche dalle verifiche e autorizzazioni del servizio."
+            : "Il profilo è privato. Non viene autorizzata la sua comparsa in Scopri persone."}
+        </p>
+        <button
+          type="button"
+          aria-pressed={isPublic}
+          onClick={handleVisibilityChange}
+          disabled={!userId || loading || saving || uploading || savingVisibility}
+          style={saveBtn}
+        >
+          {savingVisibility
+            ? "Salvataggio della scelta..."
+            : isPublic
+              ? "Nascondi il mio profilo"
+              : "Autorizza la visibilità del mio profilo"}
+        </button>
+        <p style={{ opacity: 0.8 }}>
+          Scelta facoltativa e revocabile. La registrazione non rende pubblico il profilo automaticamente.
+        </p>
+      </section>
 
       {userId && <Stanza360Card userId={userId} />}
 
@@ -659,7 +707,7 @@ export default function ProfilePage() {
         disabled={loading || saving}
       />
 
-      <button style={saveBtn} onClick={handleSave} disabled={loading || saving || uploading}>
+      <button style={saveBtn} onClick={handleSave} disabled={loading || saving || uploading || savingVisibility}>
         {saving ? "Salvataggio..." : uploading ? "Caricamento foto..." : "💾 Salva modifiche"}
       </button>
 

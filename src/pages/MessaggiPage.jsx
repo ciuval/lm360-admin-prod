@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const shareUrl = "https://www.lovematch360.com/matematica-nu-este-o-opinie/";
 
 const whatsappText = encodeURIComponent(
-  "Matematica nu este o opinie.\n\nCÃ¢nd vorbim despre nivelul de trai, trebuie sÄƒ vorbim serios: cu muncÄƒ, producÈ›ie, concurenÈ›Äƒ, reguli clare È™i responsabilitate.\n\nText complet:\n" +
+  "Matematica nu este o opinie.\n\nCând vorbim despre nivelul de trai, trebuie să vorbim serios: cu muncă, producție, concurență, reguli clare și responsabilitate.\n\nText complet:\n" +
     shareUrl
 );
 
@@ -21,7 +21,7 @@ const highlights = [
     label: "Pronti da inviare",
     title: "Si inviano in un attimo.",
     text:
-      "Ogni messaggio Ã¨ pensato per viaggiare bene tra WhatsApp, Facebook e link diretti, senza perdere fascino.",
+      "Ogni messaggio è pensato per viaggiare bene tra WhatsApp, Facebook e link diretti, senza perdere fascino.",
   },
   {
     label: "Presenza umana",
@@ -33,10 +33,10 @@ const highlights = [
 
 const messageCards = [
   {
-    tag: "RomÃ¢nÄƒ",
+    tag: "Română",
     title: "Matematica nu este o opinie",
     text:
-      "Nivel de trai, muncÄƒ, producÈ›ie, concurenÈ›Äƒ È™i responsabilitate. Un messaggio pubblico giÃ  pronto per essere letto e condiviso.",
+      "Nivel de trai, muncă, producție, concurență și responsabilitate. Un messaggio pubblico già pronto per essere letto e condiviso.",
     to: "/scopri/matematica-nu-este-o-opinie",
     cta: "Apri il testo completo",
   },
@@ -44,7 +44,7 @@ const messageCards = [
     tag: "Metodo",
     title: "Non serve urlare. Serve costruire.",
     text:
-      "Il cambiamento vero nasce da ordine, lavoro, verifiche, correzioni e responsabilitÃ . Una cosa alla volta.",
+      "Il cambiamento vero nasce da ordine, lavoro, verifiche, correzioni e responsabilità. Una cosa alla volta.",
     to: "/scopri",
     cta: "Vai a Scopri",
   },
@@ -59,11 +59,11 @@ const messageCards = [
 ];
 
 const principles = [
-  "PiÃ¹ calore, meno confusione.",
-  "PiÃ¹ veritÃ , meno frasi vuote.",
-  "PiÃ¹ eleganza, meno pressione.",
-  "PiÃ¹ fiducia, meno fretta.",
-  "PiÃ¹ bellezza, piÃ¹ desiderio di tornare.",
+  "Più calore, meno confusione.",
+  "Più verità, meno frasi vuote.",
+  "Più eleganza, meno pressione.",
+  "Più fiducia, meno fretta.",
+  "Più bellezza, più desiderio di tornare.",
 ];
 
 export default function MessaggiPage() {
@@ -74,12 +74,12 @@ export default function MessaggiPage() {
       <section className="hero-wrap">
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-card">
-          <p className="eyebrow">LoveMatch360 Â· Messaggi</p>
+          <p className="eyebrow">LoveMatch360 · Messaggi</p>
           <h1 id="messaggi-title">
-            Parole che accendono curiositÃ  e fanno restare.
+            Parole che accendono curiosità e fanno restare.
           </h1>
           <p className="lead">
-            Qui ogni messaggio nasce per attirare con eleganza, farsi leggere con piacere e lasciare una sensazione bella. Si entra per curiositÃ  e si resta perchÃ© tutto parla con calore, chiarezza e stile.
+            Qui ogni messaggio nasce per attirare con eleganza, farsi leggere con piacere e lasciare una sensazione bella. Si entra per curiosità e si resta perché tutto parla con calore, chiarezza e stile.
           </p>
 
           <div className="hero-actions">
@@ -148,7 +148,7 @@ export default function MessaggiPage() {
           <p className="eyebrow">SENSAZIONE GIUSTA</p>
           <h2>Qui si respira meglio.</h2>
           <p className="section-lead">
-            Non serve alzare la voce per farsi ricordare. Bastano pagine belle, parole sincere e una presenza che fa stare bene. Quando il tono Ã¨ giusto, la differenza si sente subito.
+            Non serve alzare la voce per farsi ricordare. Bastano pagine belle, parole sincere e una presenza che fa stare bene. Quando il tono è giusto, la differenza si sente subito.
           </p>
         </div>
 
@@ -164,16 +164,16 @@ export default function MessaggiPage() {
 
       <section className="final-card">
         <p className="eyebrow">IL PASSO CHE INVITA</p>
-        <h2>Prima lâ€™attenzione, poi la fiducia, poi lâ€™incontro.</h2>
+        <h2>Prima l’attenzione, poi la fiducia, poi l’incontro.</h2>
         <p>
-          La strada piÃ¹ bella parte da qui: conquistare interesse, creare un legame e accompagnare il visitatore verso qualcosa di sempre piÃ¹ ricco, esclusivo e desiderabile.
+          La strada più bella parte da qui: conquistare interesse, creare un legame e accompagnare il visitatore verso pagine utili, conoscenze consapevoli e relazioni rispettose.
         </p>
         <div className="hero-actions">
           <Link className="btn primary" to="/scopri">
             Torna a Scopri
           </Link>
           <Link className="btn ghost" to="/premium">
-            Scopri lâ€™area premium
+            Scopri lo stato Premium
           </Link>
         </div>
       </section>

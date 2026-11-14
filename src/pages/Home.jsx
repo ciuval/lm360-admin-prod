@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loadCurrentAccountTier } from "../lib/accountTier";
+import { loadHomeProfileStatus } from "../lib/homeProfileStatus.js";
+import { supabase } from "../lib/supabaseClient";
 import { track } from "../lib/analytics.js";
 
 const journey = [
@@ -21,18 +23,16 @@ const journey = [
   },
 ];
 
-function hasProfileSignal(profile) {
-  const interests = Array.isArray(profile?.interessi)
-    ? profile.interessi.filter(Boolean)
-    : String(profile?.interessi || "").trim();
-
-  return Boolean(
-    String(profile?.nome || "").trim() &&
-      String(profile?.bio || "").trim().length >= 20 &&
-      interests &&
-      (profile?.foto_url || profile?.avatar_url)
-  );
-}
+const explorePaths = [
+  { title: "Incontri", text: "Inizia con calma: profilo, scoperta e match reciproco.", to: "/welcome", authTo: "/scopri-profili" },
+  { title: "Come funziona", text: "Capisci il percorso prima di registrarti.", to: "/come-funziona" },
+  { title: "Idee e articoli", text: "Scopri risorse, storie e contenuti pubblici.", to: "/scopri" },
+  { title: "Il libro", text: "La storia del progetto, dalla prima idea a oggi.", to: "/libro" },
+  { title: "Servizi web", text: "Le soluzioni digitali, distinte dagli incontri.", to: "/soluzioni" },
+  { title: "FAQ", text: "Risposte su account, profili e sicurezza.", to: "/faq" },
+  { title: "Sicurezza", text: "Regole, limiti e protezione delle persone.", to: "/sicurezza" },
+  { title: "Contatti", text: "Assistenza e segnalazioni anche senza account.", to: "/contatti" },
+];
 
 export default function Home() {
   const navigate = useNavigate();
@@ -41,24 +41,29 @@ export default function Home() {
     isAuthed: false,
     tier: "free",
     profile: null,
+    profileReady: false,
+    profileCheckFailed: false,
   });
 
   useEffect(() => {
     let alive = true;
 
     loadCurrentAccountTier()
-      .then((result) => {
+      .then(async (result) => {
+        const status = await loadHomeProfileStatus(supabase, result);
         if (!alive) return;
         setAccount({
           loading: false,
           isAuthed: Boolean(result?.isAuthed),
           tier: result?.tier || "free",
           profile: result?.profile || null,
+          profileReady: status.ready,
+          profileCheckFailed: status.verificationFailed,
         });
       })
       .catch(() => {
         if (!alive) return;
-        setAccount({ loading: false, isAuthed: false, tier: "free", profile: null });
+        setAccount({ loading: false, isAuthed: false, tier: "free", profile: null, profileReady: false, profileCheckFailed: false });
       });
 
     return () => {
@@ -66,10 +71,7 @@ export default function Home() {
     };
   }, []);
 
-  const profileReady = useMemo(
-    () => hasProfileSignal(account.profile),
-    [account.profile]
-  );
+  const profileReady = account.profileReady;
 
   const displayName = String(account.profile?.nome || "").trim();
 
@@ -109,6 +111,19 @@ export default function Home() {
         primaryRoute: "/admin",
         secondary: "Prova Scopri persone",
         secondaryRoute: "/scopri-profili",
+      };
+    }
+
+    if (account.profileCheckFailed) {
+      return {
+        eyebrow: "Verifica del profilo",
+        title: "Il tuo spazio merita una verifica.",
+        description:
+          "Non riusciamo a verificare le foto del tuo profilo in questo momento. Apri il profilo per controllare i dati, senza ripetere la registrazione.",
+        primary: "Controlla il profilo",
+        primaryRoute: "/profilo",
+        secondary: "Vedi il percorso",
+        secondaryRoute: "/welcome",
       };
     }
 
@@ -287,6 +302,38 @@ export default function Home() {
           line-height: 1.55;
         }
 
+        .lm-home-discover {
+          margin-top: 24px;
+          padding: clamp(24px, 4vw, 40px);
+          border: 1px solid rgba(255,255,255,.10);
+          border-radius: 28px;
+          background: rgba(255,255,255,.025);
+        }
+        .lm-home-discover > p {
+          max-width: 70ch; line-height: 1.65; color: rgba(248,250,252,.76);
+        }
+        .lm-home-discover-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+          gap: 12px;
+          margin-top: 22px;
+        }
+        .lm-home-discover-card {
+          display: grid; align-content: start; gap: 10px;
+          min-height: 136px; padding: 18px;
+          border: 1px solid rgba(255,255,255,.14);
+          border-radius: 18px; background: rgba(255,255,255,.06);
+          color: #fff; text-decoration: none;
+          transition: background 160ms ease, transform 160ms ease;
+        }
+        .lm-home-discover-card:hover {
+          background: rgba(240,143,192,.12); transform: translateY(-2px);
+        }
+        .lm-home-discover-card:focus-visible {
+          outline: 3px solid #8ddcff; outline-offset: 3px;
+        }
+        .lm-home-discover-card strong { font-size: 1.12rem; color: #ffd6ea; }
+        .lm-home-discover-card span { color: rgba(248,250,252,.78); line-height: 1.5; }
         .lm-home-section {
           padding: clamp(48px, 8vw, 88px) 8px 0;
         }
@@ -380,7 +427,8 @@ export default function Home() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .lm-home-button { transition: none; }
+          .lm-home-button, .lm-home-discover-card { transition: none; }
+          .lm-home-discover-card:hover { transform: none; }
         }
       `}</style>
 
@@ -426,6 +474,23 @@ export default function Home() {
             <span>Il match nasce soltanto quando l'interesse si incontra.</span>
           </div>
         </aside>
+      </section>
+
+      <section className="lm-home-discover" aria-labelledby="discover-site-title">
+        <h2 id="discover-site-title">C'è molto da scoprire, anche senza un account.</h2>
+        <p>Esplora il sito con libertà. Puoi conoscere le idee, leggere il libro, informarti sulla sicurezza o capire come funzionano gli incontri. La registrazione serve solo per le funzioni personali.</p>
+        <div className="lm-home-discover-grid">
+          {explorePaths.map((item) => (
+            <Link
+              className="lm-home-discover-card"
+              key={item.title}
+              to={account.isAuthed && item.authTo ? item.authTo : item.to}
+            >
+              <strong>{item.title}</strong>
+              <span>{item.text}</span>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <aside aria-label="Impegno per la sicurezza digitale" style={{ marginTop: 20, padding: "20px 24px", border: "1px solid rgba(240,143,192,.35)", borderRadius: 20, background: "rgba(240,143,192,.075)" }}>

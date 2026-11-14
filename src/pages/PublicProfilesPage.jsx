@@ -5,27 +5,10 @@ import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { track } from "../lib/analytics.js";
 import { getActivationJourneyProps } from "../lib/activationJourney.js";
-import { buildDiscoverableProfiles } from "../lib/publicProfiles.js";
-
-function normalizeRole(value) {
-  return String(value || "").trim().toLowerCase();
-}
-
-function isFutureDate(value) {
-  if (!value) return false;
-  const time = new Date(value).getTime();
-  return Number.isFinite(time) && time > Date.now();
-}
+import { normalizePublicProfileProjection } from "../lib/publicProfiles.js";
 
 function hasPremiumAccess(profile) {
-  const role = normalizeRole(profile?.ruolo);
-
-  return (
-    Boolean(profile?.premium) ||
-    role === "premium" ||
-    role === "super" ||
-    isFutureDate(profile?.premium_fine)
-  );
+  return profile?.premium === true;
 }
 
 function toInterestArray(value) {
@@ -56,6 +39,7 @@ export default function PublicProfilesPage() {
   const likingIdsRef = useRef(new Set());
   const [hasExistingLikes, setHasExistingLikes] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [discoveryError, setDiscoveryError] = useState(false);
   const [query, setQuery] = useState("");
   const [filtroInteresse, setFiltroInteresse] = useState("");
 
@@ -79,7 +63,7 @@ export default function PublicProfilesPage() {
           const { data: likeData, error: likeError } = await supabase
             .from("likes")
             .select("user_to")
-            .eq("user_from", currentUserId);
+            .eq("user_id", currentUserId);
 
           if (!alive) return;
           if (likeError) {
@@ -108,52 +92,31 @@ export default function PublicProfilesPage() {
           setMatches(matchedIds);
         }
 
-        const [profilesResult, photosResult] = await Promise.all([
-          supabase
-            .from("profili")
-            .select("id, nome, bio, foto_url, avatar_url, interessi, premium, premium_fine, ruolo, status_account")
-            .eq("status_account", "attivo")
-            .order("nome", { ascending: true }),
-          supabase
-            .from("profili_foto")
-            .select("profilo_id, foto_url, ordine, is_primary")
-            .eq("is_primary", true)
-            .order("ordine", { ascending: true }),
-        ]);
-
-        const { data: profiliData, error: profiliError } = profilesResult;
-        const { data: photoRows, error: photosError } = photosResult;
+        // La funzione PostgreSQL controlla consenso, stato, completezza e minimizzazione.
+        // Nessun fallback alle tabelle private se la RPC non è ancora disponibile.
+        const { data: rpcProfiles, error: rpcError } = await supabase.rpc(
+          "lm360_get_public_profiles",
+          { p_profile_id: null }
+        );
 
         if (!alive) return;
 
-        if (profiliError) {
+        if (rpcError || !Array.isArray(rpcProfiles)) {
+          setDiscoveryError(true);
+          setProfili([]);
           track("discovery_load_failed", {
             ...getActivationJourneyProps(),
-            stage: "profiles",
+            stage: "public_rpc",
           }).catch(() => {});
-          toast.error("Errore nel caricamento dei profili.");
-          setProfili([]);
           return;
         }
 
-        if (photosError) {
-          track("discovery_load_failed", {
-            ...getActivationJourneyProps(),
-            stage: "photos",
-          }).catch(() => {});
-        }
-
-        const otherProfiles = (profiliData || []).filter((profilo) => profilo.id !== currentUserId);
-        const pubblici = buildDiscoverableProfiles(
-          profiliData || [],
-          photosError ? [] : photoRows || [],
-          currentUserId
-        );
+        const pubblici = normalizePublicProfileProjection(rpcProfiles, currentUserId);
+        setDiscoveryError(false);
         setProfili(pubblici);
         track("discovery_opened", {
           ...getActivationJourneyProps(),
           results: pubblici.length,
-          excluded_results: otherProfiles.length - pubblici.length,
         }).catch(() => {});
       } catch {
         if (!alive) return;
@@ -162,6 +125,7 @@ export default function PublicProfilesPage() {
           stage: "unexpected",
         }).catch(() => {});
         toast.error("Errore temporaneo nella sezione scopri.");
+        setDiscoveryError(true);
         setProfili([]);
       } finally {
         if (alive) {
@@ -189,6 +153,7 @@ export default function PublicProfilesPage() {
     try {
       const { error } = await supabase.from("likes").insert([
         {
+          user_id: userId,
           user_from: userId,
           user_to: profiloId,
         },
@@ -215,7 +180,7 @@ export default function PublicProfilesPage() {
         const { count, error: countError } = await supabase
           .from("likes")
           .select("user_to", { count: "exact", head: true })
-          .eq("user_from", userId);
+          .eq("user_id", userId);
 
         if (countError) {
           track("first_like_check_failed", getActivationJourneyProps()).catch(() => {});
@@ -228,43 +193,34 @@ export default function PublicProfilesPage() {
         track("first_like_sent", getActivationJourneyProps()).catch(() => {});
       }
 
-      const { data: likeBack, error: likeBackError } = await supabase
-        .from("likes")
-        .select("user_from, user_to")
-        .eq("user_from", profiloId)
-        .eq("user_to", userId)
-        .maybeSingle();
-
-      if (likeBackError) {
-        track("match_check_failed", getActivationJourneyProps()).catch(() => {});
-        return;
-      }
-
-      if (!likeBack || matches.includes(profiloId)) return;
+      // Non leggiamo il like ricevuto: è un dato privato dell'altra persona.
+      // Solo il backend può confermare se la coppia è reciprocamente interessata.
+      if (matches.includes(profiloId)) return;
 
       const pair = [userId, profiloId].sort();
 
-      const { error: matchError } = await supabase.from("match_scores").upsert(
-        [
-          {
-            user_a: pair[0],
-            user_b: pair[1],
-            score: 100,
-            matched_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ],
-        { onConflict: "user_a,user_b" }
-      );
+      // I match sono confermati dal backend, mai creati direttamente dal browser.
+      const { data: confirmedMatch, error: matchError } = await supabase
+        .from("match_scores")
+        .select("user_a, user_b, score")
+        .eq("user_a", pair[0])
+        .eq("user_b", pair[1])
+        .eq("score", 100)
+        .maybeSingle();
 
       if (matchError) {
-        track("match_create_failed", getActivationJourneyProps()).catch(() => {});
-        toast.error("Like salvato, ma il match non è stato registrato.");
+        track("match_check_failed", getActivationJourneyProps()).catch(() => {});
+        toast("Like salvato. La verifica del match non è disponibile.");
         return;
       }
 
-      track("match_created", getActivationJourneyProps()).catch(() => {});
-      toast.success("💘 Match reciproco trovato!");
+      if (!confirmedMatch) {
+        toast.success("Like salvato. Il match non è ancora confermato.");
+        return;
+      }
+
+      track("match_confirmed", getActivationJourneyProps()).catch(() => {});
+      toast.success("💘 Match reciproco confermato!");
       setMatches((prev) => [...prev, profiloId]);
     } catch {
       track("like_failed", {
@@ -328,9 +284,9 @@ export default function PublicProfilesPage() {
       <section role="status" aria-label="Stato del profilo" style={profileVisibleBox}>
         <span aria-hidden="true" style={profileVisibleIcon}>✓</span>
         <div>
-          <strong style={profileVisibleTitle}>Il tuo profilo gratuito è completo e visibile.</strong>
+          <strong style={profileVisibleTitle}>Il tuo profilo soddisfa i requisiti per entrare in Scopri.</strong>
           <p style={profileVisibleText}>
-            Puoi scoprire persone, inviare like e creare match. Nessun abbonamento richiesto.
+            La disponibilità e la visibilità dei profili dipendono anche dalle autorizzazioni del servizio. Nessun abbonamento richiesto.
           </p>
         </div>
       </section>
@@ -361,6 +317,8 @@ export default function PublicProfilesPage() {
 
       {loading ? (
         <p>Caricamento profili...</p>
+      ) : discoveryError ? (
+        <p role="alert">Scopri persone non è disponibile in questo momento. Nessun profilo privato viene mostrato.</p>
       ) : profiliFiltrati.length === 0 ? (
         <section
             aria-label="Nessun profilo da scoprire"
@@ -375,14 +333,14 @@ export default function PublicProfilesPage() {
             }}
           >
             <p style={{ margin: "0 0 0.5rem", fontWeight: 800 }}>
-              Il tuo profilo c’è. Stiamo aspettando le altre persone.
+              Nessun profilo disponibile in questo momento.
             </p>
             <p style={{ margin: 0, opacity: 0.82 }}>
-              Non devi acquistare Premium. Il tuo profilo è già visibile e pronto a ricevere
-              interazioni quando arriveranno altri profili completi.
+              Non serve acquistare Premium. Se non vedi altri profili, la causa può essere la disponibilità
+              degli utenti o una limitazione temporanea del servizio.
             </p>
             <Link
-              to={`/profilo/${userId}`}
+              to="/profilo"
               style={{
                 display: "inline-block",
                 marginTop: 12,
@@ -391,7 +349,7 @@ export default function PublicProfilesPage() {
                 textDecoration: "none",
               }}
             >
-              Guarda il mio profilo pubblico
+              Gestisci il mio profilo
             </Link>
             <Link
               to="/profilo"
@@ -425,7 +383,7 @@ export default function PublicProfilesPage() {
               >
                 <Link to={`/profilo/${profilo.id}`} style={linkStyle}>
                   <img
-                    src={profilo.foto_url || profilo.avatar_url || "/default-avatar.png"}
+                    src={profilo.foto_url || "/default-avatar.png"}
                     alt={`Foto di ${profilo.nome}`}
                     style={avatarStyle}
                   />

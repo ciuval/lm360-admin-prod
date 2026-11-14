@@ -44,3 +44,14 @@ test("a gallery photo satisfies the photo requirement", () => {
 
   assert.equal(completion.isComplete, true);
 });
+
+
+test("due requisiti su quattro significano 50%, non profilo completo", () => {
+  const completion = calculateProfileCompletion({
+    profile: { nome: "Test", bio: "", interessi: "" },
+    photos: [{ url: "data:image/png;base64,dGVzdA==" }],
+  });
+  assert.equal(completion.score, 50);
+  assert.equal(completion.isComplete, false);
+  assert.deepEqual(completion.missingKeys, ["bio", "interests"]);
+});
