@@ -73,7 +73,26 @@ const statusItems = [
   "Nessun credito chat per messaggio",
 ];
 
-export default function SiteFooter() {
+export default function SiteFooter({ isAuthed = false, isAdmin = false }) {
+  const visibleGroups = linkGroups
+    .filter((group) => group.title !== "Dietro le quinte" || isAdmin)
+    .map((group) => {
+      if (group.title === "Dietro le quinte") {
+        return { ...group, links: group.links.filter((link) => link.href !== "#/quantum") };
+      }
+      if (group.title !== "Per entrare" || isAuthed) return group;
+      return {
+        ...group,
+        links: [
+          { label: "Registrati", href: "#/register" },
+          { label: "Accedi", href: "#/login" },
+          { label: "Come funziona", href: "#/come-funziona" },
+          { label: "Scopri persone (accesso richiesto)", href: "#/scopri-profili" },
+          { label: "Premium (acquisti sospesi)", href: "#/premium" },
+        ],
+      };
+    });
+
   return (
     <footer style={footerStyle} aria-label="Mappa finale del sito">
       <div style={innerStyle}>
@@ -95,7 +114,7 @@ export default function SiteFooter() {
         </section>
 
         <nav style={groupsStyle} aria-label="Collegamenti footer">
-          {linkGroups.map((group) => (
+          {visibleGroups.map((group) => (
             <section key={group.title} style={groupStyle} aria-labelledby={`footer-${slug(group.title)}`}>
               <h3 id={`footer-${slug(group.title)}`} style={groupTitleStyle}>
                 {group.title}
@@ -237,6 +256,8 @@ const linksStyle = {
 
 const linkStyle = {
   display: "inline-flex",
+  minHeight: 44,
+  alignItems: "center",
   padding: "0.48rem 0.62rem",
   borderRadius: "999px",
   border: "1px solid rgba(255, 255, 255, 0.1)",
