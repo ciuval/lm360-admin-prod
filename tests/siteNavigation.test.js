@@ -98,3 +98,14 @@ test("link di menu, footer e Home puntano a route o file pubblici previsti", asy
   }
   assert.ok(links.length >= 35, "Audit link troppo piccolo");
 });
+
+test("messaggi editoriali restano risorse, non la chat; testi leggibili", async () => {
+  const [footer, editorial] = await Promise.all([
+    read("src/components/SiteFooter.jsx"),
+    read("src/pages/MessaggiPage.jsx"),
+  ]);
+  assert.match(footer, /label: "Messaggi da leggere", href: "#\\/messaggi"/);
+  assert.doesNotMatch(footer, /label: "Messaggi", href: "#\\/messaggi"/);
+  assert.doesNotMatch(editorial, /[ÃÂÈÄ�]|â€/);
+  assert.match(editorial, /Il libro|libro/i);
+});
