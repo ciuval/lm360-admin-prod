@@ -7,7 +7,6 @@
  * Non stampare email, UUID, password, token, contenuti chat o errori del provider.
  */
 import { randomBytes } from "node:crypto";
-import assert from "node:assert/strict";
 import { createClient } from "@supabase/supabase-js";
 import { assertLocalE2eUrl } from "../src/lib/localE2eSafety.js";
 import { persistProfile, syncPrimaryProfilePhoto } from "../src/lib/persistProfile.js";
@@ -217,6 +216,8 @@ async function cleanLocalTestRows() {
   const operations = [
     admin.from("messaggi").delete().in("mittente_id", ids),
     admin.from("likes").delete().in("user_id", ids),
+    admin.from("match_scores").delete().in("user_a", ids),
+    admin.from("match_scores").delete().in("user_b", ids),
     admin.from("stanze_360").delete().in("user_id", ids),
     admin.from("profili_foto").delete().in("profilo_id", ids),
   ];
