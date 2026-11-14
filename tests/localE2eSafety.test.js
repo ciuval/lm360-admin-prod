@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { assertLocalE2eUrl } from "../src/lib/localE2eSafety.js";
 
 test("Supabase E2E autorizza soltanto API loopback sulla porta locale standard", () => {
@@ -41,4 +43,10 @@ test("Collaudo V2 locale non parte dai test CI e contiene l'intero percorso a du
   assert.doesNotMatch(script, /(?:process\.env\.)?VITE_SUPABASE_/);
   assert.doesNotMatch(script, /console\.(?:log|error|warn)/);
   assert.doesNotMatch(script, /supabase\.co|service_role_key\s*=/i);
+});
+
+test("Lo script E2E locale supera il controllo sintattico senza eseguire richieste", () => {
+  const file = fileURLToPath(new URL("../scripts/e2e-two-accounts-local.mjs", import.meta.url));
+  const checked = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" });
+  assert.equal(checked.status, 0, "Lo script E2E non è sintatticamente valido");
 });
