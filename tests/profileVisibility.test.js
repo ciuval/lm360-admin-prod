@@ -90,6 +90,11 @@ test("frontend prevede opt-in, filtri di visibilita e anteprima privata del prop
   assert.match(profilePage, /Nascondi il mio profilo/);
   assert.match(profilePage, /setProfileVisibility\(supabase/);
   assert.match(profilePage, /profilo_pubblico: false/);
-  assert.match(profileCard, /if \(!ownProfile\) profileQuery = profileQuery\.eq\("profilo_pubblico", true\)/);
-  assert.match(discovery, /\.eq\("profilo_pubblico", true\)/);
+  assert.match(profileCard, /\.rpc\(/);
+  assert.match(profileCard, /"lm360_get_public_profiles"/);
+  assert.match(discovery, /"lm360_get_public_profiles"/);
+  assert.doesNotMatch(profileCard, /\.from\("profili"\)/);
+  assert.doesNotMatch(profileCard, /\.from\("profili_foto"\)/);
+  assert.doesNotMatch(discovery, /\.from\("profili"\)/);
+  assert.doesNotMatch(discovery, /\.from\("profili_foto"\)/);
 });
