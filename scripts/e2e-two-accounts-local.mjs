@@ -221,11 +221,20 @@ async function cleanLocalTestRows() {
     admin.from("stanze_360").delete().in("user_id", ids),
     admin.from("profili_foto").delete().in("profilo_id", ids),
   ];
-  await Promise.allSettled(operations);
-  for (const id of ids) {
-    const result = await admin.auth.admin.deleteUser(id);
-    if (result.error) throw new Error("LOCAL_TEST_CLEANUP_FAILED");
+  let failed = false;
+  const results = await Promise.allSettled(operations);
+  for (const result of results) {
+    if (result.status === "rejected" || result.value?.error) failed = true;
   }
+  for (const id of ids) {
+    try {
+      const result = await admin.auth.admin.deleteUser(id);
+      if (result.error) failed = true;
+    } catch {
+      failed = true;
+    }
+  }
+  if (failed) throw new Error("LOCAL_TEST_CLEANUP_FAILED");
 }
 
 try {
