@@ -5,27 +5,10 @@ import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { track } from "../lib/analytics.js";
 import { getActivationJourneyProps } from "../lib/activationJourney.js";
-import { buildDiscoverableProfiles } from "../lib/publicProfiles.js";
-
-function normalizeRole(value) {
-  return String(value || "").trim().toLowerCase();
-}
-
-function isFutureDate(value) {
-  if (!value) return false;
-  const time = new Date(value).getTime();
-  return Number.isFinite(time) && time > Date.now();
-}
+import { normalizePublicProfileProjection } from "../lib/publicProfiles.js";
 
 function hasPremiumAccess(profile) {
-  const role = normalizeRole(profile?.ruolo);
-
-  return (
-    Boolean(profile?.premium) ||
-    role === "premium" ||
-    role === "super" ||
-    isFutureDate(profile?.premium_fine)
-  );
+  return profile?.premium === true;
 }
 
 function toInterestArray(value) {
@@ -56,6 +39,7 @@ export default function PublicProfilesPage() {
   const likingIdsRef = useRef(new Set());
   const [hasExistingLikes, setHasExistingLikes] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [discoveryError, setDiscoveryError] = useState(false);
   const [query, setQuery] = useState("");
   const [filtroInteresse, setFiltroInteresse] = useState("");
 
@@ -108,53 +92,31 @@ export default function PublicProfilesPage() {
           setMatches(matchedIds);
         }
 
-        const [profilesResult, photosResult] = await Promise.all([
-          supabase
-            .from("profili")
-            .select("id, nome, bio, foto_url, avatar_url, interessi, premium, premium_fine, ruolo, status_account, profilo_pubblico")
-            .eq("status_account", "attivo")
-            .eq("profilo_pubblico", true)
-            .order("nome", { ascending: true }),
-          supabase
-            .from("profili_foto")
-            .select("profilo_id, foto_url, ordine, is_primary")
-            .eq("is_primary", true)
-            .order("ordine", { ascending: true }),
-        ]);
-
-        const { data: profiliData, error: profiliError } = profilesResult;
-        const { data: photoRows, error: photosError } = photosResult;
+        // La funzione PostgreSQL controlla consenso, stato, completezza e minimizzazione.
+        // Nessun fallback alle tabelle private se la RPC non è ancora disponibile.
+        const { data: rpcProfiles, error: rpcError } = await supabase.rpc(
+          "lm360_get_public_profiles",
+          { p_profile_id: null }
+        );
 
         if (!alive) return;
 
-        if (profiliError) {
+        if (rpcError || !Array.isArray(rpcProfiles)) {
+          setDiscoveryError(true);
+          setProfili([]);
           track("discovery_load_failed", {
             ...getActivationJourneyProps(),
-            stage: "profiles",
+            stage: "public_rpc",
           }).catch(() => {});
-          toast.error("Errore nel caricamento dei profili.");
-          setProfili([]);
           return;
         }
 
-        if (photosError) {
-          track("discovery_load_failed", {
-            ...getActivationJourneyProps(),
-            stage: "photos",
-          }).catch(() => {});
-        }
-
-        const otherProfiles = (profiliData || []).filter((profilo) => profilo.id !== currentUserId);
-        const pubblici = buildDiscoverableProfiles(
-          profiliData || [],
-          photosError ? [] : photoRows || [],
-          currentUserId
-        );
+        const pubblici = normalizePublicProfileProjection(rpcProfiles, currentUserId);
+        setDiscoveryError(false);
         setProfili(pubblici);
         track("discovery_opened", {
           ...getActivationJourneyProps(),
           results: pubblici.length,
-          excluded_results: otherProfiles.length - pubblici.length,
         }).catch(() => {});
       } catch {
         if (!alive) return;
@@ -163,6 +125,7 @@ export default function PublicProfilesPage() {
           stage: "unexpected",
         }).catch(() => {});
         toast.error("Errore temporaneo nella sezione scopri.");
+        setDiscoveryError(true);
         setProfili([]);
       } finally {
         if (alive) {
@@ -354,6 +317,8 @@ export default function PublicProfilesPage() {
 
       {loading ? (
         <p>Caricamento profili...</p>
+      ) : discoveryError ? (
+        <p role="alert">Scopri persone non è disponibile in questo momento. Nessun profilo privato viene mostrato.</p>
       ) : profiliFiltrati.length === 0 ? (
         <section
             aria-label="Nessun profilo da scoprire"
@@ -375,7 +340,7 @@ export default function PublicProfilesPage() {
               degli utenti o una limitazione temporanea del servizio.
             </p>
             <Link
-              to={`/profilo/${userId}`}
+              to="/profilo"
               style={{
                 display: "inline-block",
                 marginTop: 12,
@@ -384,7 +349,7 @@ export default function PublicProfilesPage() {
                 textDecoration: "none",
               }}
             >
-              Guarda il mio profilo pubblico
+              Gestisci il mio profilo
             </Link>
             <Link
               to="/profilo"
@@ -418,7 +383,7 @@ export default function PublicProfilesPage() {
               >
                 <Link to={`/profilo/${profilo.id}`} style={linkStyle}>
                   <img
-                    src={profilo.foto_url || profilo.avatar_url || "/default-avatar.png"}
+                    src={profilo.foto_url || "/default-avatar.png"}
                     alt={`Foto di ${profilo.nome}`}
                     style={avatarStyle}
                   />
