@@ -32,3 +32,27 @@ export function buildDiscoverableProfiles(profiles = [], photoRows = [], current
     })
     .filter((profile) => calculateProfileCompletion({ profile }).isComplete);
 }
+
+
+/**
+ * La RPC lm360_get_public_profiles applica l'autorizzazione lato PostgreSQL.
+ * Questo adattatore mantiene solo i sei campi previsti dal contratto,
+ * senza effettuare query dirette a profili o foto di altre persone.
+ *
+ * Non sostituisce le verifiche server-side sul consenso.
+ */
+export function normalizePublicProfileProjection(rows = [], currentUserId = null) {
+  if (!Array.isArray(rows)) return [];
+
+  return rows
+    .filter((row) => row?.id && row.id !== currentUserId)
+    .map((row) => ({
+      id: row.id,
+      nome: row.nome || "",
+      bio: row.bio || "",
+      interessi: row.interessi || "",
+      foto_url: row.foto_url || "",
+      premium: row.premium === true,
+    }))
+    .filter((row) => calculateProfileCompletion({ profile: row }).isComplete);
+}
