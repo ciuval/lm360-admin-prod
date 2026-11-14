@@ -1,80 +1,104 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
+import { normalizePublicProfileProjection } from "../lib/publicProfiles.js";
 
 export default function ProfilePublicCard() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [profilo, setProfilo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [isMatch, setIsMatch] = useState(false);
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data: session } = await supabase.auth.getSession();
-      const myId = session?.session?.user?.id;
-      setUserId(myId || null);
+    let alive = true;
 
-      const ownProfile = Boolean(myId && id && myId === id);
-      let profileQuery = supabase
-        .from("profili")
-        .select("id, nome, bio, interessi, foto_url, avatar_url, ruolo, status_account, profilo_pubblico")
-        .eq("id", id)
-        .eq("status_account", "attivo");
-      if (!ownProfile) profileQuery = profileQuery.eq("profilo_pubblico", true);
+    async function fetchData() {
+      setLoading(true);
+      setLoadError(false);
+      setProfilo(null);
+      setIsMatch(false);
 
-      const [{ data, error }, { data: photoRows }] = await Promise.all([
-        profileQuery.maybeSingle(),
-        supabase
-          .from("profili_foto")
-          .select("foto_url, ordine, is_primary")
-          .eq("profilo_id", id)
-          .order("is_primary", { ascending: false })
-          .order("ordine", { ascending: true })
-          .limit(1),
-      ]);
+      try {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (!alive) return;
 
-      if (!error && data) {
-        setProfilo({
-          ...data,
-          foto_url: data.foto_url || data.avatar_url || photoRows?.[0]?.foto_url || "",
-        });
+        if (authError || !user?.id) {
+          setLoadError(true);
+          return;
+        }
+
+        setUserId(user.id);
+
+        if (user.id === id) {
+          navigate("/profilo", { replace: true });
+          return;
+        }
+
+        // Una sola API di lettura minimizzata. Mai leggere profili o foto altrui
+        // dalle tabelle private, anche quando la RPC non è disponibile.
+        const { data, error } = await supabase.rpc(
+          "lm360_get_public_profiles",
+          { p_profile_id: id }
+        );
+        if (!alive) return;
+
+        if (error || !Array.isArray(data)) {
+          setLoadError(true);
+          return;
+        }
+
+        const visible = normalizePublicProfileProjection(data, user.id);
+        const selected = visible.find((row) => row.id === id) || null;
+        setProfilo(selected);
+
+        if (!selected) return;
+
+        const pair = [user.id, id].sort();
+        const { data: matchRow, error: matchError } = await supabase
+          .from("match_scores")
+          .select("user_a, user_b, score")
+          .eq("user_a", pair[0])
+          .eq("user_b", pair[1])
+          .eq("score", 100)
+          .maybeSingle();
+
+        if (!alive) return;
+        setIsMatch(!matchError && Boolean(matchRow));
+      } catch {
+        if (alive) setLoadError(true);
+      } finally {
+        if (alive) setLoading(false);
       }
-
-      if (myId && id) {
-        const pair = [myId, id].sort();
-
-      const { data: matchRow } = await supabase
-        .from("match_scores")
-        .select("user_a, user_b, score")
-        .eq("user_a", pair[0])
-        .eq("user_b", pair[1])
-        .eq("score", 100)
-        .maybeSingle();
-
-      setIsMatch(Boolean(matchRow));
-      }
-
-      setLoading(false);
-    };
+    }
 
     if (id) fetchData();
-  }, [id]);
+    else {
+      setLoading(false);
+      setLoadError(true);
+    }
 
-  if (loading) return <p style={textStyle}>⏳ Caricamento...</p>;
-  if (!profilo) return <p style={textStyle}>❌ Profilo non trovato.</p>;
+    return () => {
+      alive = false;
+    };
+  }, [id, navigate]);
+
+  if (loading) return <p style={textStyle}>Caricamento...</p>;
+  if (loadError) return <p role="alert" style={textStyle}>Profilo non disponibile in questo momento.</p>;
+  if (!profilo) return <p style={textStyle}>Profilo non disponibile o non autorizzato alla visibilità.</p>;
 
   return (
     <div style={containerStyle}>
       <h2 style={titleStyle}>
-        👤 Profilo
+        Profilo pubblico
         {isMatch && <span style={badgeStyle}>💘 Match!</span>}
       </h2>
 
-      {(profilo.foto_url || profilo.avatar_url) && (
+      {profilo.foto_url && (
         <img
-          src={profilo.foto_url || profilo.avatar_url}
+          src={profilo.foto_url}
           alt={`Foto di ${profilo.nome || "questo profilo"}`}
           style={{ width: "150px", borderRadius: "8px", marginBottom: "1rem" }}
         />
@@ -83,7 +107,6 @@ export default function ProfilePublicCard() {
       <p><strong>Nome:</strong> {profilo.nome || "N/D"}</p>
       <p><strong>Bio:</strong> {profilo.bio || "Nessuna bio"}</p>
       <p><strong>Interessi:</strong> {profilo.interessi || "Nessuno"}</p>
-      <p><strong>Ruolo:</strong> {profilo.ruolo || "utente"}</p>
 
       {userId && userId !== id && !isMatch && (
         <button onClick={() => navigate(`/stanza/${id}`)} style={roomBtnStyle}>
