@@ -226,6 +226,12 @@ export default function RegisterPage() {
   return (
     <main style={pageStyle}>
       <section style={cardStyle} aria-labelledby="register-title">
+        <nav aria-label="Esplora prima di registrarti" style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 20 }}>
+          <Link to="/" style={{ color: "#ffd6ea" }}>Home</Link>
+          <Link to="/come-funziona" style={{ color: "#ffd6ea" }}>Come funziona</Link>
+          <Link to="/faq" style={{ color: "#ffd6ea" }}>FAQ</Link>
+          <Link to="/sicurezza" style={{ color: "#ffd6ea" }}>Sicurezza</Link>
+        </nav>
         <p style={eyebrowStyle}>Il primo passo · circa un minuto</p>
         <h1 id="register-title" style={titleStyle}>Crea il tuo spazio.</h1>
         <p style={introStyle}>
