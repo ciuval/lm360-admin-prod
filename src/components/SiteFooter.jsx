@@ -21,7 +21,6 @@ const linkGroups = [
       { label: "Scopri persone", href: "#/scopri-profili" },
       { label: "Profilo", href: "#/profilo" },
       { label: "Match", href: "#/match" },
-      { label: "Messaggi", href: "#/messaggi" },
       { label: "Premium", href: "#/premium" },
     ],
   },
@@ -30,6 +29,7 @@ const linkGroups = [
     note: "Contenuti che sostengono il percorso.",
     links: [
       { label: "Articoli e idee", href: "#/scopri" },
+      { label: "Messaggi da leggere", href: "#/messaggi" },
       { label: "YouTube News", href: "#/youtube-news" },
       { label: "Libro", href: "#/libro" },
       { label: "Metodo", href: "#/playbook" },
