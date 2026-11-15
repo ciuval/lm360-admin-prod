@@ -31,9 +31,14 @@ test("Scopri non garantisce visibilità o match senza conferma", async () => {
   assert.match(page, /Il match non è ancora confermato/);
 });
 
-test("MatchDashboard non richiede una colonna eta inesistente", async () => {
+test("MatchDashboard legge i match e non richiede direttamente profili privati", async () => {
   const page = await read("src/pages/MatchDashboard.jsx");
-  assert.match(page, /\.select\("id, nome, bio, interessi, foto_url"\)/);
+  const resolver = await read("src/lib/matchProfiles.js");
+  assert.match(page, /loadVisibleMatchedProfiles\(supabase,/);
+  assert.match(resolver, /\.select\("user_a, user_b, score"\)/);
+  assert.match(resolver, /"lm360_get_public_profiles"/);
+  assert.doesNotMatch(page, /\.from\(["']profili["']\)/);
+  assert.doesNotMatch(resolver, /\.from\(["']profili["']\)/);
   assert.doesNotMatch(page, /profilo\.eta|nome, eta, bio/);
   assert.match(page, /setLoadError\(true\)/);
   assert.match(page, /role="alert"/);
