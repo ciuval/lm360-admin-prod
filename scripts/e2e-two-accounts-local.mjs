@@ -54,11 +54,9 @@ async function preflight() {
     // HEAD, count senza consultare righe o contenuti.
     requireData(await admin.from(table).select("*", { count: "exact", head: true }), "MISSING_TABLE_" + table);
   }
-  // Le chiamate di controllo usano solo parametri null/impossibili.
-  requireData(await admin.rpc("lm360_get_public_profiles", { p_profile_id: null }), "MISSING_PUBLIC_RPC");
-  const neverExisting = "00000000-0000-4000-8000-0000000000ee";
-  requireData(await admin.rpc("get_stanza_compatibility", { target_user_id: neverExisting }), "MISSING_ROOM_RPC");
-  requireData(await admin.rpc("send_stanza_message", { target_user_id: neverExisting, message_content: "" }), "MISSING_SEND_RPC");
+  // RPC verificati con il ruolo authenticated dopo il login di A/B.
+  // Il service_role non riceve necessariamente EXECUTE sulle funzioni
+  // riservate agli authenticated: evitare un falso blocco del preflight.
 }
 
 async function createSyntheticAccount(code) {
