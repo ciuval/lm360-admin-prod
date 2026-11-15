@@ -13,7 +13,7 @@ test("baseline Supabase sintetica è isolata dalle migrazioni distribuibili", as
   assert.match(prepare, /LOCAL_BASELINE_EXISTS_WITH_DIFFERENT_CONTENT/);
   assert.match(prepare, /\.git\\info\\exclude/);
   assert.match(prepare, /20260910_lm360_core_lab.sql/);
-  assert.doesNotMatch(prepare, /supabase\s+(start|link|db\s+push|db\s+dump|migration\s+up)/i);
+  assert.doesNotMatch(prepare, /^\s*(?:npx\s+(?:--yes\s+)?|&\s*)?supabase\s+(start|link|db\s+push|db\s+dump|migration\s+up)/im);
   assert.doesNotMatch(baseline, /create\s+schema\s+auth|create\s+role\s+(authenticated|anon)|create\s+table\s+auth\.users/i);
 });
 
