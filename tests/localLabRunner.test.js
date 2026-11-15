@@ -32,3 +32,16 @@ test("API test validates RPC permissions with actual authenticated test users", 
   assert.match(source, /a\.client\.rpc\("get_stanza_compatibility"/);
   assert.match(source, /reader\.client\.rpc\("lm360_get_public_profiles"/);
 });
+
+
+test("PowerShell 5.1 non scambia gli avvisi informativi di supabase status per errori", async () => {
+  const ps = await readFile(new URL("../scripts/local-only/run-fase2-local.ps1", import.meta.url), "utf8");
+  assert.match(ps, /\$savedErrorActionPreference\s*=\s*\$ErrorActionPreference/);
+  assert.match(ps, /\$ErrorActionPreference\s*=\s*'Continue'/);
+  assert.match(ps, /supabase status -o env 2>\$null/);
+  assert.match(ps, /\$statusExitCode\s*=\s*\$LASTEXITCODE/);
+  assert.match(ps, /\$ErrorActionPreference\s*=\s*\$savedErrorActionPreference/);
+  assert.match(ps, /if \(\$statusExitCode -ne 0\)/);
+  assert.match(ps, /throw 'LOCAL_SUPABASE_STATUS_FAILED'/);
+  assert.doesNotMatch(ps, /Write-Host\s+\$raw|Write-Output\s+\$raw/);
+});
