@@ -181,7 +181,7 @@ export default function ChatBox() {
   };
 
   const messaggiPerData = messaggi.reduce((acc, msg) => {
-    const giorno = new Date(msg.inviato_il).toLocaleDateString();
+    const giorno = new Date(msg.inviato_il).toLocaleDateString("it-IT");
     if (!acc[giorno]) acc[giorno] = [];
     acc[giorno].push(msg);
     return acc;
@@ -234,12 +234,12 @@ export default function ChatBox() {
                   border: msg.letto ? "1px solid #0f0" : "1px solid #444",
                 }}
                 title={msg.letto && msg.mittente_id === session.user.id
-                  ? `Messaggio letto alle ${new Date(msg.inviato_il).toLocaleTimeString()}`
+                  ? `Messaggio letto alle ${new Date(msg.inviato_il).toLocaleTimeString("it-IT")}`
                   : undefined}
               >
                 <div>{msg.testo}</div>
                 <div style={{ fontSize: "0.75rem", color: "#bbb", marginTop: "0.3rem" }}>
-                  🕓 {new Date(msg.inviato_il).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  🕓 {new Date(msg.inviato_il).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
                   {msg.mittente_id === session.user.id && msg.letto && " ✅"}
                 </div>
               </div>
