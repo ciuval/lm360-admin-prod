@@ -132,3 +132,14 @@ Causa isolata: la publication `supabase_realtime` del LAB non include `public.me
 **Passo successivo dopo l'abilitazione**: ricaricare le due chat (per ricreare le subscription), lasciare Chrome/Andrea senza refresh, inviare un solo nuovo messaggio sintetico da Edge/Bianca, verificare se compare automaticamente e se il ricevente non autorizzato resta escluso. Il terzo messaggio già inviato NON va ripetuto.
 
 **Limiti**: la publication include il tipo di evento per cui il client si iscrive; non sostituisce RLS. Nessun deploy o intervento sul Supabase cloud/Stripe; PR draft.
+
+
+## Diagnostica browser Realtime — WebSocket 101
+
+**15/11/2026, sessione Chrome/Andrea**: Chrome DevTools mostra una connessione WebSocket originata da `ChatBox.jsx` con stato HTTP **101** e un'altra del dev server Vite. Quindi il browser riesce a effettuare l'upgrade WebSocket, ma questo **non certifica** lo stato `SUBSCRIBED` del canale Postgres Changes, né la ricezione dei payload RLS filtrati.
+
+**Scenario riprodotto dopo `MESSAGGI_PUBLISHED=YES`**: Edge/Bianca invia il quarto messaggio sintetico «Test Realtime 2» alle 21:15, visibile in Edge ma non in Chrome/Andrea senza refresh. Le letture dopo refresh continuano a funzionare. Nessun nuovo invio o modifica DB finché non sappiamo lo stato del canale.
+
+**Diagnostica non invasiva**: in `ChatBox.jsx` ora è visibile un breve stato accessibile della subscription, aggiornato dal callback ufficiale `.subscribe((status) => ...)`: «Realtime: canale collegato (consegna da verificare)» per `SUBSCRIBED`, «Realtime: non disponibile» per `CHANNEL_ERROR`, `TIMED_OUT` o `CLOSED`, altrimenti «collegamento in corso». Non stampa eventi, messaggi, URI WebSocket, token o UUID. Quando SUBSCRIBED rilegge in modo autorizzato la cronologia per allineamento, ma non dichiara consegna push senza nuovo test. Il controllo del callback non modifica policy, tabelle o invii.
+
+**Prossima prova**: `git pull --ff-only` nel LAB senza fermare il server, Ctrl+R solo per caricare la UI diagnostica nella chat di Chrome/Andrea; riferire soltanto la riga «Realtime: …», senza catturare il pannello Network o esporre chiavi. Nessun nuovo messaggio finché l'esito della subscription non è noto. PR #27 resta draft; nessun deploy/Stripe/cloud.
