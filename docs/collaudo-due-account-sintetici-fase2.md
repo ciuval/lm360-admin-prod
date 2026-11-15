@@ -48,3 +48,15 @@
 Il test con vere API locali è **PASS**, inclusi vari controlli negativi. Mancano ancora prova browser con due utenti sintetici, realtime/typing, Mailpit e un audit RLS sull'ambiente effettivo di rilascio. Se un controllo fallisce, la PR non deve essere distribuita. Rollback attuale: revert dei commit sul branch, nessuna modifica al progetto online. Nessun nuovo checkout, Stripe immutato.
 
 Fonti tecniche: [Supabase local development](https://supabase.com/docs/guides/local-development), [Test auth flows / Mailpit](https://supabase.com/docs/guides/auth/testing-auth-flows).
+
+
+## Stato browser — 15 novembre 2026
+
+- **PASS effettivo browser locale**: Andrea Test in Chrome e Bianca Test in Edge hanno completato signup e accesso in sessioni indipendenti. Il guard sessione ora funziona dopo aggiunta della colonna di compatibilità solo LAB `profili.stripe_customer_id`.
+- **PASS browser**: profili completi al 100% con immagini sintetiche, visibilità opt-in separata, entrambe le schede presenti in Scopri, due like inviati e UI «Like inviato».
+- **BLOCCO browser**: entrando nella pagina Match da Bianca appare «Non riusciamo a mostrare i match in questo momento» anche dopo il secondo like. L'esistenza del match nella tabella non è ancora stata verificata in questa specifica sessione browser.
+- **Causa verificata nel codice**: `src/pages/MatchDashboard.jsx` leggeva direttamente `profili` dell'altra persona, mentre la fixture RLS permette la lettura diretta solo del proprietario; zero righe diventavano un errore UI.
+- **Correzione PR (non ancora provata nel browser)**: `src/lib/matchProfiles.js` combina `match_scores.score=100` con `lm360_get_public_profiles(p_profile_id)` per ciascuna controparte. Solo le proiezioni pubbliche consentite possono comparire. Nessuna modifica alla RLS o concessione di lettura sui profili privati.
+- Test di regressione: match visibile, like unidirezionale, revoca visibilità, righe RPC incoerenti, errore RLS/RPC, duplicati e assenza sessione. GitHub Actions su `0e3d7cf`: **163 test superati, 0 falliti, build Vite riuscita**.
+- **Da riprovare nel browser**: aggiornare la copia LAB con `git pull --ff-only`, ricaricare `/#/match` in Edge, controllare che il match Andrea–Bianca sia visualizzato e il link alla Stanza 360 sia presente. Se non compare, acquisire soltanto un codice d'errore non sensibile tramite diagnostica read-only locale.
+- Stanza 360 e chat browser **non ancora verificate**. PR resta draft, nessuna modifica a main, sito online, Supabase produzione o Stripe.
