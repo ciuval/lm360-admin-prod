@@ -111,3 +111,24 @@ Fonti tecniche: [Supabase local development](https://supabase.com/docs/guides/lo
 **Diagnosi preparata, sola lettura e isolata**: `scripts/local-only/check-fase2-realtime.ps1` verifica branch e porte Docker localhost, identità del database locale, publication, membership messaggi, RLS, ruolo authenticated, policy SELECT, servizio realtime. Emissione soltanto di flag, non chiavi, UUID, email o testi. Test `tests/localRealtimeDiagnostic.test.js` assicura assenza di SQL mutativo. Prima eseguire script nel PC LAB; soltanto se `MESSAGGI_PUBLISHED=NO` e RLS/SELECT risultano corretti, preparare fix **esclusivamente locale**, poi riprovare in due browser senza reload.
 
 **Protezione**: nessuna modifica a SQL cloud, produzione o Stripe; PR #27 ancora draft. Per il momento non ripetere messaggi già inviati.
+
+## Ripristino Realtime esclusivamente locale — publication messaggi
+
+**Diagnosi reale confermata dall'utente, 15/11/2026**:
+
+- `PUBLICATION=PRESENT`
+- `MESSAGGI_PUBLISHED=NO`
+- `MESSAGGI_RLS=ENABLED`
+- `MESSAGGI_SELECT_GRANT=YES`
+- `MESSAGGI_SELECT_POLICY=PRESENT`
+- `REALTIME_CONTAINER=RUNNING`
+
+Causa isolata: la publication `supabase_realtime` del LAB non include `public.messaggi`, quindi la subscription `postgres_changes` della chat non può ricevere gli INSERT. Vedere documentazione ufficiale Supabase Postgres Changes (29/10/2026): https://supabase.com/docs/guides/realtime/postgres-changes.
+
+**Rimedio predisposto ma NON ancora eseguito sul PC dell'utente**: `scripts/local-only/enable-fase2-realtime.ps1` esegue solo `ALTER PUBLICATION supabase_realtime ADD TABLE public.messaggi` e solo sul Docker locale `LM360_FASE2_LAB`. Guardie: branch, `supabase/config.toml`, bind localhost, label container esatta, publication presente non-all-tables, RLS, grant SELECT autenticato, nessun grant SELECT anon, unica policy di lettura `messaggi_read_participants` limitata ai partecipanti. Se una guardia fallisce, la modifica viene rifiutata. È idempotente: ripetere non raddoppia la publication. Esegue post-check della membership prima di dire PASS. `-Rollback` esegue solo `ALTER PUBLICATION supabase_realtime DROP TABLE public.messaggi`, mantenendo dati e RLS. Nessuna migrazione di produzione o modifica dei dati.
+
+**Test automatici di contratto**: `tests/localRealtimeEnable.test.js`; GitHub Actions commit `3bfa0e0`: **178 test PASS, 0 FAIL e build Vite OK**. La riuscita della modifica SQL locale non è ancora certificata finché l'utente non esegue lo script e mostra `MESSAGGI_PUBLISHED=YES`.
+
+**Passo successivo dopo l'abilitazione**: ricaricare le due chat (per ricreare le subscription), lasciare Chrome/Andrea senza refresh, inviare un solo nuovo messaggio sintetico da Edge/Bianca, verificare se compare automaticamente e se il ricevente non autorizzato resta escluso. Il terzo messaggio già inviato NON va ripetuto.
+
+**Limiti**: la publication include il tipo di evento per cui il client si iscrive; non sostituisce RLS. Nessun deploy o intervento sul Supabase cloud/Stripe; PR draft.
