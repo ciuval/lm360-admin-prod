@@ -27,6 +27,9 @@ create table public.profili (
   premium_start timestamptz,
   premium_fine timestamptz,
   tipo_abbonamento text,
+  -- Solo colonna di compatibilità con loadCurrentAccountTier.
+  -- Non contiene alcun customer ID reale e non viene usata per pagamenti.
+  stripe_customer_id text,
   profilo_pubblico boolean not null default false,
   status_account text not null default 'attivo',
   created_at timestamptz not null default now(),
