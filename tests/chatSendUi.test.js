@@ -50,3 +50,17 @@ test("date e orari della conversazione sono coerenti in italiano su Chrome ed Ed
   assert.doesNotMatch(chat, /\.toLocaleDateString\(\)/);
   assert.doesNotMatch(chat, /\.toLocaleTimeString\(\)/);
 });
+
+
+test("lo stato Realtime è leggibile nella chat senza token o payload in log", async () => {
+  const chat = await readChat();
+  assert.match(chat, /\.subscribe\(\(status\) => \{/);
+  assert.match(chat, /status === "SUBSCRIBED"/);
+  assert.match(chat, /status === "CHANNEL_ERROR" \|\| status === "TIMED_OUT" \|\| status === "CLOSED"/);
+  assert.match(chat, /setRealtimeStatus\("COLLEGATO"\)/);
+  assert.match(chat, /setRealtimeStatus\("NON_DISPONIBILE"\)/);
+  assert.match(chat, /role="status" aria-live="polite"/);
+  assert.match(chat, /Realtime: canale collegato \(consegna da verificare\)/);
+  assert.match(chat, /La cronologia resta consultabile/);
+  assert.doesNotMatch(chat, /console\.(?:log|warn|error)/);
+});
