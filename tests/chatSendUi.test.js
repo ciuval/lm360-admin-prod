@@ -70,10 +70,42 @@ test("ignora callback di canali gia smontati in React StrictMode", async () => {
   const chat = await readChat();
   assert.match(chat, /let active = true/);
   assert.match(chat, /if \(!active\) return;/);
-  assert.match(chat, /active = false;\s*supabase\.removeChannel\(messaggiChannel\)/);
+  assert.match(chat, /active = false;\s*authListener\.subscription\.unsubscribe\(\)/);
+  assert.match(chat, /if \(messaggiChannel\) supabase\.removeChannel\(messaggiChannel\)/);
   assert.match(chat, /\.subscribe\(\(status\) => \{[\s\S]*?if \(!active\) return;/);
   assert.match(chat, /setRealtimeFailure\(status\)/);
   assert.match(chat, /setRealtimeFailure\(null\)/);
   assert.match(chat, /realtimeFailure \|\| "ERRORE"/);
   assert.doesNotMatch(chat, /console\.(?:log|warn|error)/);
+});
+
+
+test("prima della subscription Realtime è applicato il JWT della sessione corrente", async () => {
+  const chat = await readChat();
+  assert.match(chat, /const \{ data, error \} = await supabase\.auth\.getSession\(\)/);
+  assert.match(chat, /data\.session\.user\?\.id !== myId/);
+  assert.match(chat, /!data\?\.session\?\.access_token/);
+  assert.match(chat, /await supabase\.realtime\.setAuth\(data\.session\.access_token\)/);
+  const jwt = chat.indexOf("await supabase.realtime.setAuth(data.session.access_token)");
+  const subscribe = chat.indexOf('.channel("chat-messaggi")');
+  assert.ok(jwt >= 0 && subscribe > jwt, "Realtime deve autenticarsi prima di sottoscrivere");
+  assert.match(chat, /if \(!active\) return;\s*messaggiChannel = supabase/);
+  assert.match(chat, /setRealtimeFailure\("SESSIONE_NON_VALIDA"\)/);
+});
+
+test("Realtime aggiorna il token alla scadenza e chiude i canali al logout", async () => {
+  const chat = await readChat();
+  assert.match(chat, /supabase\.auth\.onAuthStateChange\(\(event, nextSession\) => \{/);
+  assert.match(chat, /event === "TOKEN_REFRESHED"/);
+  assert.match(chat, /supabase\.realtime\.setAuth\(nextSession\.access_token\)/);
+  assert.match(chat, /event === "SIGNED_OUT"/);
+  assert.match(chat, /setRealtimeFailure\("SESSIONE_TERMINATA"\)/);
+  assert.match(chat, /authListener\.subscription\.unsubscribe\(\)/);
+  assert.doesNotMatch(chat, /console\.(?:log|warn|error)/);
+});
+
+test("notifiche audio bloccate non impediscono la conferma di lettura", async () => {
+  const chat = await readChat();
+  assert.match(chat, /new Audio\("\/notify\.mp3"\)\.play\(\)\.catch\(\(\) => \{\}\)/);
+  assert.match(chat, /await supabase\.from\("messaggi"\)\.update\(\{ letto: true \}\)/);
 });
