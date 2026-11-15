@@ -60,3 +60,14 @@ Fonti tecniche: [Supabase local development](https://supabase.com/docs/guides/lo
 - Test di regressione: match visibile, like unidirezionale, revoca visibilità, righe RPC incoerenti, errore RLS/RPC, duplicati e assenza sessione. GitHub Actions su `0e3d7cf`: **163 test superati, 0 falliti, build Vite riuscita**.
 - **Da riprovare nel browser**: aggiornare la copia LAB con `git pull --ff-only`, ricaricare `/#/match` in Edge, controllare che il match Andrea–Bianca sia visualizzato e il link alla Stanza 360 sia presente. Se non compare, acquisire soltanto un codice d'errore non sensibile tramite diagnostica read-only locale.
 - Stanza 360 e chat browser **non ancora verificate**. PR resta draft, nessuna modifica a main, sito online, Supabase produzione o Stripe.
+
+
+## Browser — accesso Stanza 360 con due profili completi
+
+- **15/11/2026: PASS apertura Stanza 360 dal browser locale.** Dopo il match reciproco verificato e il salvataggio delle due Stanze (5 qualità offerte + 5 cercate, imperfezioni facoltative), la schermata mostra «La porta si è aperta», compatibilità calcolata **100%** nello scenario con scelte sintetiche identiche, cinque qualità condivise e il CTA «Entra e scambia due parole».
+- Lo screenshot dell'apertura mostra **Andrea Test** come sessione attiva (Chrome); questa evidenza certifica l'apertura da quel lato, non ancora l'apertura da Bianca/Edge.
+- **Nota UI individuata:** compare «Tu e questa persona» anziché nome del partner, perché Stanza/Chat usavano una lettura diretta della tabella privata `profili`, nascosta dalla RLS ai non proprietari.
+- Correzione preparata sul branch draft: `src/lib/partnerDisplayName.js` recupera unicamente il nome tramite `lm360_get_public_profiles(p_profile_id)` e fallback generico senza consenso. `src/pages/Stanza360Page.jsx` e `src/pages/ChatBox.jsx` la invocano **solo dopo** i gate preesistenti di match reciproco e compatibilità. Nessun permesso RLS allargato, nessun nuovo endpoint o accesso diretto a profili altrui.
+- Test aggiunti in `tests/partnerDisplayName.test.js`: proiezione autorizzata, revoca/non disponibilità, errore RPC, non autenticato, gate mantenuti. GitHub Actions commit `89125fc`: **167 test verdi, 0 falliti, build Vite OK**.
+- **DA COLLAUDARE nel browser dopo git pull**: nome partner, apertura della chat, invio/ricezione di un messaggio tra Chrome ed Edge, eventuali limiti realtime/typing. Non dichiarare chat/browser E2E superato prima della prova.
+- Nessun dato cloud reale, nessun deploy, nessuna modifica a Stripe. PR draft.
