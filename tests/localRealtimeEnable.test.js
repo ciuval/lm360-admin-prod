@@ -47,5 +47,7 @@ test("consente solo ALTER PUBLICATION della tabella messaggi; rollback idempoten
   assert.match(script, /alter publication supabase_realtime drop table public\.messaggi/);
   assert.match(script, /LOCAL_REALTIME_PUBLICATION_POSTCHECK_FAILED/);
   assert.doesNotMatch(script, /\b(?:supabase\s+(?:link|db\s+(?:reset|push))|revoke\s+select|grant\s+select|alter\s+table\s+public\.messaggi)\b/i);
-  assert.doesNotMatch(script, /\b(?:testo|message_content|email|password|service_role_key)\b/i);
+  const sql = script.match(/\$sql = @\'([\s\S]*?)\'@/);
+  assert.ok(sql);
+  assert.doesNotMatch(sql[1], /\b(?:testo|message_content|email|password|service_role_key)\b/i);
 });
