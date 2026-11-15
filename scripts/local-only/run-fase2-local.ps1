@@ -50,8 +50,19 @@ try {
 
   Write-Host 'Step 2/3: lettura riservata delle sole chiavi Supabase locali'
   # Niente Out-Host o stampa della risposta di status: contiene segreti.
-  $raw = @(& npx --yes supabase status -o env 2>$null)
-  if ($LASTEXITCODE -ne 0) {
+  # Windows PowerShell 5.1 converte lo stderr di programmi nativi in
+  # NativeCommandError. "Stopped services" puo essere solo informativo:
+  # intercettiamo lo stderr senza renderlo bloccante, ma verifichiamo il codice.
+  $savedErrorActionPreference = $ErrorActionPreference
+  try {
+    $ErrorActionPreference = 'Continue'
+    $raw = @(& npx --yes supabase status -o env 2>$null)
+    $statusExitCode = $LASTEXITCODE
+  }
+  finally {
+    $ErrorActionPreference = $savedErrorActionPreference
+  }
+  if ($statusExitCode -ne 0) {
     throw 'LOCAL_SUPABASE_STATUS_FAILED'
   }
   $keys = @{}
