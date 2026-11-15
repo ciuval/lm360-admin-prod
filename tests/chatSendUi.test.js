@@ -41,3 +41,12 @@ test("nessun duplicato quando arrivano eventi realtime insieme al refresh", asyn
   assert.match(chat, /if \(matchError \|\| roomError\)/);
   assert.doesNotMatch(chat, /console\.(?:log|warn|error)/);
 });
+
+
+test("date e orari della conversazione sono coerenti in italiano su Chrome ed Edge", async () => {
+  const chat = await readChat();
+  assert.match(chat, /toLocaleDateString\("it-IT"\)/);
+  assert.match(chat, /toLocaleTimeString\("it-IT"/);
+  assert.doesNotMatch(chat, /\.toLocaleDateString\(\)/);
+  assert.doesNotMatch(chat, /\.toLocaleTimeString\(\)/);
+});
