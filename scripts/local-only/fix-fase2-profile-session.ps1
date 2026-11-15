@@ -63,6 +63,7 @@ else {
 $sql = @'
 ALTER TABLE public.profili
   ADD COLUMN IF NOT EXISTS stripe_customer_id text;
+NOTIFY pgrst, 'reload schema';
 SELECT CASE WHEN EXISTS (
   SELECT 1 FROM information_schema.columns
   WHERE table_schema = 'public'
