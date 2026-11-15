@@ -1,69 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { Link } from "react-router-dom";
+import { loadVisibleMatchedProfiles } from "../lib/matchProfiles.js";
 
 export default function MatchDashboard() {
   const [matchList, setMatchList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [hasReciprocalMatch, setHasReciprocalMatch] = useState(false);
 
   useEffect(() => {
-    const fetchMatches = async () => {
+    let alive = true;
+
+    async function fetchMatches() {
+      setLoading(true);
       setLoadError(false);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) {
+
+      try {
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+
+        const result = await loadVisibleMatchedProfiles(supabase, data?.session?.user?.id);
+
+        if (!alive) return;
+        setMatchList(result.profiles.map((profilo) => ({ profilo })));
+        setHasReciprocalMatch(result.hasReciprocalMatch);
+      } catch {
+        if (!alive) return;
         setMatchList([]);
-        setLoading(false);
-        return;
-      }
-
-      const id = session.user.id;
-
-      const { data: matches, error: matchErr } = await supabase
-        .from("match_scores")
-        .select("user_a, user_b, score")
-        .or(`user_a.eq.${id},user_b.eq.${id}`)
-        .eq("score", 100)
-        .order("score", { ascending: false });
-
-      if (matchErr) {
         setLoadError(true);
-        setLoading(false);
-        return;
+      } finally {
+        if (alive) setLoading(false);
       }
-
-      if (!matches || matches.length === 0) {
-        setMatchList([]);
-        setLoading(false);
-        return;
-      }
-
-      const ids = [...new Set(matches.map((m) => (m.user_a === id ? m.user_b : m.user_a)).filter(Boolean))];
-
-      const { data: profili, error: profiliErr } = await supabase
-        .from("profili")
-.select("id, nome, bio, interessi, foto_url")
-        .in("id", ids);
-
-      if (profiliErr) {
-        setLoadError(true);
-        setLoading(false);
-        return;
-      }
-
-      const uniti = matches
-        .map((m) => {
-          const otherId = m.user_a === id ? m.user_b : m.user_a;
-          return { profilo: profili.find((p) => p.id === otherId) };
-        })
-        .filter((m) => m.profilo);
-
-      if (uniti.length === 0) setLoadError(true);
-      setMatchList(uniti);
-      setLoading(false);
-    };
+    }
 
     fetchMatches();
+    return () => { alive = false; };
   }, []);
 
   return (
@@ -91,12 +63,12 @@ export default function MatchDashboard() {
         }}
       >
         <p style={{ margin: "0 0 0.5rem", fontWeight: 800 }}>
-          Nessun match ancora, percorso pronto.
+          {hasReciprocalMatch ? "Nessun match visibile in questo momento." : "Nessun match ancora, percorso pronto."}
         </p>
         <p style={{ margin: 0, opacity: 0.82 }}>
-          I match compariranno qui solo quando ci sara interesse reciproco. Completa
-          il profilo, torna su Scopri e lascia like solo ai profili che senti davvero
-          vicini.
+          {hasReciprocalMatch
+            ? "Hai un match reciproco, ma il profilo dell'altra persona non è attualmente disponibile nella scoperta autorizzata. Rispettiamo la sua scelta di visibilità."
+            : "I match compariranno qui solo quando ci sarà interesse reciproco. Completa il profilo, torna su Scopri e lascia like solo ai profili che senti davvero vicini."}
         </p>
         <a
           href="#/scopri-profili"
