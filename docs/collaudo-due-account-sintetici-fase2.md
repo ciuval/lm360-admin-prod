@@ -1,13 +1,13 @@
 # LoveMatch360 — Fase 2: collaudo con due account sintetici
 
-**Stato: harness locale preparato; test Auth/API reale NON ancora eseguito.** Nessun ambiente staging Supabase cloud esistente al 14/11/2026 (elenco dei branch di sviluppo vuoto). La PR #27 rimane draft.
+**Stato al 15/11/2026: collaudo Auth/API locale con due account sintetici PASS, riferito dall'utente tramite output della CLI.** Nessun ambiente staging Supabase cloud attivo nell'ultimo controllo. La PR #27 rimane draft: test nel browser, realtime, e RLS della produzione ancora da verificare.
 
-## Perché il percorso non è ancora dichiarabile verde
+## Perché l'esito locale non autorizza ancora il rilascio
 
-- Le suite SQL V1/V2 superate in Docker simulano `auth.uid()` su Postgres, ma non eseguono la registrazione e il login reali con Supabase Auth.
+- Le suite SQL V1/V2 hanno simulato `auth.uid()` su PostgreSQL. Ora è stato inoltre superato il percorso locale **reale Auth/PostgREST/RPC** con due utenti sintetici, ma non ancora il browser.
 - In produzione esistono `profili`, `profili_foto`, `likes`, `match_scores`, `messaggi`, ma `stanze_360` non è presente e mancano le RPC `lm360_get_public_profiles(uuid)`, `get_stanza_compatibility(uuid)`, `send_stanza_message(uuid,text)`. Non usare produzione per simulare il flusso.
 - `supabase/migrations/20260911_stanza_360.sql` era incoerente col campo `messaggi.testo` e nel branch è stato corretto il riferimento `contenuto -> testo`; NON applicata al progetto principale.
-- Il repository contiene solo una migrazione SQL (`20260911_stanza_360.sql`), **non un bootstrap completo dello schema esistente**. Eseguire `supabase start` direttamente su questo schema senza prepararne la baseline locale potrebbe fallire. Prima va resa riproducibile una copia **solo schema** (nessun dato o credenziale di produzione) e aggiunto l'hardening V1/V2 collaudato.
+- Il repository contiene la migrazione distribuibile `20260911_stanza_360.sql`, **non un bootstrap completo dello schema di produzione**. Per il test è stata aggiunta e applicata soltanto sul PC la baseline minima `scripts/local-only/20260910_lm360_core_lab.sql`, esclusa dai commit come migrazione distribuibile. Non equivale a verificare lo schema e le policy storiche della produzione.
 - `typing_status` usa `is_typing`, mentre la chat React legge/scrive `typing`. Inoltre la tabella non ha chiave univoca per coppia, quindi il realtime typing è **un blocco secondario distinto** da risolvere prima del collaudo UI completo.
 - Le fotografie attuali sono salvate come `foto_url` e righe `profili_foto` in database (data URL), non come upload nell'API Supabase Storage: il test fotografa *il comportamento attuale*. Non dichiarare Storage collaudato.
 
@@ -20,16 +20,13 @@
 - Registrazione A/B, conferma amministrativa **solo locale** se richiesta, login separati, profilo nome/bio/interessi, foto sintetica 1×1, consenso opt-in/revoca, scoperta filtrata, primo like, tentativo di impersonazione e falsificazione di match (negati), like reciproco, match 100, Stanza 360 completa per entrambi, invio messaggio dopo accesso, lettura da B, divieto lettura anonima e cleanup degli utenti locali.
 - Le credenziali, gli UUID e il testo dei messaggi non sono stampati.
 
-## Come eseguire, quando la baseline locale sarà pronta
+## Procedura di ripetizione nel laboratorio
 
-1. Usare la **copia locale di prova**, mai il progetto online. La stack ufficiale richiede Supabase CLI e Docker Desktop.
-2. In una cartella di test dedicata preparare la baseline delle tabelle esistenti e le migrazioni corrette (schema soltanto, senza dati personali), poi avviare `npx supabase start` (solo dopo aver verificato le dipendenze con `npx supabase --help`).
-3. Recuperare da `npx supabase status` le credenziali **locali** e impostare in una sessione PowerShell non condivisa:
-   - `LM360_LOCAL_SUPABASE_URL` = `http://127.0.0.1:54321`
-   - `LM360_LOCAL_SUPABASE_ANON_KEY` = chiave anon/publishable **locale**
-   - `LM360_LOCAL_SUPABASE_SERVICE_ROLE_KEY` = chiave amministrativa **locale** (solo per la conferma e pulizia dei due account sintetici)
-4. Nel checkout della PR #27 eseguire `npm run test:e2e:local`, senza mai pubblicare i valori delle variabili. Il test interrompe la procedura con `FAIL fase ...` al primo contratto violato; nessun falso `PASS`.
-5. Dopo la prova rimuovere le variabili di ambiente e fermare/reset­tare **soltanto** lo stack Supabase locale. La procedura esegue già la cancellazione dei soli due account sintetici creati; se il cleanup fallisce usare il reset locale documentato, non il database remoto.
+1. Usare esclusivamente `I:\\lm360-clean\\LM360_FASE2_LAB` con `supabase/config.toml` locale e baseline già applicata. Non collegare il progetto al cloud.
+2. Docker Desktop: `Port binding behavior = Localhost only`. Verificare con `docker ps` che le porte pubblicate siano solo `127.0.0.1` o `::1`, non `0.0.0.0` o `[::]`.
+3. In PowerShell nella copia LAB eseguire `& '.\\scripts\\local-only\\run-fase2-local.ps1'`. Lo script esegue `npm ci`, recupera le sole chiavi locali in memoria da `supabase status -o env`, lancia `npm run test:e2e:local` e ripulisce le variabili di ambiente.
+4. Il test stampa soltanto i codici PASS/FAIL dei passi; al termine cancella i due account di prova locali. Se il cleanup segnala FAIL, verificare e ripristinare **soltanto** lo stack locale.
+5. Non diffondere l'output integrale di `supabase status`, chiavi, password o token. Per interrompere il laboratorio utilizzare `npx --yes supabase stop` dalla cartella LAB.
 
 **Importante:** la conferma amministrativa del test non dimostra che l'email di conferma funzioni. Per verificarla eseguire una prova separata con il Mailpit locale (`http://127.0.0.1:54324`) e `auth.email.enable_confirmations = true`; le email rimangono nel computer.
 
@@ -38,15 +35,16 @@
 | Prova | Stato |
 |---|---|
 | SQL isolato con 3 identità A/B/C (fixture V1/V2) | PASS già riportato dall'utente |
-| Preflight schema e RPC locali | Da eseguire dopo bootstrap |
-| Auth A/B e profili/foto | Non eseguito |
-| Consenso opt-in, revoca e discovery | Non eseguito su vere API |
-| Like reciproco, match e Stanza 360 | Non eseguito su vere API |
-| Messaggi letti e negazione anon | Non eseguito su vere API |
-| Browser desktop/mobile, email Mailpit e realtime | Non eseguito |
+| Preflight schema e RPC locali | PASS — 6 tabelle e 3 funzioni (9/9) presenti, verifica lettura locale |
+| Auth A/B e profili/foto | PASS — signup, login, profili, foto sintetiche (output utente) |
+| Consenso opt-in, revoca e discovery | PASS — vere API locali (output utente) |
+| Like reciproco, match e Stanza 360 | PASS — match reciproco 100, impersonazione e falsificazione negate (output utente) |
+| Messaggi letti e negazione anon | PASS — lettura partner e accesso anonimo negato (output utente) |
+| Pulizia account sintetici locali | PASS — cleanup confermato dallo script (output utente) |
+| Browser desktop/mobile, email Mailpit e realtime | Non ancora eseguito |
 
 ## Criteri di uscita / rollback
 
-Un eventuale esito verde di `npm test` non basta: occorrono `PASS` del test con vere API locali, prove RLS negative e prova browser con identità sintetiche. Se un controllo fallisce, la PR non deve essere distribuita. Rollback attuale: revert dei commit sul branch, nessuna modifica al progetto online. Nessun nuovo checkout, Stripe immutato.
+Il test con vere API locali è **PASS**, inclusi vari controlli negativi. Mancano ancora prova browser con due utenti sintetici, realtime/typing, Mailpit e un audit RLS sull'ambiente effettivo di rilascio. Se un controllo fallisce, la PR non deve essere distribuita. Rollback attuale: revert dei commit sul branch, nessuna modifica al progetto online. Nessun nuovo checkout, Stripe immutato.
 
 Fonti tecniche: [Supabase local development](https://supabase.com/docs/guides/local-development), [Test auth flows / Mailpit](https://supabase.com/docs/guides/auth/testing-auth-flows).
