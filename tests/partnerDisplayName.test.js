@@ -58,6 +58,6 @@ test("le route Stanza e Chat mantengono i gate di match e compatibilità", async
   assert.match(stanza, /allowed = !roomResult\.error && !match\.error && Boolean\(match\.data\)/);
   assert.match(stanza, /<Link to={`\/chat\/\$\{id\}`}/);
   assert.match(chat, /if \(matchError \|\| roomError\)/);
-  assert.match(chat, /disabled=\{!chatAbilitata\}/);
+  assert.match(chat, /disabled=\{!chatAbilitata \|\| sending\}/);
   assert.match(chat, /\.rpc\("send_stanza_message"/);
 });
