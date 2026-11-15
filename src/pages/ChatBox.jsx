@@ -20,6 +20,7 @@ export default function ChatBox() {
   const [sending, setSending] = useState(false);
   const [messagesLoadError, setMessagesLoadError] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState("IN_ATTESA");
+  const [realtimeFailure, setRealtimeFailure] = useState(null);
   const typingTimeout = useRef(null);
 
   useEffect(() => {
@@ -105,11 +106,14 @@ export default function ChatBox() {
 
   useEffect(() => {
     if (!session?.user?.id || !destinatarioId || !chatAbilitata) return;
-    refreshMessages(session.user.id, destinatarioId).catch(() => setMessagesLoadError(true));
+    let active = true;
+    refreshMessages(session.user.id, destinatarioId).catch(() => { if (active) setMessagesLoadError(true); });
     setRealtimeStatus("COLLEGAMENTO");
+    setRealtimeFailure(null);
     const messaggiChannel = supabase
       .channel("chat-messaggi")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messaggi" }, async (payload) => {
+        if (!active) return;
         const nuovo = payload.new;
         const io = session.user.id;
         const coinvolto =
@@ -125,17 +129,22 @@ export default function ChatBox() {
         }
       })
       .subscribe((status) => {
-        // Solo stato tecnico del canale: non esporre mai payload, token o UUID.
+        // Ignora callback tardivi di canali smontati (React StrictMode, cambio stanza).
+        // Solo stato tecnico, mai messaggi, URL, credenziali, payload o UUID.
+        if (!active) return;
         if (status === "SUBSCRIBED") {
+          setRealtimeFailure(null);
           setRealtimeStatus("COLLEGATO");
-          refreshMessages(session.user.id, destinatarioId).catch(() => setMessagesLoadError(true));
+          refreshMessages(session.user.id, destinatarioId).catch(() => { if (active) setMessagesLoadError(true); });
         } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          setRealtimeFailure(status);
           setRealtimeStatus("NON_DISPONIBILE");
         }
       });
     const typingChannel = supabase
       .channel("typing-status")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "typing_status" }, (payload) => {
+        if (!active) return;
         const nuovo = payload.new;
         if (nuovo.user_id === destinatarioId && nuovo.destinatario_id === session.user.id) {
           setAltraPersonaStaScrivendo(nuovo.typing);
@@ -143,6 +152,7 @@ export default function ChatBox() {
       })
       .subscribe();
     return () => {
+      active = false;
       supabase.removeChannel(messaggiChannel);
       supabase.removeChannel(typingChannel);
     };
@@ -232,7 +242,7 @@ export default function ChatBox() {
           {realtimeStatus === "COLLEGATO"
             ? "Realtime: canale collegato (consegna da verificare)"
             : realtimeStatus === "NON_DISPONIBILE"
-              ? "Realtime: non disponibile. La cronologia resta consultabile."
+              ? `Realtime: non disponibile (${realtimeFailure || "ERRORE"}). La cronologia resta consultabile.`
               : "Realtime: collegamento in corso…"}
         </p>
       )}
