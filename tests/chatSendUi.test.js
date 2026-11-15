@@ -64,3 +64,16 @@ test("lo stato Realtime è leggibile nella chat senza token o payload in log", a
   assert.match(chat, /La cronologia resta consultabile/);
   assert.doesNotMatch(chat, /console\.(?:log|warn|error)/);
 });
+
+
+test("ignora callback di canali gia smontati in React StrictMode", async () => {
+  const chat = await readChat();
+  assert.match(chat, /let active = true/);
+  assert.match(chat, /if \(!active\) return;/);
+  assert.match(chat, /active = false;\s*supabase\.removeChannel\(messaggiChannel\)/);
+  assert.match(chat, /\.subscribe\(\(status\) => \{[\s\S]*?if \(!active\) return;/);
+  assert.match(chat, /setRealtimeFailure\(status\)/);
+  assert.match(chat, /setRealtimeFailure\(null\)/);
+  assert.match(chat, /realtimeFailure \|\| "ERRORE"/);
+  assert.doesNotMatch(chat, /console\.(?:log|warn|error)/);
+});
