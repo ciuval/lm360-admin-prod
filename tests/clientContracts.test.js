@@ -58,5 +58,5 @@ test("Chat fallisce chiusa se RPC e verifica del match falliscono", async () => 
   assert.match(page, /if \(matchError \|\| roomError\)/);
   assert.match(page, /setChatAbilitata\(false\)/);
   assert.match(page, /La chat resta chiusa per sicurezza/);
-  assert.match(page, /disabled=\{!chatAbilitata\}/);
+  assert.match(page, /disabled=\{!chatAbilitata \|\| sending\}/);
 });
