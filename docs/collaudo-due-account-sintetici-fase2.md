@@ -100,3 +100,14 @@ Fonti tecniche: [Supabase local development](https://supabase.com/docs/guides/lo
 **Piccolo fix successivo sul branch draft**: in `src/pages/ChatBox.jsx` le date/ore ora specificano `it-IT`, per evitare la divergenza osservata tra Chrome (data americana `11/15/2026`) ed Edge (data italiana `15/11/2026`). Test aggiunto in `tests/chatSendUi.test.js`, da verificare in UI dopo pull; non altera messaggi, auth o RPC.
 
 **Protezione ambienti**: nessun deploy, nessuna scrittura al database cloud o attivazione Stripe. PR #27 resta draft e viene conservata come evidenza e revisione prima di qualunque rilascio.
+
+
+## Test Realtime senza reload — 15 novembre 2026
+
+**Esito: NON SUPERATO / causa da diagnosticare.** Screenshot Edge con Bianca Test mostra il terzo messaggio sintetico «Test Realtime LoveMatch360» inviato alle 13:00 e presente nel proprio elenco; screenshot Chrome con Andrea Test, acquisito successivamente, mostra ancora soltanto i primi due messaggi. Non emerge alcun aggiornamento automatico nel browser ricevente. Non affermare che Realtime funzioni: persistenza e lettura dopo reload erano state verificate in precedenza ma non equivalgono a consegna live.
+
+**Indizio verificato nello schema**: `scripts/local-only/20260910_lm360_core_lab.sql` contiene la nota «Realtime e typing non sono ancora coperti» e **non** include `public.messaggi` nella publication `supabase_realtime`. La subscription UI `ChatBox.jsx` per `postgres_changes` `INSERT` esiste. Occorre verificare la membership effettiva nel Docker locale: può mancare anche senza un errore nella chat. Non effettuare GRANT o ALTER alla cieca.
+
+**Diagnosi preparata, sola lettura e isolata**: `scripts/local-only/check-fase2-realtime.ps1` verifica branch e porte Docker localhost, identità del database locale, publication, membership messaggi, RLS, ruolo authenticated, policy SELECT, servizio realtime. Emissione soltanto di flag, non chiavi, UUID, email o testi. Test `tests/localRealtimeDiagnostic.test.js` assicura assenza di SQL mutativo. Prima eseguire script nel PC LAB; soltanto se `MESSAGGI_PUBLISHED=NO` e RLS/SELECT risultano corretti, preparare fix **esclusivamente locale**, poi riprovare in due browser senza reload.
+
+**Protezione**: nessuna modifica a SQL cloud, produzione o Stripe; PR #27 ancora draft. Per il momento non ripetere messaggi già inviati.
