@@ -19,6 +19,7 @@ export default function ChatBox() {
   const chatBoxRef = useRef(null);
   const [sending, setSending] = useState(false);
   const [messagesLoadError, setMessagesLoadError] = useState(false);
+  const [realtimeStatus, setRealtimeStatus] = useState("IN_ATTESA");
   const typingTimeout = useRef(null);
 
   useEffect(() => {
@@ -105,6 +106,7 @@ export default function ChatBox() {
   useEffect(() => {
     if (!session?.user?.id || !destinatarioId || !chatAbilitata) return;
     refreshMessages(session.user.id, destinatarioId).catch(() => setMessagesLoadError(true));
+    setRealtimeStatus("COLLEGAMENTO");
     const messaggiChannel = supabase
       .channel("chat-messaggi")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messaggi" }, async (payload) => {
@@ -122,7 +124,15 @@ export default function ChatBox() {
           }
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        // Solo stato tecnico del canale: non esporre mai payload, token o UUID.
+        if (status === "SUBSCRIBED") {
+          setRealtimeStatus("COLLEGATO");
+          refreshMessages(session.user.id, destinatarioId).catch(() => setMessagesLoadError(true));
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          setRealtimeStatus("NON_DISPONIBILE");
+        }
+      });
     const typingChannel = supabase
       .channel("typing-status")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "typing_status" }, (payload) => {
@@ -213,6 +223,19 @@ export default function ChatBox() {
         </div>
       ) : null}
 
+      {chatAbilitata && (
+        <p role="status" aria-live="polite" style={{
+          fontSize: "0.85rem",
+          color: realtimeStatus === "COLLEGATO" ? "#9de6b2" : "#ccc",
+          margin: "0 0 0.75rem",
+        }}>
+          {realtimeStatus === "COLLEGATO"
+            ? "Realtime: canale collegato (consegna da verificare)"
+            : realtimeStatus === "NON_DISPONIBILE"
+              ? "Realtime: non disponibile. La cronologia resta consultabile."
+              : "Realtime: collegamento in corso…"}
+        </p>
+      )}
       {messagesLoadError && chatAbilitata && (
         <p role="alert" style={closedStyle}>
           La cronologia non è disponibile in questo momento. Non inviare nuovamente lo stesso messaggio.
