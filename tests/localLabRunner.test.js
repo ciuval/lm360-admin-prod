@@ -29,6 +29,6 @@ test("API test validates RPC permissions with actual authenticated test users", 
   const source = await readFile(new URL("../scripts/e2e-two-accounts-local.mjs", import.meta.url), "utf8");
   assert.doesNotMatch(source, /admin\.rpc\("get_stanza_compatibility"/);
   assert.doesNotMatch(source, /admin\.rpc\("lm360_get_public_profiles"/);
-  assert.match(source, /actor\.client\.rpc\("get_stanza_compatibility"/);
+  assert.match(source, /a\.client\.rpc\("get_stanza_compatibility"/);
   assert.match(source, /reader\.client\.rpc\("lm360_get_public_profiles"/);
 });
