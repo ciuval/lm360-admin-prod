@@ -106,57 +106,110 @@ export default function ChatBox() {
 
   useEffect(() => {
     if (!session?.user?.id || !destinatarioId || !chatAbilitata) return;
+    const myId = session.user.id;
     let active = true;
-    refreshMessages(session.user.id, destinatarioId).catch(() => { if (active) setMessagesLoadError(true); });
+    let messaggiChannel = null;
+    let typingChannel = null;
     setRealtimeStatus("COLLEGAMENTO");
     setRealtimeFailure(null);
-    const messaggiChannel = supabase
-      .channel("chat-messaggi")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messaggi" }, async (payload) => {
-        if (!active) return;
-        const nuovo = payload.new;
-        const io = session.user.id;
-        const coinvolto =
-          (nuovo.mittente_id === io && nuovo.destinatario_id === destinatarioId) ||
-          (nuovo.mittente_id === destinatarioId && nuovo.destinatario_id === io);
-        if (coinvolto) {
-          setMessaggi((prev) => prev.some((msg) => msg.id === nuovo.id) ? prev : [...prev, nuovo]);
-          if (nuovo.mittente_id !== io) {
-            new Audio("/notify.mp3").play();
-            toast("💬 Nuovo messaggio ricevuto!");
-            await supabase.from("messaggi").update({ letto: true }).eq("id", nuovo.id);
+
+    // Il token dell'account deve raggiungere Realtime PRIMA dell'iscrizione.
+    // Il solo stato SUBSCRIBED non garantisce il ruolo authenticated.
+    const startRealtime = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (!active) return;
+      if (error || !data?.session?.access_token || data.session.user?.id !== myId) {
+        setRealtimeFailure("SESSIONE_NON_VALIDA");
+        setRealtimeStatus("NON_DISPONIBILE");
+        return;
+      }
+
+      // La credenziale rimane nella memoria del client, mai in log o UI.
+      await supabase.realtime.setAuth(data.session.access_token);
+      if (!active) return;
+
+      messaggiChannel = supabase
+        .channel("chat-messaggi")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "messaggi" }, async (payload) => {
+          if (!active) return;
+          const nuovo = payload.new;
+          const coinvolto =
+            (nuovo.mittente_id === myId && nuovo.destinatario_id === destinatarioId) ||
+            (nuovo.mittente_id === destinatarioId && nuovo.destinatario_id === myId);
+          if (coinvolto) {
+            setMessaggi((prev) => prev.some((msg) => msg.id === nuovo.id) ? prev : [...prev, nuovo]);
+            if (nuovo.mittente_id !== myId) {
+              // La notifica sonora non deve impedire di marcare il messaggio come letto.
+              new Audio("/notify.mp3").play().catch(() => {});
+              toast("💬 Nuovo messaggio ricevuto!");
+              await supabase.from("messaggi").update({ letto: true }).eq("id", nuovo.id);
+            }
           }
-        }
-      })
-      .subscribe((status) => {
-        // Ignora callback tardivi di canali smontati (React StrictMode, cambio stanza).
-        // Solo stato tecnico, mai messaggi, URL, credenziali, payload o UUID.
-        if (!active) return;
-        if (status === "SUBSCRIBED") {
-          setRealtimeFailure(null);
-          setRealtimeStatus("COLLEGATO");
-          refreshMessages(session.user.id, destinatarioId).catch(() => { if (active) setMessagesLoadError(true); });
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
-          setRealtimeFailure(status);
-          setRealtimeStatus("NON_DISPONIBILE");
-        }
-      });
-    const typingChannel = supabase
-      .channel("typing-status")
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "typing_status" }, (payload) => {
-        if (!active) return;
-        const nuovo = payload.new;
-        if (nuovo.user_id === destinatarioId && nuovo.destinatario_id === session.user.id) {
-          setAltraPersonaStaScrivendo(nuovo.typing);
-        }
-      })
-      .subscribe();
+        })
+        .subscribe((status) => {
+          // Nessun token, UUID, URL o payload nei messaggi diagnostici.
+          if (!active) return;
+          if (status === "SUBSCRIBED") {
+            setRealtimeFailure(null);
+            setRealtimeStatus("COLLEGATO");
+            refreshMessages(myId, destinatarioId).catch(() => { if (active) setMessagesLoadError(true); });
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+            setRealtimeFailure(status);
+            setRealtimeStatus("NON_DISPONIBILE");
+          }
+        });
+
+      typingChannel = supabase
+        .channel("typing-status")
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "typing_status" }, (payload) => {
+          if (!active) return;
+          const nuovo = payload.new;
+          if (nuovo.user_id === destinatarioId && nuovo.destinatario_id === myId) {
+            setAltraPersonaStaScrivendo(nuovo.typing);
+          }
+        })
+        .subscribe();
+    };
+
+    // Aggiorna la credenziale Realtime quando Supabase Auth rinnova la sessione.
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (!active) return;
+      if (event === "TOKEN_REFRESHED" && nextSession?.user?.id === myId && nextSession.access_token) {
+        Promise.resolve().then(() => {
+          if (active) return supabase.realtime.setAuth(nextSession.access_token);
+        }).catch(() => {
+          if (active) {
+            setRealtimeFailure("SESSIONE_NON_VALIDA");
+            setRealtimeStatus("NON_DISPONIBILE");
+          }
+        });
+      }
+      if (event === "SIGNED_OUT") {
+        if (messaggiChannel) supabase.removeChannel(messaggiChannel);
+        if (typingChannel) supabase.removeChannel(typingChannel);
+        messaggiChannel = null;
+        typingChannel = null;
+        setRealtimeFailure("SESSIONE_TERMINATA");
+        setRealtimeStatus("NON_DISPONIBILE");
+      }
+    });
+
+    // La lettura RLS non dipende dalla riuscita del canale Realtime.
+    refreshMessages(myId, destinatarioId).catch(() => { if (active) setMessagesLoadError(true); });
+    startRealtime().catch(() => {
+      if (active) {
+        setRealtimeFailure("SESSIONE_NON_VALIDA");
+        setRealtimeStatus("NON_DISPONIBILE");
+      }
+    });
+
     return () => {
       active = false;
-      supabase.removeChannel(messaggiChannel);
-      supabase.removeChannel(typingChannel);
+      authListener.subscription.unsubscribe();
+      if (messaggiChannel) supabase.removeChannel(messaggiChannel);
+      if (typingChannel) supabase.removeChannel(typingChannel);
     };
-  }, [session, destinatarioId, chatAbilitata]);
+  }, [session?.user?.id, destinatarioId, chatAbilitata]);
 
   const inviaMessaggio = async () => {
     if (!session?.user?.id || !destinatarioId || !chatAbilitata || !input.trim() || sending) return;
