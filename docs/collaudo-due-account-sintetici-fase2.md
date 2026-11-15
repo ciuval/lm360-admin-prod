@@ -71,3 +71,14 @@ Fonti tecniche: [Supabase local development](https://supabase.com/docs/guides/lo
 - Test aggiunti in `tests/partnerDisplayName.test.js`: proiezione autorizzata, revoca/non disponibilità, errore RPC, non autenticato, gate mantenuti. GitHub Actions commit `89125fc`: **167 test verdi, 0 falliti, build Vite OK**.
 - **DA COLLAUDARE nel browser dopo git pull**: nome partner, apertura della chat, invio/ricezione di un messaggio tra Chrome ed Edge, eventuali limiti realtime/typing. Non dichiarare chat/browser E2E superato prima della prova.
 - Nessun dato cloud reale, nessun deploy, nessuna modifica a Stripe. PR draft.
+
+
+## Browser — apertura chat e verifica invio da Andrea
+
+- **15/11/2026: PASS apertura chat locale** dal browser Chrome con Andrea Test, nome partner Bianca Test visualizzato, campo messaggio e pulsante di invio accessibili; match e compatibilità server-side verificati prima.
+- **Esito invio ancora NON certificato**: screenshot mostrano testo digitato, poi viewport di chat vuota dopo il tentativo di invio. Dalle immagini non si può inferire se la RPC abbia committato il messaggio. Non ripetere l'invio fino alla verifica, per evitare duplicati.
+- **Difetto frontend accertato nel codice**: dopo RPC positiva, `ChatBox.jsx` azzerava il composer senza rileggere `messaggi`; aspettava solo l'evento realtime e chiamava `scrollIntoView` su un elemento interno, con possibile scroll dell'intera pagina sotto l'header sticky.
+- **Fix nel branch draft**, da verificare nel browser: ri-lettura server-side dei messaggi della sola coppia dopo conferma RPC, scroll limitato al riquadro chat, blocco di invii ripetuti durante l'operazione, deduplicazione tra refresh e realtime, messaggio di errore in caso di cronologia non disponibile senza suggerire un secondo invio. La RPC `send_stanza_message` e tutte le policy DB rimangono invariate.
+- Test `tests/chatSendUi.test.js`, CI `40d9adc`: **171 test verdi, 0 falliti, build Vite OK**.
+- **Prossima evidenza richiesta**: pull del branch nel LAB, Ctrl+R nella chat Andrea (prima di un nuovo invio) e screenshot della conversazione; se non si vede alcun messaggio, eseguire una SELECT read-only aggregata sul Docker LAB prima di scegliere il passo successivo.
+- Da provare ancora la ricezione in Edge/Bianca, realtime e typing. PR draft; non modificati produzione, cloud Supabase o Stripe.
