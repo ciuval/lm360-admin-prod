@@ -171,3 +171,12 @@ Causa isolata: la publication `supabase_realtime` del LAB non include `public.me
 **GitHub CI (commit `11f99ce`)**: 183 test PASS, 0 FAIL e Vite build riuscita. Questo certifica test statici e build, **non** l'arrivo degli eventi dal Docker reale.
 
 **Prossimo collaudo**: `git pull --ff-only` nel clone LAB, aggiornare *entrambi* i browser una sola volta dopo il pull. Nuova lettura read-only di `realtime.subscription` aggregata per `claims_role` (senza esporre JWT, claims o UUID). Il risultato atteso, se entrambe le sottoscrizioni correnti sono attive, è `authenticated|2`, `anon|0`; un conteggio diverso richiede nuova diagnosi, non modifica delle policy. Solo dopo prova push **senza refresh**, una volta per direzione. Nessun deploy, Supabase cloud o Stripe modificato. PR #27 ancora draft.
+
+
+## Realtime live Bianca → Andrea — PASS browser 15/11/2026
+
+**Evidenza screenshot user fornita dopo il test esplicitamente eseguito senza refresh**: in Chrome/Andrea, con stato `Realtime: canale collegato (consegna da verificare)`, è comparso il quinto messaggio sintetico «Test Realtime 4 — Verifica finale della ricezione automatica.» inviato da Edge/Bianca alle 22:06. Nella schermata precedente Chrome non aveva ancora tale messaggio. Pertanto **Bianca → Andrea, Realtime live: PASS** secondo il protocollo senza `Ctrl+R` indicato all'utente. Non è un test automatico strumentato: evidenza browser fornita dal proprietario.
+
+Prima di questo test, la verifica locale read-only di `realtime.subscription` ha restituito `authenticated|2`, senza `anon` per `public.messaggi`, a seguito del fix che applica il JWT di sessione al canale prima della sottoscrizione. RLS rimasta attiva; nessuna concessione al ruolo anon. L'intera prova è circoscritta al Supabase e Vite locali.
+
+**Ancora da collaudare**: push live **Andrea → Bianca** senza reload. Dopo il suo PASS, considerare E2E Realtime bidirezionale completato nel LAB, non l'intera app pronta alla produzione; restano test negativi di autorizzazione, mobile, sicurezza e produzione. PR #27 draft, Stripe inattivo, nessun deploy.
