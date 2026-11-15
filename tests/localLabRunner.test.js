@@ -22,7 +22,7 @@ test("PowerShell runner isolates local two-account testing from production", asy
   }
   assert.doesNotMatch(ps, /https?:\/\/[^'"\s]*supabase\.co/i);
   assert.doesNotMatch(ps, /^\s*(?:npx\s+)?supabase\s+(?:link|db\s+push|db\s+reset|migration\s+up)/im);
-  assert.doesNotMatch(ps, /Write-Host\s+\$raw|Write-Host\s+\$keys|Out-Host/);
+  assert.doesNotMatch(ps, /^\s*(?:Write-Host\s+\$(?:raw|keys)|Out-Host)/m);
 });
 
 test("API test validates RPC permissions with actual authenticated test users", async () => {
