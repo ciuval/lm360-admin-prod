@@ -180,3 +180,17 @@ Causa isolata: la publication `supabase_realtime` del LAB non include `public.me
 Prima di questo test, la verifica locale read-only di `realtime.subscription` ha restituito `authenticated|2`, senza `anon` per `public.messaggi`, a seguito del fix che applica il JWT di sessione al canale prima della sottoscrizione. RLS rimasta attiva; nessuna concessione al ruolo anon. L'intera prova è circoscritta al Supabase e Vite locali.
 
 **Ancora da collaudare**: push live **Andrea → Bianca** senza reload. Dopo il suo PASS, considerare E2E Realtime bidirezionale completato nel LAB, non l'intera app pronta alla produzione; restano test negativi di autorizzazione, mobile, sicurezza e produzione. PR #27 draft, Stripe inattivo, nessun deploy.
+
+
+## Chiusura del collaudo Realtime bidirezionale — 15/11/2026
+
+**Esito: PASS nel laboratorio locale, con evidenza browser reale in entrambe le direzioni.**
+
+- **Bianca → Andrea: PASS.** Screenshot in Chrome/Andrea: «Test Realtime 4 — Verifica finale della ricezione automatica.» compare alle **22:06** dopo l'invio in Edge/Bianca, nel test condotto senza refresh della pagina ricevente.
+- **Andrea → Bianca: PASS.** Screenshot in Edge/Bianca: «Test Realtime 5 — Bianca, mi ricevi senza aggiornare la pagina?» compare alle **22:09** dopo l'invio da Chrome/Andrea, nel test condotto senza refresh della pagina ricevente.
+- Entrambe le chat riportano `Realtime: canale collegato`; la verifica tecnica read-only precedente aveva restituito `authenticated|2` per le sottoscrizioni `public.messaggi` (nessuna `anon`). La modifica `supabase.realtime.setAuth(session.access_token)` prima della sottoscrizione ha superato la prova manuale. Non è stata indebolita la RLS.
+- Il percorso core completo E2E locale è dunque verificato nel browser: **signup sintetico indipendente → profili e foto → consenso visibilità → scoperta → like reciproci → match → Stanza 360 → chat persistente → consegna Realtime bidirezionale**.
+
+**Portata del PASS:** test manuale end-to-end su due browser e due account sintetici, non test automatico di carico/disconnessione. Le precedenti sezioni che indicano Realtime come *ancora da collaudare* descrivono lo stato storico prima di questa prova; il risultato aggiornato è **PASS bidirezionale in LAB**.
+
+**Vincoli ancora aperti prima di qualsiasi rilascio**: test negativi RLS/IDOR con terzo account e utente anonimo, verifica revoca/chiusura match e sessione, resilienza disconnessioni, esperienza mobile/accessibilità, confronto schema cloud e documentazione sicurezza. La PR #27 resta **draft**; non autorizza deploy né attivazione di Stripe. Nessun cambiamento a Vercel, Supabase online o dati reali.
