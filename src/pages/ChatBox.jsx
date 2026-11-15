@@ -16,7 +16,9 @@ export default function ChatBox() {
   const [availabilityError, setAvailabilityError] = useState(false);
   const [altraPersonaStaScrivendo, setAltraPersonaStaScrivendo] = useState(false);
   const [destinatarioNome, setDestinatarioNome] = useState("questa persona");
-  const scrollRef = useRef(null);
+  const chatBoxRef = useRef(null);
+  const [sending, setSending] = useState(false);
+  const [messagesLoadError, setMessagesLoadError] = useState(false);
   const typingTimeout = useRef(null);
 
   useEffect(() => {
@@ -72,22 +74,37 @@ export default function ChatBox() {
     });
   }, [session, destinatarioId]);
 
+  // Legge soltanto la coppia autorizzata: la RLS di messaggi resta attiva.
+  // Riutilizzato anche dopo un invio riuscito, senza dipendere da Realtime.
+  const refreshMessages = async (myId, partnerId) => {
+    const { data, error } = await supabase
+      .from("messaggi")
+      .select("id, mittente_id, destinatario_id, testo, letto, inviato_il")
+      .or(`and(mittente_id.eq.${myId},destinatario_id.eq.${partnerId}),and(mittente_id.eq.${partnerId},destinatario_id.eq.${myId})`)
+      .order("inviato_il", { ascending: true });
+
+    if (error) {
+      setMessagesLoadError(true);
+      return false;
+    }
+
+    const validRows = (data || []).filter((msg) =>
+      (msg.mittente_id === myId && msg.destinatario_id === partnerId) ||
+      (msg.mittente_id === partnerId && msg.destinatario_id === myId)
+    );
+    setMessaggi(validRows);
+    setMessagesLoadError(false);
+    return true;
+  };
+
+  const scrollConversationToEnd = () => {
+    const container = chatBoxRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
+  };
+
   useEffect(() => {
     if (!session?.user?.id || !destinatarioId || !chatAbilitata) return;
-    const caricaMessaggi = async () => {
-      const { data } = await supabase
-        .from("messaggi")
-        .select("id, mittente_id, destinatario_id, testo, letto, inviato_il")
-        .or(`mittente_id.eq.${session.user.id},destinatario_id.eq.${session.user.id}`)
-        .order("inviato_il", { ascending: true });
-      const filtrati = (data || []).filter(
-        (msg) =>
-          (msg.mittente_id === session.user.id && msg.destinatario_id === destinatarioId) ||
-          (msg.mittente_id === destinatarioId && msg.destinatario_id === session.user.id)
-      );
-      setMessaggi(filtrati);
-    };
-    caricaMessaggi();
+    refreshMessages(session.user.id, destinatarioId).catch(() => setMessagesLoadError(true));
     const messaggiChannel = supabase
       .channel("chat-messaggi")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messaggi" }, async (payload) => {
@@ -97,7 +114,7 @@ export default function ChatBox() {
           (nuovo.mittente_id === io && nuovo.destinatario_id === destinatarioId) ||
           (nuovo.mittente_id === destinatarioId && nuovo.destinatario_id === io);
         if (coinvolto) {
-          setMessaggi((prev) => [...prev, nuovo]);
+          setMessaggi((prev) => prev.some((msg) => msg.id === nuovo.id) ? prev : [...prev, nuovo]);
           if (nuovo.mittente_id !== io) {
             new Audio("/notify.mp3").play();
             toast("💬 Nuovo messaggio ricevuto!");
@@ -122,19 +139,35 @@ export default function ChatBox() {
   }, [session, destinatarioId, chatAbilitata]);
 
   const inviaMessaggio = async () => {
-    if (!session?.user?.id || !destinatarioId || !chatAbilitata || !input.trim()) return;
-    const { data: sent, error } = await supabase.rpc("send_stanza_message", {
-      target_user_id: destinatarioId,
-      message_content: input.trim(),
-    });
-    if (error || !sent) {
-      toast.error("Il messaggio non è stato inviato. Riprova.");
-      return;
+    if (!session?.user?.id || !destinatarioId || !chatAbilitata || !input.trim() || sending) return;
+    setSending(true);
+    try {
+      const { data: sent, error } = await supabase.rpc("send_stanza_message", {
+        target_user_id: destinatarioId,
+        message_content: input.trim(),
+      });
+      if (error || !sent) {
+        toast.error("Il messaggio non è stato inviato. Riprova.");
+        return;
+      }
+
+      // Il backend ha confermato la scrittura. Non proporre un secondo invio
+      // se una successiva lettura fallisce: si rischierebbe un duplicato.
+      setInput("");
+      track("room_message_sent").catch(() => {});
+      updateTypingStatus(false).catch(() => {});
+
+      const loaded = await refreshMessages(session.user.id, destinatarioId);
+      if (!loaded) {
+        toast.error("Messaggio inviato, ma la cronologia non si aggiorna. Ricarica la pagina.");
+      } else {
+        requestAnimationFrame(scrollConversationToEnd);
+      }
+    } catch {
+      toast.error("Invio non confermato. Verifica la chat prima di riprovare.");
+    } finally {
+      setSending(false);
     }
-    track("room_message_sent").catch(() => {});
-    setInput("");
-    updateTypingStatus(false);
-    setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
   const updateTypingStatus = async (isTyping) => {
@@ -180,7 +213,12 @@ export default function ChatBox() {
         </div>
       ) : null}
 
-      <div style={chatBox} className="chat-box" aria-label={`Conversazione con ${destinatarioNome}`}>
+      {messagesLoadError && chatAbilitata && (
+        <p role="alert" style={closedStyle}>
+          La cronologia non è disponibile in questo momento. Non inviare nuovamente lo stesso messaggio.
+        </p>
+      )}
+      <div ref={chatBoxRef} style={chatBox} className="chat-box" aria-label={`Conversazione con ${destinatarioNome}`}>
         {Object.entries(messaggiPerData).map(([giorno, messaggiDelGiorno]) => (
           <div key={giorno}>
             <div style={{ textAlign: "center", color: "#999", margin: "0.5rem 0" }}>📅 {giorno}</div>
@@ -213,7 +251,7 @@ export default function ChatBox() {
             💬 Sta scrivendo...
           </div>
         )}
-        <div ref={scrollRef} />
+
       </div>
 
       <div style={inputRow}>
@@ -230,9 +268,11 @@ export default function ChatBox() {
           placeholder="Scrivi un messaggio..."
           style={{ ...inputStyle, fontSize: "1.05rem" }}
           className="chat-input"
-          disabled={!chatAbilitata}
+          disabled={!chatAbilitata || sending}
         />
-        <button onClick={inviaMessaggio} style={sendBtn} disabled={!chatAbilitata} aria-label="Invia messaggio">📤</button>
+        <button onClick={inviaMessaggio} style={sendBtn} disabled={!chatAbilitata || sending || !input.trim()} aria-label="Invia messaggio">
+          {sending ? "Invio…" : "📤"}
+        </button>
       </div>
     </div>
   );
