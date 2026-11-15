@@ -82,3 +82,21 @@ Fonti tecniche: [Supabase local development](https://supabase.com/docs/guides/lo
 - Test `tests/chatSendUi.test.js`, CI `40d9adc`: **171 test verdi, 0 falliti, build Vite OK**.
 - **Prossima evidenza richiesta**: pull del branch nel LAB, Ctrl+R nella chat Andrea (prima di un nuovo invio) e screenshot della conversazione; se non si vede alcun messaggio, eseguire una SELECT read-only aggregata sul Docker LAB prima di scegliere il passo successivo.
 - Da provare ancora la ricezione in Edge/Bianca, realtime e typing. PR draft; non modificati produzione, cloud Supabase o Stripe.
+
+
+## Conclusione collaudo browser bidirezionale — 15 novembre 2026
+
+**Esito del percorso core: PASS in laboratorio locale, su due sessioni browser reali e due account sintetici.** Le prove visive condivise dal proprietario confermano:
+
+1. Registrazione/login indipendenti in Chrome (Andrea) ed Edge (Bianca).
+2. Profilo e foto sintetici al 100% per entrambi; consenso alla visibilità volontario, revocabile e separato; ognuno vede l'altro in Scopri solo dopo autorizzazione.
+3. Like reciproci e match `score=100` confermati nel browser: indica reciprocità, non compatibilità sentimentale.
+4. Due Stanze 360 compilate e salvate con cinque qualità offerte e cinque cercate; controllo di compatibilità sintetico 100%, porta aperta e link chat disponibile.
+5. Primo messaggio sintetico **Andrea → Bianca** inviato via Chat, visibile dopo refresh nella sessione Andrea e ricevuto nella sessione Bianca.
+6. Risposta sintetica **Bianca → Andrea**: screenshot della chat Bianca con entrambi i messaggi e screenshot della chat Andrea con entrambi, confermando lettura bidirezionale e persistenza della conversazione. Nessuna ripetizione del primo invio necessaria.
+
+**Limiti del PASS**: la ricezione *senza refresh* tramite Realtime/typing non è stata isolata e non può essere considerata certificata dalle schermate; le policy RLS e gli schemi della produzione non sono identici alla baseline semplificata LAB, quindi il collaudo non autorizza deploy o attivazione dei pagamenti. Mancano ancora test browser mobile e verifica negativa con identità non autorizzata.
+
+**Piccolo fix successivo sul branch draft**: in `src/pages/ChatBox.jsx` le date/ore ora specificano `it-IT`, per evitare la divergenza osservata tra Chrome (data americana `11/15/2026`) ed Edge (data italiana `15/11/2026`). Test aggiunto in `tests/chatSendUi.test.js`, da verificare in UI dopo pull; non altera messaggi, auth o RPC.
+
+**Protezione ambienti**: nessun deploy, nessuna scrittura al database cloud o attivazione Stripe. PR #27 resta draft e viene conservata come evidenza e revisione prima di qualunque rilascio.
