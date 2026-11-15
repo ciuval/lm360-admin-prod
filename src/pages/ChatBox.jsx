@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import toast, { Toaster } from "react-hot-toast";
 import { track } from "../lib/analytics.js";
+import { loadConsentedPartnerName } from "../lib/partnerDisplayName.js";
 
 export default function ChatBox() {
   const { id: destinatarioId } = useParams();
@@ -58,12 +59,10 @@ export default function ChatBox() {
           .eq("destinatario_id", myId)
           .eq("letto", false);
       }
-      const { data: profilo } = await supabase
-        .from("profili")
-        .select("nome")
-        .eq("id", destinatarioId)
-        .maybeSingle();
-      setDestinatarioNome(profilo?.nome || "questa persona");
+      const name = allowed
+        ? await loadConsentedPartnerName(supabase, myId, destinatarioId)
+        : "questa persona";
+      setDestinatarioNome(name);
       setVerificaAccesso(false);
     };
     checkMatchAndRead().catch(() => {
