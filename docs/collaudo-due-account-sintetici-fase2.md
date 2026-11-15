@@ -152,3 +152,22 @@ Causa isolata: la publication `supabase_realtime` del LAB non include `public.me
 **Possibile artefatto del React.StrictMode**: `src/application.jsx` usa `React.StrictMode` che rimonta gli effetti in sviluppo. In `ChatBox.jsx` la sottoscrizione precedente può emettere `CLOSED` dopo cleanup e sovrascrivere in ritardo lo stato mostrato dalla nuova. Questa è una **ipotesi da verificare**, non una diagnosi confermata. Il callback Realtime ora ignora gli eventi di un effetto già smontato tramite flag `active` settato a false prima di `removeChannel`. Lo stesso controllo vale per i payload e l'indicatore typing. Senza scrivere payload/URI/chiavi in console, l'interfaccia visualizza lo stato terminale esatto fra `CHANNEL_ERROR`, `TIMED_OUT` e `CLOSED`; su `SUBSCRIBED` segnala «canale collegato (consegna da verificare)».
 
 **Prossimo test UI**: `git -C 'I:\lm360-clean\LM360_FASE2_LAB' pull --ff-only`, poi un solo reload di Chrome/Andrea; riferire la riga «Realtime: ...», senza aprire Network e senza inviare messaggi. Il LAB Vite HMR potrebbe già mostrare l'aggiornamento dopo pull. Se `SUBSCRIBED`, test push bidirezionale da eseguire in seguito; se stato errore, esaminare status specifico e l'eventuale presenza della tabella `public.typing_status` in una diagnostica read-only. Nessun intervento su DB cloud, policy, Vercel o Stripe; PR #27 rimane draft.
+
+
+## Realtime: sottoscrizione anonima rilevata — 15/11/2026
+
+**Diagnosi read-only dal PC LAB (due sessioni Edge/Bianca e Chrome/Andrea):**
+
+- `realtime.subscription` per `public.messaggi`: 2 righe totali.
+- `claims_role = authenticated`: 1 riga.
+- `claims_role = anon`: 1 riga.
+- `supabase_realtime.pubinsert`: YES; WAL logical, 3/3 slot logici attivi; canali WebSocket riportano `SUBSCRIBED` in entrambe le chat.
+- Ultimo messaggio sintetico «Test Realtime 3» inviato da Bianca non comparso in Chrome/Andrea senza refresh.
+
+**Interpretazione**: la sottoscrizione anonima non dovrebbe poter leggere i messaggi con RLS; i conteggi non identificano da soli il browser coinvolto né escludono sottoscrizioni obsolete. Nessuna apertura dei privilegi `anon`, nessuna disattivazione RLS.
+
+**Modifica FE da verificare nel LAB, non ancora confermata dal browser**: `src/pages/ChatBox.jsx` ora chiama `supabase.auth.getSession()` per ottenere la sessione attuale e verifica la corrispondenza dell'utente; `await supabase.realtime.setAuth(data.session.access_token)` avviene **prima** della creazione e sottoscrizione dei canali Postgres Changes. Il JWT rimane in memoria e non è loggato. Un listener `TOKEN_REFRESHED` aggiorna la credenziale Realtime e `SIGNED_OUT` chiude i canali; cleanup sicuro con React StrictMode. `tests/chatSendUi.test.js` verifica sequenza JWT-first, rinnovo sessione e logout. Migliorata anche la gestione del blocco audio di notifica per non interrompere conferma di lettura.
+
+**GitHub CI (commit `11f99ce`)**: 183 test PASS, 0 FAIL e Vite build riuscita. Questo certifica test statici e build, **non** l'arrivo degli eventi dal Docker reale.
+
+**Prossimo collaudo**: `git pull --ff-only` nel clone LAB, aggiornare *entrambi* i browser una sola volta dopo il pull. Nuova lettura read-only di `realtime.subscription` aggregata per `claims_role` (senza esporre JWT, claims o UUID). Il risultato atteso, se entrambe le sottoscrizioni correnti sono attive, è `authenticated|2`, `anon|0`; un conteggio diverso richiede nuova diagnosi, non modifica delle policy. Solo dopo prova push **senza refresh**, una volta per direzione. Nessun deploy, Supabase cloud o Stripe modificato. PR #27 ancora draft.
