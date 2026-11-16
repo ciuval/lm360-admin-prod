@@ -7,7 +7,7 @@ $lab = 'I:\lm360-clean\LM360_FASE2_LAB'
 $branchExpected = 'integration/quality-gate-20261112'
 $container = 'supabase_db_LM360_FASE2_LAB'
 $envNames = @('LM360_LOCAL_SUPABASE_URL', 'LM360_LOCAL_SUPABASE_ANON_KEY',
-              'LM360_LOCAL_SUPABASE_SERVICE_ROLE_KEY')
+              'LM360_LOCAL_SUPABASE_SERVICE_ROLE_KEY', 'LM360_LOCAL_ANON_DENIAL_GUARD')
 
 if (-not (Test-Path -LiteralPath (Join-Path $lab 'supabase\config.toml') -PathType Leaf) -or
     -not (Test-Path -LiteralPath (Join-Path $lab 'node_modules') -PathType Container) -or
@@ -32,6 +32,23 @@ if ($LASTEXITCODE -ne 0 -or $details.Count -ne 1 -or
   throw 'LOCAL_DATABASE_IDENTITY_MISMATCH'
 }
 
+# SQL metadata-only: non legge righe, contenuti della chat, token o utenti.
+# Un 401 anon senza codice SQL e' PASS solo se il gateway accetta la chiave
+# E questa verifica conferma RLS+assenza di SELECT anon nel database specifico.
+$sql = @'
+select case when exists (
+    select 1 from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public' and c.relname = 'messaggi' and c.relrowsecurity
+) and not has_table_privilege('anon', 'public.messaggi', 'SELECT')
+  and has_table_privilege('authenticated', 'public.messaggi', 'SELECT')
+then 'ANON_DB_GUARD=PASS' else 'ANON_DB_GUARD=FAIL' end;
+'@
+$guard = @(& docker exec $container psql -X -A -t -U postgres -d postgres -v ON_ERROR_STOP=1 -c $sql 2>$null)
+if ($LASTEXITCODE -ne 0 -or $guard.Count -ne 1 -or $guard[0] -ne 'ANON_DB_GUARD=PASS') {
+  throw 'LOCAL_ANON_DATABASE_GUARD_FAILED'
+}
+
 Push-Location $lab
 try {
   # CLI status restituisce chiavi private, dunque mai Out-Host o stdout.
@@ -54,12 +71,14 @@ try {
     throw 'LOCAL_KEYS_NOT_AVAILABLE'
   }
   $env:LM360_LOCAL_SUPABASE_URL = 'http://127.0.0.1:54321'
+  $env:LM360_LOCAL_ANON_DENIAL_GUARD = 'YES'
   $env:LM360_LOCAL_SUPABASE_ANON_KEY = $keys['ANON_KEY']
   $env:LM360_LOCAL_SUPABASE_SERVICE_ROLE_KEY = $keys['SERVICE_ROLE_KEY']
   $keys.Clear()
   $raw = @()
 
   Write-Host '===== LOVEMATCH360 PRIVACY TEST SOLO LAB ====='
+  Write-Host 'ANON_DB_GUARD=PASS (RLS attiva; SELECT anon negato)'
   Write-Host 'Account A/B: lettura di metadati sintetici, senza modifiche'
   Write-Host 'Account C: creazione temporanea, verifica RLS, eliminazione'
   & node scripts/e2e-third-account-privacy-local.mjs
