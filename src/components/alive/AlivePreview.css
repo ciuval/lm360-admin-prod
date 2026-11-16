@@ -106,6 +106,21 @@
   overflow: visible;
 }
 
+/* Il cuore era già rosa quando inattivo: al clic si RIEMPIE di rosa
+   e rimane evidenziato, così la selezione è davvero riconoscibile. */
+.lm360-alive-card--heart.is-selected {
+  border-color: #ff8cbd;
+  background: rgba(255, 105, 170, .16);
+  box-shadow: inset 0 0 0 1px rgba(255, 181, 215, .35),
+              0 0 22px rgba(255, 105, 170, .2);
+}
+
+.lm360-alive-card--heart.is-selected .lm360-alive-mark svg {
+  fill: #ff81b9;
+  stroke: #ffe0ef;
+  filter: drop-shadow(0 0 8px rgba(255, 129, 185, .46));
+}
+
 .lm360-alive-label {
   color: #fff;
   font-size: 1rem;
