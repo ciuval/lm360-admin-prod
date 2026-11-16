@@ -41,7 +41,8 @@ test("test non legge testo chat e non stampa PII o errori provider", async () =>
   assert.doesNotMatch(js, /console\.(?:log|error|warn)/);
   assert.doesNotMatch(js, /JSON\.stringify\((?:error|result)\)/);
   assert.match(js, /dataOf\(result, "CLEANUP_SYNTHETIC_C_FAILED"\)/);
-  assert.match(js, /process\.stdout\.write\("CLEANUP solo account C locale: PASS/);
+  assert.match(js, /CLEANUP solo account C locale: PASS/);
+  assert.match(js, /const createdAndRemoved = await cleanup\(\)/);
 });
 
 test("terzo utente non deve leggere messaggi, match, stanze e non deve inviare senza match", async () => {
