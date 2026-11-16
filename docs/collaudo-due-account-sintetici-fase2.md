@@ -231,3 +231,25 @@ Il fallimento si verifica prima di `stage = "CREATE_C"`, quindi **nessun terzo a
 **Autotest CI sul commit `1758ffa`**: 189 test PASS, 0 FAIL, build Vite OK. La prova API con il terzo account è **ancora da eseguire sul Docker locale**; non confondere i test statici con il successo RLS/IDOR reale. Se il gateway non supera il probe con la chiave anon, è possibile una configurazione JWT/chiavi divergente e bisogna diagnosticare senza forzare PASS.
 
 **Prossimo passo**: `git pull --ff-only` nel clone LAB e poi `check-third-account-privacy.ps1` una sola volta. Se tutte le guardie sono PASS, Carlo temporaneo effettua le verifiche negative RLS, invio negato, invariabilità messaggi A/B e cancellazione automatica. In caso di FAIL, fermarsi. Nessun db reset, produzione, Stripe o deploy.
+
+
+## Collaudo privacy con terzo account: PASS — 16/11/2026
+
+**Evidenza: output PowerShell del test eseguito dall'utente nel Docker locale**, dopo `git pull --ff-only` al commit `dbb1bdb`, eseguendo `scripts/local-only/check-third-account-privacy.ps1`. Questo aggiornamento registra il risultato reale, diverso dallo stato storico *pending* riportato nelle sezioni precedenti.
+
+Risultati osservati:
+
+- `ANON_DB_GUARD=PASS` — RLS attiva su `public.messaggi`, `SELECT` negato ad `anon`; gateway e chiave locale verificati.
+- `ANON_DENIED_HTTP=401` — accesso HTTP anonimo rifiutato con gate indipendenti soddisfatti.
+- `PASS account anonimo: accesso ai messaggi negato`.
+- `PASS terzo account sintetico autenticato e profilo proprio leggibile`.
+- `PASS terzo account: lettura globale, per ID e per coppia negate`.
+- `PASS terzo account: match, Stanza 360 e profili riservati non visibili`.
+- `PASS terzo account: stanza e invio negati; conversazione originale intatta`.
+- `PASS privacy RLS/IDOR: 3 account nel Supabase locale`.
+- `CLEANUP solo account C locale: PASS`.
+- `COLLAUDO PRIVACY LOCALE SUPERATO`.
+
+**Esito**: **PASS test negativo RLS/IDOR con terzo account** sulla conversazione sintetica Andrea/Bianca; nessuna lettura globale, per ID o per coppia, né invio senza match; account C eliminato e messaggi A/B invariati secondo il test. La prova esamina un database **laboratorio** volutamente ridotto, non lo schema live e non certifica ogni percorso alternativo di accesso. Il `401` da solo non è considerato sufficiente: sono state verificate anche la RLS e la configurazione della chiave/gateway locale.
+
+**Prossimo gate non ancora eseguito**: revoca accesso alla chat dopo la perdita del match (verificare lettura della cronologia e invio dopo revoca) e confronto con policy/schema effettivo online **in sola lettura** prima di qualsiasi rilascio. Manteniamo PR #27 **draft**; nessun deploy, nessuna modifica a Supabase cloud o Stripe.
