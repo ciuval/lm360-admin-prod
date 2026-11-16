@@ -72,7 +72,18 @@ async function run() {
   const anonymous = await anon.from("messaggi")
     .select("id", { count: "exact", head: true });
   if (anonymous.error) {
-    check(anonymous.error.code === "42501", "ANON_UNEXPECTED_ERROR");
+    // Soltanto codici tecnici allowlistati: niente message/hint/details,
+    // token, headers o URL del provider. Errori inattesi restano FAIL.
+    const code = String(anonymous.error.code ?? "");
+    if (code !== "42501") {
+      const safeCode = /^[A-Z0-9_]{1,20}$/.test(code) ? code : "UNKNOWN";
+      const safeStatus = Number.isInteger(anonymous.status) &&
+        anonymous.status >= 100 && anonymous.status <= 599
+        ? String(anonymous.status) : "UNKNOWN";
+      process.stdout.write("ANON_DIAGNOSTIC_CODE=" + safeCode +
+        " HTTP=" + safeStatus + "\n");
+      throw new Error("ANON_UNEXPECTED_ERROR");
+    }
   } else {
     check(anonymous.count === 0, "ANON_READ_ALLOWED");
   }
@@ -151,13 +162,14 @@ async function run() {
 }
 
 async function cleanup() {
-  if (!createdId) return;
+  if (!createdId) return false;
   // Non toccare mai A o B. La FK auth.users → profili usa CASCADE.
   const result = await admin.auth.admin.deleteUser(createdId);
   dataOf(result, "CLEANUP_SYNTHETIC_C_FAILED");
   const remaining = dataOf(await admin.from("profili")
     .select("id").eq("id", createdId).maybeSingle(), "CLEANUP_PROFILE_CHECK_FAILED");
   check(remaining === null, "CLEANUP_PROFILE_REMAINS");
+  return true;
 }
 
 try {
@@ -169,8 +181,10 @@ try {
   process.exitCode = 1;
 } finally {
   try {
-    await cleanup();
-    process.stdout.write("CLEANUP solo account C locale: PASS\n");
+    const createdAndRemoved = await cleanup();
+    process.stdout.write(createdAndRemoved
+      ? "CLEANUP solo account C locale: PASS\n"
+      : "CLEANUP account C: NON NECESSARIO (nessun account creato)\n");
   } catch {
     // Non proporre db reset: A/B devono rimanere intatti.
     process.stderr.write("FAIL CLEANUP_C: verifica manuale SOLO nel LAB, NON usare db reset\n");
