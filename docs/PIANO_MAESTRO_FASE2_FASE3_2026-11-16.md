@@ -161,3 +161,12 @@ La Fase 3 è una *esperienza*, non un'altra architettura. Primi quattro simboli 
 **Gate visuale:** microanimazioni piacevoli e brevi, nessun evento chat/like, nessuna attività umana falsamente simulata, UI accessibile e stabile su mobile. Non confondere CI PASS con QA browser PASS.
 
 **Rollback:** rimuovere il flag dall'ambiente per nascondere subito l'anteprima; revert mirato dei commit del branch per togliere il codice, se necessario. Nessuna migrazione SQL e nessun server remoto modificato.
+
+
+### Check visivo Cuore — 16/11/2026
+
+L'utente ha verificato la preview nel browser LAB: **pulsazione PASS**, **messaggio di feedback PASS**, ma **cambiamento cromatico FAIL** nella prima versione, perché l'icona era già rosa da inattiva e la selezione modificava solo il bordo con contrasto insufficiente.
+
+**Correzione minima:** in `src/components/alive/AlivePreview.css` il cuore selezionato `.lm360-alive-card--heart.is-selected` ha fondo e bordo più evidenti; l'SVG ora passa da `fill:none` al riempimento `#ff81b9` e mantiene un bagliore rosa finché `aria-pressed=true`. Un secondo clic deseleziona. Nessun evento like o modifica backend. Il focus accessibile e la riduzione del movimento rimangono intatti.
+
+**CI successiva:** 194 test PASS, 0 FAIL e build Vite riuscita sul commit `c6f940a`. **La resa cromatica sul browser dell'utente deve ancora essere riverificata dopo il pull**, quindi non dichiarare PASS visivo definitivo prima di quel controllo.
