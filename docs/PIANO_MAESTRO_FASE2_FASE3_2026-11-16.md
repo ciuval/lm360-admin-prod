@@ -126,3 +126,38 @@ La Fase 3 è una *esperienza*, non un'altra architettura. Primi quattro simboli 
 - **Stato tecnico al 16/11/2026:** PR #27 **draft**, `main` invariato, Supabase online e Stripe intatti. Il piano non autorizza deploy.
 
 **Primo checkpoint di lavoro:** scrivere e collaudare il contratto **2.1 — revoca match, blocco e segnalazione**, partendo dallo schema effettivo del LAB e senza alterare la coppia Andrea/Bianca.
+
+
+## 8. Checkpoint Fase 3.1 — Prima implementazione React (16/11/2026)
+
+**Stato: codice realizzato nel branch di integrazione, test automatici PASS, prova visuale nel browser LAB ancora da eseguire.** Non è una funzionalità pubblicata.
+
+### File effettivi
+
+| File | Contenuto / responsabilità |
+| --- | --- |
+| src/components/alive/AlivePreview.jsx | Anteprima interattiva con quattro pulsanti Heart, Smile, MessageCircleHeart, Sparkles; clic seleziona/deseleziona, aria-pressed e feedback accessibile aria-live=polite; nessuna chiamata a Supabase, analytics o messaggi |
+| src/components/alive/AlivePreview.css | Dark/glass; quattro animazioni heartbeat/wink/pop/twinkle; focus visibile, touch target ampi, layout a due colonne sotto 760px, prefers-reduced-motion |
+| src/pages/Home.jsx | Mostra il componente solo con import.meta.env.DEV e VITE_LM360_ALIVE_PREVIEW=true; una build di produzione non lo mostra neppure se il flag è configurato |
+| tests/alivePreview.test.js | Contratti di sicurezza flag, quattro icone, assenza backend, semantica pulsanti e movimento ridotto |
+
+### Protocollo manuale sul PC Windows (un'azione per volta)
+
+1. Docker Supabase LAB già attivo; evitare db reset e qualsiasi deploy.
+2. Aggiornare soltanto il clone LAB:
+   git -C 'I:\lm360-clean\LM360_FASE2_LAB' pull --ff-only
+3. Chiudere l'eventuale server Vite su 5174 con Ctrl+C. Poi in PowerShell eseguire queste righe nell'ordine:
+
+    $env:VITE_LM360_ALIVE_PREVIEW = 'true'
+    try {
+      & 'I:\lm360-clean\LM360_FASE2_LAB\scripts\local-only\start-fase2-browser.ps1'
+    } finally {
+      Remove-Item Env:\VITE_LM360_ALIVE_PREVIEW -ErrorAction SilentlyContinue
+    }
+
+4. Aprire http://127.0.0.1:5174/#/ e provare tutte le icone: clic/tocco, Tab + Enter/Space, descrizioni, vista mobile 375px/768px, preferenza movimento ridotto. L'anteprima compare dopo le card di esplorazione.
+5. Fermare Vite con Ctrl+C; riavviare senza flag e verificare che l'anteprima non compaia.
+
+**Gate visuale:** microanimazioni piacevoli e brevi, nessun evento chat/like, nessuna attività umana falsamente simulata, UI accessibile e stabile su mobile. Non confondere CI PASS con QA browser PASS.
+
+**Rollback:** rimuovere il flag dall'ambiente per nascondere subito l'anteprima; revert mirato dei commit del branch per togliere il codice, se necessario. Nessuna migrazione SQL e nessun server remoto modificato.
