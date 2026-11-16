@@ -209,3 +209,14 @@ Prima di questo test, la verifica locale read-only di `realtime.subscription` ha
 **Esecuzione prevista**: con Docker Desktop e Supabase `LM360_FASE2_LAB` già avviati, eseguire dal PowerShell del PC `git -C 'I:\lm360-clean\LM360_FASE2_LAB' pull --ff-only`; solo dopo Git OK lanciare `& 'I:\lm360-clean\LM360_FASE2_LAB\scripts\local-only\check-third-account-privacy.ps1'`. Raccogliere unicamente i flag `PASS`/`FAIL`, non log con chiavi e ID. Non aprire un terzo browser, non inviare messaggi reali.
 
 **Criterio di promozione**: PASS per lettura negata a C e `anon` e invio negato C; poi test manuale UI/URL della Stanza con terzo account se desiderato. Questo collaudo riguarda il solo **schema LAB**; la sicurezza del database di produzione richiede audit separato prima di rilascio. PR #27 resta draft; Stripe, Vercel e Supabase cloud non toccati.
+
+
+## Primo avvio test Carlo: errore anon inatteso — 16/11/2026
+
+**Evidenza PowerShell fornita dall'utente**: `git pull --ff-only` terminato con fast-forward alla revisione `058df4c`; lo script `check-third-account-privacy.ps1` ha prodotto `FAIL ANON ANON_UNEXPECTED_ERROR`, seguito da `CLEANUP solo account C locale: PASS` e dall'arresto controllato `LOCAL_THIRD_ACCOUNT_TEST_FAILED`. Il codice precedente accettava esattamente `42501` per l'accesso anonimo negato, ma ha ricevuto un errore differente. **Non si deve dedurre una fuga di dati né dichiarare il test PASS**; è necessario identificare il codice dell'errore prima di adattare gli esiti attesi.
+
+Il fallimento si verifica prima di `stage = "CREATE_C"`, quindi **nessun terzo account è stato creato**. La precedente dicitura cleanup «PASS» era fuorviante in questa circostanza; è stata sostituita da «NON NECESSARIO (nessun account creato)» quando appropriato.
+
+**Diagnostica di sola classificazione aggiunta al test**: per i soli errori anon diversi da `42501`, lo script stampa `ANON_DIAGNOSTIC_CODE=<codice allowlistato>` e `HTTP=<status numerico>`; non accede né mostra testo errore, `hint`, `details`, URL, JWT, chiavi, email o messaggi. L'esito rimane FAIL finché la causa non è verificata. Aggiunto test statico che assicura il comportamento fail-closed. Nessuna modifica a grant, RLS, dati o produzione.
+
+**Prossimo passo**: nel solo LAB, dopo `git pull --ff-only`, riprovare il wrapper una volta e riportare esclusivamente flag e codici sanitizzati. Se ancora FAIL anon, fare diagnosi per quel codice, non ripetere invii. PR #27 draft, nessun deploy/Stripe.
