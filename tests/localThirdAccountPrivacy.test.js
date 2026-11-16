@@ -61,3 +61,15 @@ test("terzo utente non deve leggere messaggi, match, stanze e non deve inviare s
   assert.doesNotMatch(js, /admin\.auth\.admin\.deleteUser\(a\.id\)/);
   assert.doesNotMatch(js, /admin\.auth\.admin\.deleteUser\(b\.id\)/);
 });
+
+
+test("diagnostica anon espone soltanto codice tecnico e stato HTTP, senza trasformare l'errore in PASS", async () => {
+  const js = await readFile(jsFile, "utf8");
+  assert.match(js, /ANON_DIAGNOSTIC_CODE=/);
+  assert.match(js, /HTTP=/);
+  assert.match(js, /const safeCode = \/\^\[A-Z0-9_\]\{1,20\}\$/);
+  assert.match(js, /throw new Error\("ANON_UNEXPECTED_ERROR"\)/);
+  assert.match(js, /code !== "42501"/);
+  assert.doesNotMatch(js, /anonymous\.error\.(?:message|details|hint)/);
+  assert.match(js, /NON NECESSARIO \(nessun account creato\)/);
+});
