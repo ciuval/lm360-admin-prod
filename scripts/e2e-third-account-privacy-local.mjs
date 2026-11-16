@@ -45,6 +45,26 @@ async function countAllPairs(ids) {
   check(!q.error && Number.isInteger(q.count), "BASELINE_MESSAGES_UNAVAILABLE");
   return q.count;
 }
+async function verifyAnonymousKey() {
+  // Controllo indipendente: gateway REST vivo e chiave anon accettata.
+  // Solo GET della descrizione API; nessuna tabella o dato utente letto.
+  let response;
+  try {
+    response = await fetch(new URL("/rest/v1/", url), {
+      method: "GET",
+      headers: {
+        apikey: anonKey,
+        Authorization: "Bearer " + anonKey,
+        Accept: "application/openapi+json",
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+  } catch {
+    throw new Error("ANON_GATEWAY_PROBE_FAILED");
+  }
+  check(response.status === 200, "ANON_API_KEY_UNVERIFIED");
+}
+
 async function run() {
   // A/B devono essere ESATTAMENTE i due account di browser sintetici.
   const profiles = dataOf(await admin.from("profili")
@@ -66,22 +86,31 @@ async function run() {
   check(sample?.length === 1, "SYNTHETIC_MESSAGE_NOT_FOUND");
   const messageId = sample[0].id; // Solo memoria, nessun contenuto letto.
 
-  // Prima confermiamo l'accesso anonimo negato: qualunque altro
-  // errore che non sia 42501 non deve essere scambiato per PASS.
+  // Confermiamo sia l'accettazione della chiave anon dal gateway,
+  // sia l'assenza di GRANT SELECT e la RLS attiva nel DB Docker locale.
+  // Solo così un HTTP 401 senza codice SQL può essere classificato come rifiuto.
   stage = "ANON";
+  check(process.env.LM360_LOCAL_ANON_DENIAL_GUARD === "YES", "ANON_DB_GUARD_NOT_VERIFIED");
+  await verifyAnonymousKey();
   const anonymous = await anon.from("messaggi")
     .select("id", { count: "exact", head: true });
   if (anonymous.error) {
     // Soltanto codici tecnici allowlistati: niente message/hint/details,
     // token, headers o URL del provider. Errori inattesi restano FAIL.
     const code = String(anonymous.error.code ?? "");
-    if (code !== "42501") {
+    if (code === "" && anonymous.status === 401) {
+      // Solo dopo gateway 200 + verifica grant/RLS sul DB. Nessuna eccezione 401
+      // generica può diventare un PASS senza questi due controlli indipendenti.
+      process.stdout.write("ANON_DENIED_HTTP=401 (gateway e RLS verificati)\n");
+    } else if (code !== "42501") {
       const safeCode = /^[A-Z0-9_]{1,20}$/.test(code) ? code : "UNKNOWN";
       const safeStatus = Number.isInteger(anonymous.status) &&
         anonymous.status >= 100 && anonymous.status <= 599
         ? String(anonymous.status) : "UNKNOWN";
+      const codeClass = code === "" ? "EMPTY" : /^[A-Z0-9_]{1,20}$/.test(code)
+        ? "STANDARD" : "NON_STANDARD";
       process.stdout.write("ANON_DIAGNOSTIC_CODE=" + safeCode +
-        " HTTP=" + safeStatus + "\n");
+        " HTTP=" + safeStatus + " CLASS=" + codeClass + "\n");
       throw new Error("ANON_UNEXPECTED_ERROR");
     }
   } else {
