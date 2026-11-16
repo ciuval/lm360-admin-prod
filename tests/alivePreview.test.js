@@ -47,3 +47,14 @@ test("le quattro animazioni sono limitate alla preview e rispettano reduced moti
   assert.match(css, /transition: none !important/);
   assert.doesNotMatch(css, /animation-iteration-count:\s*infinite/);
 });
+
+test("il cuore selezionato si riempie visibilmente di rosa, senza perdere il focus accessibile", async () => {
+  const css = await read("src/components/alive/AlivePreview.css");
+  const jsx = await read("src/components/alive/AlivePreview.jsx");
+  assert.match(css, /\.lm360-alive-card--heart\.is-selected\s*\{[^}]*border-color:\s*#ff8cbd;/);
+  assert.match(css, /\.lm360-alive-card--heart\.is-selected\s+\.lm360-alive-mark svg\s*\{[^}]*fill:\s*#ff81b9;/);
+  assert.match(css, /\.lm360-alive-card:focus-visible\s*\{/);
+  assert.match(jsx, /aria-pressed=\{selected === id\}/);
+  assert.match(jsx, /previous === id \? null : id/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+});
