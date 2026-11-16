@@ -74,3 +74,24 @@ test("diagnostica anon espone soltanto codice tecnico e stato HTTP, senza trasfo
   assert.doesNotMatch(js, /anonymous\.error\.(?:message|details|hint)/);
   assert.match(js, /NON NECESSARIO \(nessun account creato\)/);
 });
+
+
+test("401 anon senza codice diventa negato solo con gateway verificato e RLS/GRANT letti dal LAB", async () => {
+  const js = await readFile(jsFile, "utf8");
+  const ps = await readFile(psFile, "utf8");
+  assert.match(js, /async function verifyAnonymousKey\(\)/);
+  assert.match(js, /new URL\("\/rest\/v1\/", url\)/);
+  assert.match(js, /response\.status === 200, "ANON_API_KEY_UNVERIFIED"/);
+  assert.match(js, /LM360_LOCAL_ANON_DENIAL_GUARD === "YES"/);
+  assert.match(js, /await verifyAnonymousKey\(\)/);
+  assert.match(js, /code === "" && anonymous\.status === 401/);
+  assert.match(js, /ANON_DENIED_HTTP=401/);
+  assert.match(js, /throw new Error\("ANON_UNEXPECTED_ERROR"\)/);
+  assert.match(ps, /not has_table_privilege\('anon', 'public\.messaggi', 'SELECT'\)/);
+  assert.match(ps, /has_table_privilege\('authenticated', 'public\.messaggi', 'SELECT'\)/);
+  assert.match(ps, /c\.relrowsecurity/);
+  assert.match(ps, /ANON_DB_GUARD=PASS/);
+  assert.match(ps, /LOCAL_ANON_DATABASE_GUARD_FAILED/);
+  assert.match(ps, /Remove-Item -Path/);
+  assert.doesNotMatch(ps, /(?:grant\s+select|alter\s+table|create\s+policy)\s+/i);
+});
