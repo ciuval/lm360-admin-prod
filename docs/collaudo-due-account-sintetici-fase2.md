@@ -194,3 +194,18 @@ Prima di questo test, la verifica locale read-only di `realtime.subscription` ha
 **Portata del PASS:** test manuale end-to-end su due browser e due account sintetici, non test automatico di carico/disconnessione. Le precedenti sezioni che indicano Realtime come *ancora da collaudare* descrivono lo stato storico prima di questa prova; il risultato aggiornato è **PASS bidirezionale in LAB**.
 
 **Vincoli ancora aperti prima di qualsiasi rilascio**: test negativi RLS/IDOR con terzo account e utente anonimo, verifica revoca/chiusura match e sessione, resilienza disconnessioni, esperienza mobile/accessibilità, confronto schema cloud e documentazione sicurezza. La PR #27 resta **draft**; non autorizza deploy né attivazione di Stripe. Nessun cambiamento a Vercel, Supabase online o dati reali.
+
+
+## Fase 2 — Test negativo RLS/IDOR con terzo account (16/11/2026)
+
+**Stato: predisposto, NON ancora eseguito sul LAB utente.** Procedura pensata per la vera conversazione sintetica già collaudata in Chrome/Andrea e Edge/Bianca, senza rifare match, chat o account A/B.
+
+**File:**
+
+- `scripts/e2e-third-account-privacy-local.mjs`: test API con terzo account temporaneo `Carlo Test`; legge i due profili sintetici solo se **entrambi** sono presenti univocamente e le rispettive email hanno dominio riservato `@example.test`. Verifica una conversazione esistente tramite soli ID e conteggi, mai tramite testo. Prima di creare C controlla divieto SELECT per `anon` (o errore `42501`); registra e autentica C via Supabase Auth locale; conferma che C legga il proprio profilo; esegue SELECT globali e mirate su `messaggi`, `match_scores`, `stanze_360`, `profili`: atteso **0 righe A/B**; controlla che `can_open_stanza` e `send_stanza_message` per C→A siano **false** senza match; riconta i messaggi A/B invariati e nessun invio C. In `finally` cancella **solo il nuovo utente C** e verifica che il profilo C sia scomparso. In caso di cleanup fallito: FAIL e correzione manuale locale mirata, **mai `supabase db reset`**.
+- `scripts/local-only/check-third-account-privacy.ps1`: wrapper PowerShell 5.1 con blocco branch, verifica Docker/porte localhost e identità del container Supabase LAB. Chiavi anon e service_role recuperate esclusivamente da `supabase status -o env` locale e passate al sottoprocesso Node senza mostrarle; rimosse dall'ambiente PowerShell in `finally`. Nessuna variabile `VITE_*` e nessuna credenziale service_role nel browser.
+- `tests/localThirdAccountPrivacy.test.js`: guardie statiche/sintassi e divieto di eseguire lo script integrazione nella CI. I test unitari e la build **non** sostituiscono la prova API reale sul PC dell'utente.
+
+**Esecuzione prevista**: con Docker Desktop e Supabase `LM360_FASE2_LAB` già avviati, eseguire dal PowerShell del PC `git -C 'I:\lm360-clean\LM360_FASE2_LAB' pull --ff-only`; solo dopo Git OK lanciare `& 'I:\lm360-clean\LM360_FASE2_LAB\scripts\local-only\check-third-account-privacy.ps1'`. Raccogliere unicamente i flag `PASS`/`FAIL`, non log con chiavi e ID. Non aprire un terzo browser, non inviare messaggi reali.
+
+**Criterio di promozione**: PASS per lettura negata a C e `anon` e invio negato C; poi test manuale UI/URL della Stanza con terzo account se desiderato. Questo collaudo riguarda il solo **schema LAB**; la sicurezza del database di produzione richiede audit separato prima di rilascio. PR #27 resta draft; Stripe, Vercel e Supabase cloud non toccati.
