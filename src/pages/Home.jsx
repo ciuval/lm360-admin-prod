@@ -4,6 +4,10 @@ import { loadCurrentAccountTier } from "../lib/accountTier";
 import { loadHomeProfileStatus } from "../lib/homeProfileStatus.js";
 import { supabase } from "../lib/supabaseClient";
 import { track } from "../lib/analytics.js";
+import AlivePreview from "../components/alive/AlivePreview.jsx";
+
+// Anteprima accessibile solo nel server Vite di sviluppo: mai in una build pubblicata.
+const ALIVE_PREVIEW_ENABLED = import.meta.env.DEV && import.meta.env.VITE_LM360_ALIVE_PREVIEW === "true";
 
 const journey = [
   {
@@ -492,6 +496,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {ALIVE_PREVIEW_ENABLED ? <AlivePreview /> : null}
 
       <aside aria-label="Impegno per la sicurezza digitale" style={{ marginTop: 20, padding: "20px 24px", border: "1px solid rgba(240,143,192,.35)", borderRadius: 20, background: "rgba(240,143,192,.075)" }}>
         <strong style={{ display: "block", color: "#ffd6ea", fontSize: "1.1rem" }}>La sicurezza delle nuove generazioni ci riguarda tutti.</strong>
