@@ -223,3 +223,10 @@ L'utente ha confermato visivamente «Per-fettoo» per la **Scintilla viola** dop
 **QA automatico:** test di regressione in `tests/alivePreview.test.js`; commit `a97c433` **197 test PASS, 0 falliti e build Vite OK**. **QA browser delle tre nuove aureole ancora pendente**: non dichiararlo PASS senza screenshot/conferma utente. Poi verificare mobile (375/768 px), tastiera (Tab, Enter, Space), movimento ridotto, nessun like inviato. PR #27 resta draft, nessun deploy o modifica DB/Stripe.
 
 **Rollback:** disattivare `VITE_LM360_ALIVE_PREVIEW` nel LAB per nascondere la preview; revert selettivo del commit CSS `c9fb39b` solo se necessario e con audit del branch prima di intervenire.
+
+
+### Messaggio più espressivo — 17/11/2026
+
+Su richiesta dell'utente, **prima del prossimo pull**, amplificato moderatamente e solo nel LAB il movimento del Messaggio azzurro, mantenendo lo stile distinto dalle altre tre icone. In `src/components/alive/AlivePreview.css`: rimbalzo dell'icona da 480 ms/scala 1.16 a 660 ms, traslazione verticale -8 px e scala 1.22; puntini da 4 a 5 px, salita da 4 a 6 px e sequenza da 450 a 560 ms con ritardi 100/200 ms. Bagliori cromatici, Cuore, Sorriso e Scintilla invariati. Il testo continua a spiegare che non è digitazione reale; nessuna chiamata backend.
+
+Aggiornato `tests/alivePreview.test.js` per controllare durata, ampiezza, leggibilità dei puntini, stato selezionato e `prefers-reduced-motion`. La prova manuale del rimbalzo aggiornato e dei quattro bagliori si farà **solo dopo il pull**. Nessuna modifica a produzione, Supabase o Stripe; PR #27 ancora draft.
