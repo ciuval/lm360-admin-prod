@@ -127,3 +127,22 @@ Senza una persistenza server-side affidabile per coppia, istanza, consenso di A/
 - **Prossimo passo:** confrontare questa specifica con gli oggetti disponibili nel Docker e proporre il *minimo* modello persistente, **senza applicarlo finché non sia revisionato**.
 
 **Principio:** un ponte esiste soltanto se entrambe le persone desiderano attraversarlo.
+
+
+## 9. Checkpoint runtime: consenso SQL con rollback — 17/11/2026
+
+**Evidenza:** output PowerShell comunicato dal proprietario, eseguito su Docker LAB dopo il `git pull --ff-only` al commit `4672aca`:
+
+```text
+GATE21_CONSENT_SQL_SIMULATION=PASS
+GATE21_LOCAL_SCHEMA_CLEAN=PASS
+GATE21_CONSENT_AUTH_JWT_E2E=NOT_TESTED
+```
+
+Il runner `scripts/local-only/run-gate21-consent-rollback.ps1` ha controllato l'identità del container e avviato `scripts/local-only/gate21-consent-rollback.sql` in **un'unica connessione PostgreSQL**, con `BEGIN` / `ROLLBACK`. Il test ha verificato, in una simulazione SQL, che un solo consenso non apre l'accesso, due consensi distinti lo permettono, il terzo non può dare consensi per i partecipanti e il ritiro interrompe l'accesso. Il controllo successivo ha confermato l'assenza dello schema temporaneo.
+
+**Limite essenziale:** per simulare le identità lo script usa `SET LOCAL ROLE authenticated` e claim `request.jwt.claim.sub` sintetici all'interno di psql; non usa login, JWT autentici, PostgREST né la UI. Il PASS **non prova** il percorso di autenticazione reale, le policy RLS applicative in produzione, la resistenza a richieste concorrenti, i canali Realtime o una vera stanza familiare. La prova non ha creato account e non ha conservato strutture DB.
+
+**Stato dei test:** F01–F12 sul modello JavaScript: 12 PASS, 0 FAIL nella console locale (solo logica simulata). SQL di consenso: PASS nel Docker LAB con rollback. Prova JWT/API E2E: **PENDING**. Nessuna modifica a Supabase cloud, Stripe, main o deployment; PR #27 ancora Draft.
+
+**Prossimo gate:** progettare una prova con due login sintetici e JWT effettivi, impersonazione negata, revoca e cleanup verificato, esclusivamente nel Docker LAB. Prima di eseguire qualunque SQL persistente locale, riesaminare ownership, autorizzazioni, rollback, uso di account temporanei e protezione di Andrea/Bianca. Non applicare il prototipo come migration e non concedere accesso alla chat privata al mediatore.
