@@ -62,3 +62,34 @@ Non creare ora nuove tabelle/colonne o permessi, né nello stack principale né 
 **Rischio residuo, dichiarato:** essendo condiviso lo stack `LM360_FASE2_LAB`, i nuovi oggetti esistono brevemente tra installazione e pulizia. `finally` interviene su errori ordinari, **non** su interruzioni di corrente, `Terminate-Process` o arresto improvviso di Docker. Il preflight della successiva esecuzione blocca se trova oggetti con il prefisso della fixture; un cleanup manuale mirato richiederà prima verifica e non autorizza un reset globale. Non è una prova di sicurezza dello schema cloud o di sessioni Realtime.
 
 **Stato:** script e contratti sono stati committati nel branch Draft e GitHub Actions si è concluso con successo su `ab3af668`. **Nessun esecuzione JWT reale locale ancora avvenuta.** Prossima azione singola: `git pull --ff-only` del clone LAB, poi revisione/esecuzione in passo separato.
+
+
+## 6. Esito del primo test JWT reale — 17/11/2026
+
+**Evidenza:** console PowerShell riferita dal proprietario dopo l'esecuzione di `scripts/local-only/run-gate21-jwt-consent-local.ps1` nel Docker LAB sul commit `d887591`. Output:
+
+```text
+PASS JWT_AUTHENTICATED_SYNTHETIC_ACTORS
+PASS JWT_FIXTURE_RPC_READY
+PASS JWT_THIRD_PARTY_NO_CONSENT
+PASS JWT_ONE_CONSENT_DENIED
+PASS JWT_TWO_CONSENTS_ONLY_PARTICIPANTS
+PASS JWT_CLOSED_BLOCKED_DENIED
+PASS JWT_ANON_DENIED
+PASS JWT_WITHDRAW_REVOKES_VALID_SESSIONS
+GATE21_JWT_CLEANUP=PASS
+GATE21_JWT_E2E=PASS
+```
+
+**Significato:** quattro identità sintetiche (A, B, mediatore e terzo) hanno effettuato login tramite Supabase Auth locale. Tre RPC temporanee, esposte da PostgREST e protette da `auth.uid()`, hanno dimostrato che un solo consenso non abilita accesso, che due consensi separati lo abilitano ai tre partecipanti previsti, che il terzo/anon sono esclusi, e che il ritiro di A nega nuovi accessi anche con JWT ancora validi. Casi sintetici già `closed` o `blocked` hanno negato consenso/accesso. Il runner ha riportato cleanup PASS per fixture e account creati.
+
+**Non estendere il PASS oltre le prove eseguite:**
+- Non c'è ancora una funzionalità Ponte360 operativa, una stanza di mediazione o una vera chat familiare; `can_open` è una RPC di prova che restituisce un booleano.
+- I casi `closed` e `blocked` sono stati predisposti nella fixture, **non** modificati attraverso vere azioni UI/API di blocco o chiusura.
+- Il test non include un endpoint in cui B fornisce l'ID di A per impersonarlo, né verifica una revoca attribuita falsamente ad A da B: requisiti J02 e J06 **non completamente coperti**.
+- J09 è provato per il percorso normale, **non** per arresto di Docker/crash o errore intenzionale con cleanup. Nessun test di race/Realtime/stale snapshot o sessioni concorrenti durante l'invio.
+- I confini `RLS` e `GRANT` riguardano la fixture, **non** lo schema cloud e non la logica `match_scores/messaggi` di produzione.
+
+**Stato aggiornato:** prova JWT reale della **fixture locale** PASS; cleanup normale PASS; PR #27 Draft. Gate 2.1-D **ancora aperto**. Nessun merge, deploy o modifica a Supabase cloud/Stripe.
+
+**Prossimo passo mirato:** estendere i test della fixture a revoca da B, retry concorrenti, contenimento degli errori e stato reale della relazione, senza creare strutture permanenti. Prima di qualunque nuovo runtime test, fare revisione statica dei nuovi scenari e mantenere cleanup protetto.
