@@ -123,7 +123,7 @@ $grants$;
 
 -- Simuliamo il claim A, B, mediatore e terzo nelle rispettive sessioni SQL.
 set local role authenticated;
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true);
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true) as claim_value \gset
 do $mediator_pre$
 begin
   if lm360_gate21_consent_probe.can_open(1)
@@ -133,7 +133,7 @@ begin
 end
 $mediator_pre$;
 
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000004', true);
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000004', true) as claim_value \gset
 do $outsider$
 begin
   if lm360_gate21_consent_probe.can_open(1)
@@ -143,7 +143,7 @@ begin
 end
 $outsider$;
 
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true) as claim_value \gset
 do $a_accept$
 begin
   if not lm360_gate21_consent_probe.consent(1)
@@ -152,7 +152,7 @@ begin
 end
 $a_accept$;
 
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true) as claim_value \gset
 do $b_accept$
 begin
   if not lm360_gate21_consent_probe.consent(1)
@@ -163,7 +163,7 @@ begin
 end
 $b_accept$;
 
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true);
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true) as claim_value \gset
 do $mediator_after$
 begin
   if not lm360_gate21_consent_probe.can_open(1)
@@ -174,7 +174,7 @@ begin
 end
 $mediator_after$;
 
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true) as claim_value \gset
 do $revoke$
 begin
   if not lm360_gate21_consent_probe.withdraw(1)
@@ -184,7 +184,7 @@ begin
 end
 $revoke$;
 
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true) as claim_value \gset
 do $b_after$
 begin
   if lm360_gate21_consent_probe.can_open(1)
@@ -193,7 +193,7 @@ begin
 end
 $b_after$;
 
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true);
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true) as claim_value \gset
 do $mediator_revoke$
 begin
   if lm360_gate21_consent_probe.can_open(1) then
