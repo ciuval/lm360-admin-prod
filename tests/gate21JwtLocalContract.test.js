@@ -54,7 +54,7 @@ test("ephemeral fixture has unique namespace, explicit grants, identity checks a
   assert.match(setup, /grant execute on function public\.__FN_CONSENT__\(bigint\) to authenticated;/);
   assert.match(setup, /notify pgrst, 'reload schema';/);
   assert.match(clean, /drop function if exists public\.__FN_CONSENT__\(bigint\);/);
-  assert.match(clean, /drop schema if exists __SCHEMA__;/);
+  assert.match(clean, /execute 'drop schema __SCHEMA__';/);
   assert.doesNotMatch(clean, /\bcascade\b/i);
   assert.doesNotMatch(setup, /(?:create|alter|drop)\s+table\s+public\./i);
   assert.doesNotMatch(setup + clean, /(?:grant|revoke)\s+(?:all|select|update|insert)\s+on\s+public\.messaggi/i);
