@@ -41,7 +41,10 @@ const MOMENTS = [
 
 export default function AlivePreview() {
   const [selected, setSelected] = useState(null);
-  const current = MOMENTS.find((moment) => moment.id === selected);
+  const [preview, setPreview] = useState(null);
+  // Il passaggio del mouse o il focus attivano già l'animazione:
+  // mostrano anche il testo; il click rende la scelta persistente.
+  const current = MOMENTS.find((moment) => moment.id === (preview ?? selected));
 
   return (
     <section className="lm360-alive-preview" aria-labelledby="lm360-alive-title">
@@ -61,6 +64,10 @@ export default function AlivePreview() {
             type="button"
             className={"lm360-alive-card lm360-alive-card--" + id + (selected === id ? " is-selected" : "")}
             aria-pressed={selected === id}
+            onMouseEnter={() => setPreview(id)}
+            onMouseLeave={() => setPreview(null)}
+            onFocus={() => setPreview(id)}
+            onBlur={() => setPreview(null)}
             onClick={() => setSelected((previous) => previous === id ? null : id)}
           >
             <span className="lm360-alive-mark" aria-hidden="true">
@@ -77,10 +84,10 @@ export default function AlivePreview() {
         ))}
       </div>
 
-      <p className="lm360-alive-feedback" aria-live="polite" aria-atomic="true">
+      <p className="lm360-alive-feedback" aria-live="polite" aria-atomic="true" data-active={Boolean(current)}>
         {current
-          ? current.message
-          : "Scegli un'icona per vederla prendere vita. Sono effetti illustrativi, non stati reali delle persone."}
+          ? <><strong>{current.label}:</strong>{" "}{current.message}</>
+          : "Sfiora, seleziona o usa Tab sulle icone per scoprire la sorpresa. Sono effetti illustrativi, non stati reali delle persone."}
       </p>
     </section>
   );
