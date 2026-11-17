@@ -13,6 +13,9 @@ const assets = new Map([
   ["/index.html", ["../../lab/ponte360-family/index.html", "text/html; charset=utf-8"]],
   ["/app.mjs", ["../../lab/ponte360-family/app.mjs", "text/javascript; charset=utf-8"]],
   ["/policy.mjs", ["../../lab/ponte360-family/policy.mjs", "text/javascript; charset=utf-8"]],
+  ["/andrea-bianca/", ["../../lab/ponte360-couple/index.html", "text/html; charset=utf-8"]],
+  ["/andrea-bianca/app.mjs", ["../../lab/ponte360-couple/app.mjs", "text/javascript; charset=utf-8"]],
+  ["/andrea-bianca/policy.mjs", ["../../lab/ponte360-couple/policy.mjs", "text/javascript; charset=utf-8"]],
 ]);
 
 const security = {
