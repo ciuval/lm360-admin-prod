@@ -196,3 +196,10 @@ Non sono stati registrati dati del profilo visibili nello screenshot. Nessuna mo
 ### Check Sorriso — conferma utente 17/11/2026
 
 Dopo aggiornamento del clone LAB con la correzione a rotazione/feedback, l'utente conferma: «Sì, molto meglio, e anche la frase». **PASS osservato per movimento del Sorriso più riconoscibile e messaggio sotto le icone**. Lo stato cromatico giallo persistente non è stato confermato separatamente; non attribuire un PASS visivo a quel dettaglio senza prova. Nessuna modifica al database, alla produzione o a Stripe. Prossimo microcollaudo: icona Messaggio (piccolo rimbalzo, tre puntini grafici, testo esplicativo).
+
+
+### Check Messaggio — conferma utente 17/11/2026
+
+**Prova manuale nel browser LAB**: l'utente ha confermato **3/3 PASS** per l'icona Messaggio: piccolo rimbalzo visibile, tre puntini animati e comparsa della frase «Questi puntini sono un gioco grafico. Non indicano che una persona stia scrivendo.». La preview è soltanto illustrativa e non usa stati di digitazione reali, non invia messaggi, non modifica dati.
+
+**Prossima verifica:** Scintilla — piccolo movimento/rotazione, effetto luce viola e frase sotto le icone. Dopo, QA mobile, tastiera e movimento ridotto. PR #27 resta draft; nessun deploy o intervento su Supabase cloud/Stripe.
