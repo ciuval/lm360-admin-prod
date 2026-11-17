@@ -71,8 +71,33 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.lm360-alive-card--smile { --alive-color: var(--alive-gold); }
+/* Stesso effetto luce della Scintilla, ma una tinta distinta per gesto. */
+.lm360-alive-card--heart {
+  --alive-glow-light: 255, 181, 215;
+  --alive-glow-strong: 255, 129, 185;
+  --alive-glow-stroke: #ffe0ef;
+}
+.lm360-alive-card--smile {
+  --alive-color: var(--alive-gold);
+  --alive-glow-light: 255, 231, 163;
+  --alive-glow-strong: 255, 194, 71;
+  --alive-glow-stroke: #fff6d2;
+}
+.lm360-alive-card--chat {
+  --alive-color: var(--alive-sky);
+  --alive-glow-light: 173, 235, 255;
+  --alive-glow-strong: 65, 174, 255;
+  --alive-glow-stroke: #e0f7ff;
+}
+.lm360-alive-card--sparkle { --alive-color: var(--alive-violet); }
 
+.lm360-alive-card:hover,
+.lm360-alive-card.is-selected {
+  border-color: var(--alive-color);
+  background: rgba(255, 255, 255, .085);
+}
+
+/* Specifici dopo lo stato generico: oro e azzurro restano visibili al clic. */
 /* La selezione del sorriso ora si distingue nettamente anche senza animazione. */
 .lm360-alive-card--smile.is-selected {
   border-color: #ffd778;
@@ -84,13 +109,12 @@
   color: #ffe492;
   filter: drop-shadow(0 0 8px rgba(255, 215, 120, .45));
 }
-.lm360-alive-card--chat { --alive-color: var(--alive-sky); }
-.lm360-alive-card--sparkle { --alive-color: var(--alive-violet); }
 
-.lm360-alive-card:hover,
-.lm360-alive-card.is-selected {
-  border-color: var(--alive-color);
-  background: rgba(255, 255, 255, .085);
+.lm360-alive-card--chat.is-selected {
+  border-color: #90d9ff;
+  background: rgba(65, 174, 255, .16);
+  box-shadow: inset 0 0 0 1px rgba(173, 235, 255, .28),
+              0 0 22px rgba(65, 174, 255, .24);
 }
 
 .lm360-alive-card:hover { transform: translateY(-2px); }
@@ -131,6 +155,37 @@
   fill: #ff81b9;
   stroke: #ffe0ef;
   filter: drop-shadow(0 0 8px rgba(255, 129, 185, .46));
+}
+
+/* Cuore rosa, Sorriso oro e Messaggio azzurro riprendono l'aureola
+   della Scintilla: bagliore su hover/focus e persistente su selezione. */
+.lm360-alive-card:is(.lm360-alive-card--heart, .lm360-alive-card--smile, .lm360-alive-card--chat) .lm360-alive-mark::before {
+  content: "";
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(var(--alive-glow-light), .5) 0%,
+    rgba(var(--alive-glow-strong), .28) 38%,
+    transparent 73%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.lm360-alive-card:is(.lm360-alive-card--heart, .lm360-alive-card--smile, .lm360-alive-card--chat) .lm360-alive-mark svg {
+  position: relative;
+  z-index: 1;
+}
+
+.lm360-alive-card:is(.lm360-alive-card--heart, .lm360-alive-card--smile, .lm360-alive-card--chat):is(:hover, :focus-visible, .is-selected) .lm360-alive-mark::before {
+  opacity: 1;
+}
+
+.lm360-alive-card:is(.lm360-alive-card--heart, .lm360-alive-card--smile, .lm360-alive-card--chat):is(:hover, :focus-visible, .is-selected) .lm360-alive-mark svg {
+  stroke: var(--alive-glow-stroke);
+  filter: drop-shadow(0 0 6px rgba(var(--alive-glow-light), .95))
+          drop-shadow(0 0 15px rgba(var(--alive-glow-strong), .9));
 }
 
 /* Scintilla: la rotazione è stata confermata, ma la luce non era visibile.
@@ -190,6 +245,7 @@
   left: 50%;
   transform: translateX(-50%);
   pointer-events: none;
+  z-index: 2;
 }
 
 .lm360-alive-dots i {
