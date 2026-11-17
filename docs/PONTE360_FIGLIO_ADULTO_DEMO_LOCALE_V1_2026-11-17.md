@@ -1,6 +1,6 @@
 # Ponte360 · Figlio maggiorenne, mamma e papà — Demo locale V1
 
-**Data:** 17 novembre 2026. **Ambiente:** PR #27, branch \`integration/quality-gate-20261112\`, non pubblicata.  
+**Data:** 17 novembre 2026. **Ambiente:** PR #27, branch `integration/quality-gate-20261112`, non pubblicata.  
 **Stato:** demo interattiva di UX, non un servizio reale. **Nessun account creato o persistente. Nessuna connessione Supabase, chat o mediazione umana attiva.**
 
 ## Scopo
@@ -13,31 +13,31 @@ La funzione è esclusivamente per utenti adulti; un minore non deve essere incar
 
 ## File del prototipo
 
-- \`lab/ponte360-family/index.html\` — UI dark, accessibile da tastiera, ruoli simulati e informativa.
-- \`lab/ponte360-family/app.mjs\` — componenti DOM e interazioni; contenuto statico inventato, nessun input di informazioni personali.
-- \`lab/ponte360-family/policy.mjs\` — macchina a stati pura: un invito, due consensi, uscita, pausa, blocco, tutela.
-- \`scripts/local-only/serve-ponte360-family-lab.mjs\` — server HTTP in sola lettura su \`127.0.0.1:5188\`, con CSP restrittiva e solo quattro path espliciti.
-- \`tests/ponte360AdultSonLab.test.js\` — controlli automatici SON01–SON13.
+- `lab/ponte360-family/index.html` — UI dark, accessibile da tastiera, ruoli simulati e informativa.
+- `lab/ponte360-family/app.mjs` — componenti DOM e interazioni; contenuto statico inventato, nessun input di informazioni personali.
+- `lab/ponte360-family/policy.mjs` — macchina a stati pura: un invito, due consensi, uscita, pausa, blocco, tutela.
+- `scripts/local-only/serve-ponte360-family-lab.mjs` — server HTTP in sola lettura su `127.0.0.1:5188`, con CSP restrittiva e solo quattro path espliciti.
+- `tests/ponte360AdultSonLab.test.js` — controlli automatici SON01–SON13.
 
 ## Come aprire nel Windows LAB
 
 Da PowerShell:
 
-\`\`\`powershell
+```powershell
 node "I:\lm360-clean\LM360_FASE2_LAB\scripts\local-only\serve-ponte360-family-lab.mjs"
-\`\`\`
+```
 
-Il terminale mostra \`PONTE360_FAMILY_LAB=http://127.0.0.1:5188/\`. Aprire in un browser locale:
+Il terminale mostra `PONTE360_FAMILY_LAB=http://127.0.0.1:5188/`. Aprire in un browser locale:
 
-\`\`\`text
+```text
 http://127.0.0.1:5188/
-\`\`\`
+```
 
 Nella prima vista premere **Proponi una volta un dialogo facoltativo**. Passare al ruolo **Mamma**, scegliere *Accetto*; passare al ruolo **Papà**, scegliere *Accetto*: soltanto allora appare la domanda guidata. Ciascuno può approvare un piccolo passo separatamente, oppure rifiutare, mettere in pausa, bloccare o terminare.
 
 **Il cambio ruolo è solo una simulazione, non un login.** Chi prova la demo controlla tutte le schermate; quindi non inserire nomi veri, messaggi reali o dati riservati. L'app non memorizza dati né in browser né in server, non crea profili e non invia notifiche.
 
-**Arresto e rollback:** premere \`Ctrl+C\` nel terminale del server; ricaricare la pagina azzera lo stato in memoria. Nessuna migration o file temporaneo da cancellare. Se una futura modifica al branch va annullata, fare un revert Git mirato, mai reset forzato di branch o database.
+**Arresto e rollback:** premere `Ctrl+C` nel terminale del server; ricaricare la pagina azzera lo stato in memoria. Nessuna migration o file temporaneo da cancellare. Se una futura modifica al branch va annullata, fare un revert Git mirato, mai reset forzato di branch o database.
 
 ## Perché questa separazione
 
@@ -47,9 +47,9 @@ L'eventuale funzione online richiederà un **modello di consenso persistente sep
 
 ## Checkpoint tecnico del 17/11/2026
 
-Il proprietario ha eseguito \`scripts/local-only/run-gate21-jwt-consent-local.ps1\` con output:
+Il proprietario ha eseguito `scripts/local-only/run-gate21-jwt-consent-local.ps1` con output:
 
-\`\`\`text
+```text
 PASS JWT_AUTHENTICATED_SYNTHETIC_ACTORS
 PASS JWT_FIXTURE_RPC_READY
 PASS JWT_THIRD_PARTY_NO_CONSENT
@@ -61,7 +61,7 @@ PASS JWT_WITHDRAW_REVOKES_VALID_SESSIONS
 PASS JWT_WITHDRAW_BY_EITHER_PARTICIPANT
 GATE21_JWT_CLEANUP=PASS
 GATE21_JWT_E2E=PASS
-\`\`\`
+```
 
 Questi PASS si riferiscono alle RPC **temporanee della fixture Docker**, non alla demo famiglia (che usa solo JavaScript e nessun JWT), né al database online. La prova dimostra revoca possibile da ciascuno dei due utenti nella fixture, senza riutilizzo di precedenti consensi.
 
