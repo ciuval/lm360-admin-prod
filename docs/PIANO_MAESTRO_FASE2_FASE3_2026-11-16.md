@@ -212,3 +212,14 @@ Dopo aggiornamento del clone LAB con la correzione a rotazione/feedback, l'utent
 **Correzione mirata, ancora da collaudare visivamente:** in `src/components/alive/AlivePreview.css` aggiunto un alone radiale viola dietro la scintilla e un doppio bagliore SVG `drop-shadow` durante hover/focus/selezione; sul pulsante selezionato restano un bordo viola e un fondo luminoso persistenti. Nessuna animazione infinita o lampeggiante; `prefers-reduced-motion` mantiene il segnale statico. Nuovo test di regressione in `tests/alivePreview.test.js`.
 
 **GitHub CI codice:** 196 test PASS, 0 falliti, build Vite riuscita sul commit `6a7164a`. **Scintilla ancora 2/3 PASS nel browser fino a riconferma** dopo aggiornamento. Nessuna modifica a DB, Vercel produzione o Stripe; PR #27 resta draft.
+
+
+### Check Scintilla PASS e bagliori coordinati — 17/11/2026
+
+L'utente ha confermato visivamente «Per-fettoo» per la **Scintilla viola** dopo l'aggiunta dell'aureola: rotazione, frase e bagliore ora **3/3 PASS** nel browser LAB. Ha quindi chiesto lo **stesso bagliore per le altre tre icone**, ciascuno col proprio colore, per aumentare visibilità e carattere.
+
+**Implementato su branch LAB:** `src/components/alive/AlivePreview.css` estende l'alone radiale e il doppio `drop-shadow` a Cuore **rosa**, Sorriso **oro** e Messaggio **azzurro**, con variabili per le tre palette. Hover/focus mostrano il bagliore, click mantiene la selezione; animazioni esistenti inalterate. La Scintilla conserva il suo effetto viola approvato. Il Sorriso selezionato resta dorato correggendo l'ordine delle regole CSS; il Messaggio selezionato ha bordo e fondo azzurro; i tre puntini restano davanti all'SVG. Restano `aria-pressed`, focus visibile e rispetto di `prefers-reduced-motion`; nessun comportamento backend.
+
+**QA automatico:** test di regressione in `tests/alivePreview.test.js`; commit `a97c433` **197 test PASS, 0 falliti e build Vite OK**. **QA browser delle tre nuove aureole ancora pendente**: non dichiararlo PASS senza screenshot/conferma utente. Poi verificare mobile (375/768 px), tastiera (Tab, Enter, Space), movimento ridotto, nessun like inviato. PR #27 resta draft, nessun deploy o modifica DB/Stripe.
+
+**Rollback:** disattivare `VITE_LM360_ALIVE_PREVIEW` nel LAB per nascondere la preview; revert selettivo del commit CSS `c9fb39b` solo se necessario e con audit del branch prima di intervenire.
