@@ -262,3 +262,15 @@ Aggiornato `tests/alivePreview.test.js` per controllare durata, ampiezza, leggib
 - **Integrità:** nessuna nuova colonna, tabella, automazione di moderazione, servizio esterno o deploy come effetto automatico di questo principio. Prima audit, prove isolate e approvazione.
 
 **Stato:** visione di prodotto e criteri di accettazione approvati come indirizzo; non equivalgono a funzioni già implementate, né a un'affermazione che ogni contenuto vietato sia già tecnicamente bloccato. Riferimenti già esistenti: `src/content/legalDocuments.js` (AUP), `docs/legal-release-2026-10-31.md` (procedura e limiti reali), gate Fase 2 del presente piano.
+
+
+### Gate 2.1 — preparazione del contratto di chiusura (17/11/2026)
+
+**Decisione del gestore:** quando viene meno il rispetto o una persona non vuole continuare, il contatto si chiude. Distinguere tre casi: **Chiudi match** (libertà personale senza motivazione obbligatoria), **Blocca** (nessun contatto indesiderato), **Segnala** (valutazione proporzionata di un possibile abuso, non sanzione automatica da semplice accusa).
+
+**Rischio concreto trovato nella baseline LAB:** `likes_delete_own` autorizza l'eliminazione del like, ma `lm360_lab_reciprocal_after_like` è un trigger solo `AFTER INSERT` e non revoca `match_scores.score=100`. La RPC `can_open_stanza` usa quel punteggio e la RLS `messaggi_read_participants` non controlla la revoca. **Da verificare con test runtime, non dichiarare fuga già osservata.**
+
+- Specifica firmabile: [Gate 2.1 — Chiudi, Blocca, Segnala](./GATE_2_1_CHIUSURA_MATCH_BLOCCO_SEGNALAZIONE_2026-11-17.md).
+- Audit LAB metadati non mutante: `scripts/local-only/check-gate21-readonly.ps1`. Guardie branch Docker localhost, solo catalogo policy/grant/trigger/RPC e risultati booleani; nessun account letto.
+- Autotest CI: `tests/gate21ReadOnlyPreflight.test.js`, **200 test PASS, 0 FAIL e Vite build OK** sul commit `24d1383`.
+- **Prossima esecuzione fisica sul PC**: prima `git -C 'I:\lm360-clean\LM360_FASE2_LAB' pull --ff-only`, poi in un turno separato il preflight; solo dopo i risultati preparare test di revoca con coppia sintetica nuova. Nessun `db reset`, DDL o deploy.
