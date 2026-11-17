@@ -191,3 +191,8 @@ Non sono stati registrati dati del profilo visibili nello screenshot. Nessuna mo
 - `tests/alivePreview.test.js`: regressione di stato, testo, CSS e riduzione movimento.
 
 **Prova successiva:** aggiornare la copia LAB e verificare sul sorriso (1) salto+rotazione visibile (2) messaggio già su hover/focus (3) colore dorato selezionato dopo clic. Nessun deploy o modifica database.
+
+
+### Check Sorriso — conferma utente 17/11/2026
+
+Dopo aggiornamento del clone LAB con la correzione a rotazione/feedback, l'utente conferma: «Sì, molto meglio, e anche la frase». **PASS osservato per movimento del Sorriso più riconoscibile e messaggio sotto le icone**. Lo stato cromatico giallo persistente non è stato confermato separatamente; non attribuire un PASS visivo a quel dettaglio senza prova. Nessuna modifica al database, alla produzione o a Stripe. Prossimo microcollaudo: icona Messaggio (piccolo rimbalzo, tre puntini grafici, testo esplicativo).
