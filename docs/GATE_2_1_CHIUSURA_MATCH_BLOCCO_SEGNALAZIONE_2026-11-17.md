@@ -62,3 +62,19 @@ Conferma dell'utente nel browser, test positivo/negativo automatico, build verde
 - **Mai** trattare un test statico/CI come prova di autorizzazione server-side: l'esito decisivo arriverà dal Docker LAB con i nuovi account sintetici.
 
 **Prossima azione unica:** aggiornare il clone LAB con `git pull --ff-only`. Poi lanciare il preflight 2.1-A e leggere solo le righe di stato.
+
+
+## 6. Checkpoint runtime 17 novembre 2026 — revoca like in Docker LAB
+
+**Fonte:** risultati console PowerShell comunicati dal proprietario in data 17/11/2026. Il test non è stato eseguito sul cloud né nel browser. I nomi/identificativi sintetici non vengono registrati.
+
+- **Prima della correzione:** \`PASS GATE21_LOCAL_PREFLIGHT\`, \`PASS GATE21_BEFORE_REVOCATION\`, \`PASS GATE21_LIKE_REVOKED\`, ma **FAIL** su \`CAN_OPEN_A_DENIED\`, \`CAN_OPEN_B_DENIED\`, \`SEND_A_DENIED\`, \`SEND_B_DENIED\`, \`HISTORY_A_DENIED\`, \`HISTORY_B_DENIED\`; \`FAIL GATE21_REVOCATION_E2E\`, \`PASS GATE21_CLEANUP\`. Il difetto era riproducibile nello schema semplificato del LAB.
+- **Patch LAB applicata:** \`scripts/local-only/apply-gate21-unlike-guard-lab.ps1\` ha prodotto \`GATE21_LAB_PATCH_APPLIED=PASS\`. Crea trigger \`AFTER DELETE\` su \`public.likes\` che porta \`match_scores.score\` a 0 nella medesima transazione e restringe la policy SELECT \`messaggi_read_participants\` al match attivo. Non elimina i messaggi, non aggiunge colonne/tabelle. Questa patch è **solo nello stack Docker locale**, non in una migration di produzione.
+- **Controprova dopo la patch:** \`PASS GATE21_LOCAL_PREFLIGHT\`, \`PASS GATE21_BEFORE_REVOCATION\`, \`PASS GATE21_LIKE_REVOKED\`, **PASS** di entrambi i \`CAN_OPEN_..._DENIED\`, entrambi i \`SEND_..._DENIED\` e entrambi gli \`HISTORY_..._DENIED\`; \`PASS GATE21_REVOCATION_E2E\`, \`PASS GATE21_CLEANUP\`, \`GATE21_PROCESS=PASS\`.
+- **Ambito del PASS:** due nuovi utenti sintetici autenticati e richieste dirette alle API in Docker. Non prova revoca da UI, seconda sessione già aperta, concorrenza, Realtime dopo revoca, blocco permanente, pausa, richieste 😔, scuse, segnalazioni, conservazione conforme al GDPR o schema online.
+- **Attenzione:** la revoca di un like **non equivale ancora alla specifica \`Chiudi il match\` definitiva**. Se nuovi like vengono inseriti, il trigger \`AFTER INSERT\` della baseline può riattivare lo score. Occorre progettare la persistenza del divieto di contatto prima di chiamare questa funzione \`Chiudi il match\`.
+- **Rollback disponibile ma non ancora collaudato:** lo stesso script accetta \`-Rollback\`, esclusivamente nel LAB; non va eseguito per ora, perché rimuoverebbe la protezione sperimentale.
+
+**Stato aggiornato:** Step 2.1-A PASS; 2.1-B difetto riprodotto; 2.1-C contromisura LAB con controprova API PASS; **Gate finale 2.1-D ancora APERTO**. PR #27 resta Draft, nessun merge/deploy, Supabase cloud e Stripe invariati.
+
+**Successivo micro-passo:** audit e specifica testabile della differenza tra revoca like, pausa reversibile e chiusura definitiva, senza alterare lo schema né i dati reali.
