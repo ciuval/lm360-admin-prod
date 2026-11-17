@@ -230,3 +230,12 @@ L'utente ha confermato visivamente «Per-fettoo» per la **Scintilla viola** dop
 Su richiesta dell'utente, **prima del prossimo pull**, amplificato moderatamente e solo nel LAB il movimento del Messaggio azzurro, mantenendo lo stile distinto dalle altre tre icone. In `src/components/alive/AlivePreview.css`: rimbalzo dell'icona da 480 ms/scala 1.16 a 660 ms, traslazione verticale -8 px e scala 1.22; puntini da 4 a 5 px, salita da 4 a 6 px e sequenza da 450 a 560 ms con ritardi 100/200 ms. Bagliori cromatici, Cuore, Sorriso e Scintilla invariati. Il testo continua a spiegare che non è digitazione reale; nessuna chiamata backend.
 
 Aggiornato `tests/alivePreview.test.js` per controllare durata, ampiezza, leggibilità dei puntini, stato selezionato e `prefers-reduced-motion`. La prova manuale del rimbalzo aggiornato e dei quattro bagliori si farà **solo dopo il pull**. Nessuna modifica a produzione, Supabase o Stripe; PR #27 ancora draft.
+
+
+### LoveMatch360 Alive — quattro microinterazioni approvate visivamente 17/11/2026
+
+**QA locale, feedback utente + screenshot del browser Chrome:** dopo il pull della versione che include i quattro bagliori coordinati e il rimbalzo Messaggio più evidente, l'utente conferma: «Perfetto sono migliorati e mi piacciono un sacco». Lo screenshot mostra il **Messaggio** selezionato con bordo/fondo azzurro, bagliore attorno all'icona e testo esplicativo correttamente visibile. Le prove precedenti avevano già confermato il Cuore rosa (3/3), Sorriso (movimento+frase), Messaggio (rimbalzo/puntini/testo), Scintilla viola (3/3 incluso bagliore). **Approvazione estetica generale delle quattro icone e della revisione cromatica:** PASS nel LAB, ma lo screenshot presente documenta in modo diretto soltanto lo stato selezionato del Messaggio.
+
+**Stato Fase 3.1:** microinterazioni e bagliori presentabili, non ancora da pubblicare. Restano verifiche separate di **mobile 375/768px**, input **tastiera Tab/Enter/Space**, preferenza **reduced-motion**, contrasto/focus WCAG, e controllo dei comportamenti al secondo clic. Le verifiche di prodotto/backend della Fase 2 e l'audit cloud non sono implicati da questo PASS visivo; PR #27 resta **draft**. Nessun deploy, migrazione o modifica Stripe.
+
+**Rollback:** disattivare il flag di anteprima `VITE_LM360_ALIVE_PREVIEW` nel LAB; prima di qualsiasi revert o deploy eseguire un audit del branch.
