@@ -45,3 +45,20 @@ Nello stack sacrificabile:
 Non creare ora nuove tabelle/colonne o permessi, né nello stack principale né nel cloud. Prima verificare se il PC può sostenere un secondo stack Docker o se occorre una soluzione più leggera; preparare separatamente la fixture con revisione statica e cleanup testato. Non avviare il JWT E2E con lo script SQL di rollback esistente: quel test è già concluso e non possiede un endpoint di consenso HTTP.
 
 **Prossimo micro-passo:** eseguire il controllo in sola lettura dello stato Docker/risorse del PC e decidere se il secondo stack locale è praticabile. Nessuna modifica a `main`, produzione, Stripe o PR #27 Draft.
+
+
+## 5. Decisione dopo controllo risorse PC — 17/11/2026
+
+**Evidenza PowerShell del proprietario:** RAM installata 15,89 GB, libera 3,35 GB; disco C: libero 4,14 GB; disco I: libero 220,92 GB. `docker system df`: 13 immagini (12 attive), 11 container attivi, circa 8,911 GB di immagini, volume dati presente. I dati non permettono di affermare che Docker scriva sul disco I.
+
+**Scelta motivata:** **NON** avviare un secondo stack Docker: memoria e disco di sistema sono troppo limitati per un nuovo insieme di servizi. Non proporre `docker system prune`, `volume rm` o `supabase db reset` per recuperare spazio.
+
+**Alternativa preparata per il LAB esistente (non ancora eseguita):**
+- `scripts/local-only/run-gate21-jwt-consent-local.ps1`: identifica branch, porta loopback, container/label specifici e assenza di fixture pregresse; importa soltanto chiavi **locali**, mai stampate.
+- `scripts/e2e-gate21-jwt-consent-local.mjs`: crea quattro account fittizi `@example.test` con JWT reali, li elimina in `finally` e non interroga chat, likes o match degli account Andrea/Bianca.
+- `scripts/local-only/gate21-jwt-ephemeral-setup.sql` / `gate21-jwt-ephemeral-cleanup.sql`: crea una **fixture temporaneamente committata** con schema privato e tre RPC `public` dai nomi casuali; grant limitati a `authenticated`, `auth.uid()` verificata nelle funzioni, isolamento dal resto del DB. La pulizia rimuove soltanto i nomi creati dall'esecuzione, senza eliminazione delle dipendenze. Nessuna colonna/tabella dell'app è alterata.
+- `tests/gate21JwtLocalContract.test.js`: controlli statici di guardie, endpoint locale, cleanup e assenza di accesso a dati dell'app.
+
+**Rischio residuo, dichiarato:** essendo condiviso lo stack `LM360_FASE2_LAB`, i nuovi oggetti esistono brevemente tra installazione e pulizia. `finally` interviene su errori ordinari, **non** su interruzioni di corrente, `Terminate-Process` o arresto improvviso di Docker. Il preflight della successiva esecuzione blocca se trova oggetti con il prefisso della fixture; un cleanup manuale mirato richiederà prima verifica e non autorizza un reset globale. Non è una prova di sicurezza dello schema cloud o di sessioni Realtime.
+
+**Stato:** script e contratti sono stati committati nel branch Draft e GitHub Actions si è concluso con successo su `ab3af668`. **Nessun esecuzione JWT reale locale ancora avvenuta.** Prossima azione singola: `git pull --ff-only` del clone LAB, poi revisione/esecuzione in passo separato.
