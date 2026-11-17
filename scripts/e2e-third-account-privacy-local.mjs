@@ -139,8 +139,8 @@ async function run() {
   dataOf(await outsider.from("profili").insert({
     id: createdId,
     email,
-    nome: "Carlo Test",
-    bio: "Utente temporaneo per la verifica privacy locale.",
+    nome: "Ponte360 Test",
+    bio: "Alias sintetico per verificare privacy e consenso prima della mediazione.",
     interessi: "sicurezza",
   }), "CREATE_SYNTHETIC_PROFILE_FAILED");
   const mine = dataOf(await outsider.from("profili")
