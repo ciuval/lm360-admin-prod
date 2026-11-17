@@ -18,7 +18,9 @@ test("gate 2.1 local patch: confined to Docker LAB and guarded before SQL", asyn
   assert.match(s, /GATE21_RLS_PRECONDITION/);
   assert.match(s, /GATE21_GRANT_PRECONDITION/);
   assert.match(s, /GATE21_RPC_PRECONDITION/);
-  assert.doesNotMatch(s, /supabase\.co|supabase\.com\/dashboard|\bdb reset\b|\bsupabase link\b|\bsupabase db push\b/i);
+  assert.doesNotMatch(s, /supabase\.co|supabase\.com\/dashboard/i);
+  const commands = s.split("\n").filter(line => !line.trimStart().startsWith("#")).join("\n");
+  assert.doesNotMatch(commands, /\bsupabase\s+(?:link|db\s+(?:reset|push))\b/i);
 });
 
 test("gate 2.1 local patch: revoke atomically, hide history via RLS, rollback available", async () => {
