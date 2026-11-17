@@ -248,9 +248,10 @@
   z-index: 2;
 }
 
+/* Puntini azzurri leggermente più leggibili, senza simulare digitazione reale. */
 .lm360-alive-dots i {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: currentColor;
   opacity: .65;
@@ -264,13 +265,13 @@
   animation: lm360-alive-wink 820ms ease-in-out 1;
 }
 .lm360-alive-card--chat:is(:hover, :focus-visible, .is-selected) .lm360-alive-mark {
-  animation: lm360-alive-pop 480ms ease-out 1;
+  animation: lm360-alive-pop 660ms cubic-bezier(.22, .9, .3, 1) 1;
 }
 .lm360-alive-card--chat:is(:hover, :focus-visible, .is-selected) .lm360-alive-dots i {
-  animation: lm360-alive-dots 450ms ease-in-out 2;
+  animation: lm360-alive-dots 560ms ease-in-out 2;
 }
-.lm360-alive-card--chat .lm360-alive-dots i:nth-child(2) { animation-delay: 80ms; }
-.lm360-alive-card--chat .lm360-alive-dots i:nth-child(3) { animation-delay: 160ms; }
+.lm360-alive-card--chat .lm360-alive-dots i:nth-child(2) { animation-delay: 100ms; }
+.lm360-alive-card--chat .lm360-alive-dots i:nth-child(3) { animation-delay: 200ms; }
 .lm360-alive-card--sparkle:is(:hover, :focus-visible, .is-selected) .lm360-alive-mark {
   animation: lm360-alive-twinkle 700ms ease-in-out 1;
 }
@@ -314,14 +315,15 @@
 }
 
 @keyframes lm360-alive-pop {
-  0%, 100% { transform: scale(1); }
-  40% { transform: scale(1.16); }
-  70% { transform: scale(.97); }
+  0%, 100% { transform: translateY(0) scale(1); }
+  36% { transform: translateY(-8px) scale(1.22); }
+  68% { transform: translateY(2px) scale(.96); }
+  82% { transform: translateY(-2px) scale(1.04); }
 }
 
 @keyframes lm360-alive-dots {
   0%, 100% { opacity: .3; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(-4px); }
+  50% { opacity: 1; transform: translateY(-6px); }
 }
 
 @keyframes lm360-alive-twinkle {
