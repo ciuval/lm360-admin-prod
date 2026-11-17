@@ -127,3 +127,20 @@ test("anche Cuore Sorriso e Messaggio hanno il bagliore colorato della Scintilla
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.doesNotMatch(css, /animation-iteration-count:\s*infinite/);
 });
+
+test("Messaggio ha un rimbalzo e tre puntini più visibili ma non invadenti", async () => {
+  const [css, jsx] = await Promise.all([
+    read("src/components/alive/AlivePreview.css"),
+    read("src/components/alive/AlivePreview.jsx"),
+  ]);
+  assert.match(css, /animation: lm360-alive-pop 660ms/);
+  assert.match(css, /animation: lm360-alive-dots 560ms ease-in-out 2;/);
+  assert.match(css, /@keyframes lm360-alive-pop\s*\{[^}]*translateY\(-8px\) scale\(1\.22\);/);
+  assert.match(css, /@keyframes lm360-alive-dots\s*\{[^}]*translateY\(-6px\);/);
+  assert.match(css, /\.lm360-alive-dots i\s*\{\s*width: 5px;\s*height: 5px;/);
+  assert.match(css, /\.lm360-alive-card--chat\.is-selected/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /animation: none !important/);
+  assert.match(jsx, /Non indicano che una persona stia scrivendo/);
+  assert.doesNotMatch(css, /animation-iteration-count:\s*infinite/);
+});
