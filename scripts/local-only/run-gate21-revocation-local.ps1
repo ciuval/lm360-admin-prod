@@ -57,7 +57,7 @@ try {
   & node scripts/e2e-gate21-revocation-local.mjs
   $result = $LASTEXITCODE
   Write-Host ('GATE21_PROCESS=' + $(if ($result -eq 0) {'PASS'} else {'FAIL'}))
-  if ($result -ne 0) { throw 'GATE21_REVOCATION_NOT_YET_SECURE' }
+  if ($result -ne 0) { throw 'GATE21_TEST_NOT_PASSED' }
 } finally {
   foreach ($name in $vars) {
     Remove-Item -Path ('Env:\' + $name) -ErrorAction SilentlyContinue
