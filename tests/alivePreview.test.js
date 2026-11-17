@@ -94,3 +94,36 @@ test("la scintilla mostra un bagliore viola persistente al clic e visibile su fo
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.doesNotMatch(css, /animation-iteration-count:\s*infinite/);
 });
+
+test("anche Cuore Sorriso e Messaggio hanno il bagliore colorato della Scintilla", async () => {
+  const [css, jsx] = await Promise.all([
+    read("src/components/alive/AlivePreview.css"),
+    read("src/components/alive/AlivePreview.jsx"),
+  ]);
+  const hues = [
+    ["heart", "255, 181, 215", "255, 129, 185", "#ffe0ef"],
+    ["smile", "255, 231, 163", "255, 194, 71", "#fff6d2"],
+    ["chat", "173, 235, 255", "65, 174, 255", "#e0f7ff"],
+  ];
+  for (const [id, light, strong, stroke] of hues) {
+    const escaped = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    assert.match(css, new RegExp(
+      "\\.lm360-alive-card--" + id + "\\s*\\{[^}]*" +
+      "--alive-glow-light:\\s*" + escaped(light) + ";" +
+      "[^}]*--alive-glow-strong:\\s*" + escaped(strong) + ";" +
+      "[^}]*--alive-glow-stroke:\\s*" + escaped(stroke) + ";"
+    ));
+  }
+  assert.match(css, /\.lm360-alive-card:is\(\.lm360-alive-card--heart, \.lm360-alive-card--smile, \.lm360-alive-card--chat\) \.lm360-alive-mark::before/);
+  assert.match(css, /rgba\(var\(--alive-glow-light\), \.5\)/);
+  assert.match(css, /rgba\(var\(--alive-glow-strong\), \.28\)/);
+  assert.match(css, /:is\(:hover, :focus-visible, \.is-selected\) \.lm360-alive-mark::before\s*\{\s*opacity:\s*1;/);
+  assert.match(css, /drop-shadow\(0 0 15px rgba\(var\(--alive-glow-strong\), \.9\)\)/);
+  assert.match(css, /\.lm360-alive-card--smile\.is-selected\s*\{/);
+  assert.match(css, /\.lm360-alive-card--chat\.is-selected\s*\{/);
+  assert.match(css, /\.lm360-alive-card--heart\.is-selected \.lm360-alive-mark svg\s*\{\s*fill: #ff81b9;/);
+  assert.match(css, /\.lm360-alive-dots\s*\{[^}]*z-index:\s*2;/);
+  assert.match(jsx, /aria-pressed=\{selected === id\}/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.doesNotMatch(css, /animation-iteration-count:\s*infinite/);
+});
