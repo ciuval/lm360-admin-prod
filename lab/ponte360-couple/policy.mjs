@@ -73,6 +73,7 @@ export function act(s, actor, action) {
 export function statusFor(s, actor) {
   if (!ACTORS.includes(actor)) return "Ruolo non previsto.";
   if (actor === "ponte360") {
+    if (halted(s)) return "Mediazione terminata. Nessun accesso o nuovo invito.";
     return roomAllowed(s)
       ? "Demo: entrambi hanno acconsentito. Ora puoi leggere solo gli spunti della nuova stanza."
       : "Nessun accesso: Ponte360 non può osservare il litigio né leggere la vecchia chat.";
