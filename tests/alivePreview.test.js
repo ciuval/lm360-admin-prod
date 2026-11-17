@@ -135,8 +135,10 @@ test("Messaggio ha un rimbalzo e tre puntini più visibili ma non invadenti", as
   ]);
   assert.match(css, /animation: lm360-alive-pop 660ms/);
   assert.match(css, /animation: lm360-alive-dots 560ms ease-in-out 2;/);
-  assert.match(css, /@keyframes lm360-alive-pop\s*\{[^}]*translateY\(-8px\) scale\(1\.22\);/);
-  assert.match(css, /@keyframes lm360-alive-dots\s*\{[^}]*translateY\(-6px\);/);
+  assert.match(css, /@keyframes lm360-alive-pop/);
+  assert.match(css, /36%\s*\{\s*transform: translateY\(-8px\) scale\(1\.22\);/);
+  assert.match(css, /@keyframes lm360-alive-dots/);
+  assert.match(css, /50%\s*\{\s*opacity: 1; transform: translateY\(-6px\);/);
   assert.match(css, /\.lm360-alive-dots i\s*\{\s*width: 5px;\s*height: 5px;/);
   assert.match(css, /\.lm360-alive-card--chat\.is-selected/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
