@@ -6,6 +6,7 @@
 import { randomBytes } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { assertLocalE2eUrl } from "../src/lib/localE2eSafety.js";
+import { persistProfile } from "../src/lib/persistProfile.js";
 
 const url = assertLocalE2eUrl(process.env.LM360_LOCAL_SUPABASE_URL);
 if (process.env.LM360_GATE21_LOCAL_GUARD !== "YES") throw new Error("GATE21_LOCAL_GUARD_REQUIRED");
@@ -52,9 +53,20 @@ async function makeActor(code) {
 
 async function preparePair(a, b) {
   for (const actor of [a, b]) {
-    dataOf(await actor.client.from("profili").upsert({
-      id: actor.id, nome: "Persona test Gate 2.1", email: actor.email,
-    }, { onConflict: "id" }), "PROFILE_SETUP_FAILED");
+    // Il ruolo authenticated non ha UPDATE sulle colonne id/email.
+    // Non usare upsert: il profilo può già esistere dopo la registrazione.
+    const existing = dataOf(await actor.client.from("profili")
+      .select("id").eq("id", actor.id).maybeSingle(), "PROFILE_PREFLIGHT_FAILED");
+    const saved = await persistProfile(actor.client, {
+      userId: actor.id,
+      profileExists: Boolean(existing),
+      email: actor.email,
+      name: "Persona test Gate 2.1",
+      bio: "Profilo sintetico locale per collaudo revoca.",
+      interests: "arte, lettura",
+      photoUrl: null,
+    });
+    ok(saved?.id === actor.id, "PROFILE_SETUP_FAILED");
     dataOf(await actor.client.from("stanze_360").upsert({
       user_id: actor.id, ...room,
     }, { onConflict: "user_id" }), "ROOM_SETUP_FAILED");
@@ -148,8 +160,12 @@ async function cleanup() {
 
 try {
   await run();
-} catch {
+} catch (error) {
+  // Solo codici interni allowlistati: nessuna risposta HTTP, PII o dettaglio provider.
+  const safeCode = typeof error?.message === "string" && /^[A-Z0-9_]{1,80}$/.test(error.message)
+    ? error.message : "UNEXPECTED";
   process.stderr.write("FAIL GATE21_STAGE=" + phase + "\n");
+  process.stderr.write("GATE21_ERROR_CODE=" + safeCode + "\n");
   process.exitCode = 1;
 } finally {
   try { await cleanup(); status("GATE21_CLEANUP", true); }
