@@ -79,3 +79,18 @@ test("il sorriso fa una rotazione riconoscibile e mostra il testo anche al passa
   assert.match(css, /rotate\(21deg\)/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });
+
+test("la scintilla mostra un bagliore viola persistente al clic e visibile su focus", async () => {
+  const [jsx, css] = await Promise.all([
+    read("src/components/alive/AlivePreview.jsx"),
+    read("src/components/alive/AlivePreview.css"),
+  ]);
+  assert.match(jsx, /id: "sparkle"/);
+  assert.match(jsx, /previous === id \? null : id/);
+  assert.match(css, /\.lm360-alive-card--sparkle\.is-selected\s*\{[^}]*border-color:\s*#d2aaff;/);
+  assert.match(css, /\.lm360-alive-card--sparkle\s+\.lm360-alive-mark::before\s*\{[^}]*radial-gradient/);
+  assert.match(css, /\.lm360-alive-card--sparkle:is\(:hover, :focus-visible, \.is-selected\)\s+\.lm360-alive-mark::before\s*\{[^}]*opacity:\s*1;/);
+  assert.match(css, /\.lm360-alive-card--sparkle:is\(:hover, :focus-visible, \.is-selected\)\s+\.lm360-alive-mark svg\s*\{[^}]*drop-shadow/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.doesNotMatch(css, /animation-iteration-count:\s*infinite/);
+});
