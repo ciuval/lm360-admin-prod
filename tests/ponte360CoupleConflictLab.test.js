@@ -163,3 +163,21 @@ test("C15: il server esistente espone il prototipo solo sul loopback", async () 
   assert.match(src, /connect-src 'none'/);
   assert.doesNotMatch(src, /createClient|service_role|\.env/);
 });
+
+
+test("C16: dopo rifiuto, revoca, blocco o chiusura il mediatore vede uno stop definitivo", () => {
+  const scenarios = [
+    act(offered(), "andrea", "decline"),
+    act(both(), "andrea", "withdraw"),
+    act(both(), "andrea", "block"),
+    act(both(), "bianca", "unsafe"),
+    act(both(), "bianca", "close"),
+  ];
+  for (const state of scenarios) {
+    assert.equal(roomAllowed(state), false);
+    assert.equal(statusFor(state, "ponte360"),
+      "Mediazione terminata. Nessun accesso o nuovo invito.");
+    assert.equal(act(state, "ponte360", "next-prompt"), state);
+  }
+  assert.match(statusFor(offered(), "ponte360"), /^Nessun accesso:/);
+});
