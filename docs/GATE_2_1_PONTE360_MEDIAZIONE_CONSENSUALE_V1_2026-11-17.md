@@ -64,3 +64,24 @@ Un terzo soggetto neutrale può aiutare due persone adulte a ritrovare il dialog
 - **Ambito:** PR #27 Draft. Nessun deploy, Stripe sospeso, produzione invariata.
 
 **Principio:** un mediatore può offrire un ponte, ma non può attraversarlo al posto di nessuno.
+
+
+## 7. Checkpoint privacy Ponte360 — 17/11/2026
+
+**Evidenza:** output PowerShell del proprietario, eseguito nel Docker Supabase \`LM360_FASE2_LAB\` tramite \`scripts/local-only/check-third-account-privacy.ps1\`, dopo sincronizzazione del branch a \`33273ab\`. Il test temporaneo di terzo account, precedentemente denominato Carlo, ora usa **\`Ponte360 Test\`** come alias sintetico.
+
+Esito riportato:
+- \`ANON_DB_GUARD=PASS\`, \`ANON_DENIED_HTTP=401\` con gateway e privilegi/RLS locali verificati.
+- \`PASS account anonimo: accesso ai messaggi negato\`.
+- \`PASS terzo account sintetico autenticato e profilo proprio leggibile\`.
+- \`PASS terzo account: lettura globale, per ID e per coppia negate\`.
+- \`PASS terzo account: match, Stanza 360 e profili riservati non visibili\`.
+- \`PASS terzo account: stanza e invio negati; conversazione originale intatta\`.
+- \`PASS privacy RLS/IDOR: 3 account nel Supabase locale\`.
+- \`CLEANUP solo account C locale: PASS\`; \`COLLAUDO PRIVACY LOCALE SUPERATO\`.
+
+**Interpretazione:** **M01 PASS nei limiti del test locale** (assenza di accesso del terzo a chat/match/stanza A/B), **M10 PASS** (account C temporaneo eliminato, A/B invariati secondo i controlli). L'invio via RPC del terzo è negato. Non certifica M02–M09, né tutte le possibili vie di modifica dei match, né alcuna funzione di mediazione. Nessun consenso bilaterale è stato acquisito o simulato. Il PASS non equivale a verifica dello schema cloud.
+
+**Stato effettivo:** Ponte360 Test era un account di prova temporaneo ed è stato eliminato: **non esiste ora un mediatore autorizzato**. Le sezioni precedenti del documento descrivono il piano prima di questa prova. PR #27 ancora Draft; niente deploy, Stripe o produzione.
+
+**Prossimo passo:** progettare in modo testabile il consenso esplicito e separato dei due partecipanti, con revoca indipendente e stanza mediata distinta dalla chat. Non aggiungere ancora tabelle/colonne o permessi al DB: completare prima il modello di autorizzazione e le prove negative.
