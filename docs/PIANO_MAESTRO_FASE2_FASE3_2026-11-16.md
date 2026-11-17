@@ -179,3 +179,15 @@ L'utente ha verificato la preview nel browser LAB: **pulsazione PASS**, **messag
 Prossimo controllo **ancora da eseguire**: pulsante Sorriso — salto/rotazione breve, feedback sotto le icone, selezione evidente. Non confondere il PASS del Cuore con il PASS dell'intera Fase 3.1; mobile, tastiera e movimento ridotto restano da provare.
 
 Non sono stati registrati dati del profilo visibili nello screenshot. Nessuna modifica a Supabase, produzione o Stripe.
+
+
+### Check Sorriso — feedback dell'utente 17/11/2026
+
+**Prima prova visiva nel LAB**: salto confermato PASS; rotazione quasi invisibile; messaggio sotto le icone non visto. Il componente originale faceva partire l'animazione già su hover/focus, ma cambiava il messaggio soltanto al clic; i due gesti non erano sincronizzati.
+
+**Correzione nel branch, ancora da validare nel browser**:
+- `src/components/alive/AlivePreview.jsx`: stato di anteprima su mouse hover e focus da tastiera, ritorno allo stato selezionato su uscita; il clic resta un toggle persistente. Il messaggio dinamico ha etichetta esplicita («Sorriso: ...») e `aria-live=polite` già esistente.
+- `src/components/alive/AlivePreview.css`: piccolo salto più alto, rotazione fino a -23°/+21° (prima ±8°), selezione con bordo/fondo dorato, messaggio con contrasto e sfondo evidenziati. Il blocco `prefers-reduced-motion` resta attivo e non ci sono animazioni infinite.
+- `tests/alivePreview.test.js`: regressione di stato, testo, CSS e riduzione movimento.
+
+**Prova successiva:** aggiornare la copia LAB e verificare sul sorriso (1) salto+rotazione visibile (2) messaggio già su hover/focus (3) colore dorato selezionato dopo clic. Nessun deploy o modifica database.
