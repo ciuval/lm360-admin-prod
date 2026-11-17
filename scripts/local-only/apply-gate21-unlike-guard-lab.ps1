@@ -61,7 +61,9 @@ $verify$;
 if ($Rollback) {
   $sql = @'
 begin;
-'@ + $preflight + @'
+'@
+  $sql += $preflight
+  $sql += @'
 do $guard$
 begin
   if not exists (
@@ -86,7 +88,9 @@ select 'GATE21_LAB_PATCH_ROLLBACK=PASS';
 } else {
   $sql = @'
 begin;
-'@ + $preflight + @'
+'@
+  $sql += $preflight
+  $sql += @'
 do $guard$
 begin
   if exists (
