@@ -111,24 +111,32 @@ async function run() {
 
   phase = "AFTER_REVOCATION";
   // Provare da ENTRAMBE le sessioni e via RPC diretta, non solo dalla UI.
-  const aAllowed = await a.client.rpc("can_open_stanza", { target_user_id: b.id });
-  const bAllowed = await b.client.rpc("can_open_stanza", { target_user_id: a.id });
-  const aSent = await a.client.rpc("send_stanza_message", {
+  // Una RPC/SELECT non raggiungibile NON vale come prova di diniego:
+  // richiediamo un responso del server (false oppure zero righe).
+  const aAllowed = dataOf(await a.client.rpc("can_open_stanza", {
+    target_user_id: b.id,
+  }), "AFTER_CAN_OPEN_A_ERROR");
+  const bAllowed = dataOf(await b.client.rpc("can_open_stanza", {
+    target_user_id: a.id,
+  }), "AFTER_CAN_OPEN_B_ERROR");
+  const aSent = dataOf(await a.client.rpc("send_stanza_message", {
     target_user_id: b.id, message_content: "Messaggio sintetico dopo revoca A",
-  });
-  const bSent = await b.client.rpc("send_stanza_message", {
+  }), "AFTER_SEND_A_ERROR");
+  const bSent = dataOf(await b.client.rpc("send_stanza_message", {
     target_user_id: a.id, message_content: "Messaggio sintetico dopo revoca B",
-  });
-  const aRead = await a.client.from("messaggi").select("id").eq("id", originalId);
-  const bRead = await b.client.from("messaggi").select("id").eq("id", originalId);
+  }), "AFTER_SEND_B_ERROR");
+  const aRead = dataOf(await a.client.from("messaggi").select("id")
+    .eq("id", originalId), "AFTER_READ_A_ERROR");
+  const bRead = dataOf(await b.client.from("messaggi").select("id")
+    .eq("id", originalId), "AFTER_READ_B_ERROR");
 
   const checks = [
-    ["CAN_OPEN_A_DENIED", aAllowed.data !== true],
-    ["CAN_OPEN_B_DENIED", bAllowed.data !== true],
-    ["SEND_A_DENIED", aSent.data !== true],
-    ["SEND_B_DENIED", bSent.data !== true],
-    ["HISTORY_A_DENIED", Boolean(aRead.error) || aRead.data?.length === 0],
-    ["HISTORY_B_DENIED", Boolean(bRead.error) || bRead.data?.length === 0],
+    ["CAN_OPEN_A_DENIED", aAllowed === false],
+    ["CAN_OPEN_B_DENIED", bAllowed === false],
+    ["SEND_A_DENIED", aSent === false],
+    ["SEND_B_DENIED", bSent === false],
+    ["HISTORY_A_DENIED", aRead.length === 0],
+    ["HISTORY_B_DENIED", bRead.length === 0],
   ];
   const allDenied = checks.map(([label, value]) => status(label, value)).every(Boolean);
   status("GATE21_REVOCATION_E2E", allDenied);
