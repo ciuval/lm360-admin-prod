@@ -20,7 +20,7 @@ test("test privacy accetta solo endpoint locale e coppia sintetica verificata", 
   const ps = await readFile(psFile, "utf8");
   for (const word of [
     "assertLocalE2eUrl", "SYNTHETIC_PAIR_NOT_UNIQUE", "SYNTHETIC_PAIR_NOT_FOUND",
-    "NON_SYNTHETIC_PAIR_BLOCKED", "@example.test", "Andrea Test", "Bianca Test",
+    "NON_SYNTHETIC_PAIR_BLOCKED", "@example.test", "Andrea Test", "Bianca Test", "Ponte360 Test",
     "SYNTHETIC_CONVERSATION_NOT_FOUND", "auth.admin.createUser",
     "auth.getUser", "auth.admin.deleteUser", "finally",
   ]) assert.ok(js.includes(word), "Missing identity guard " + word);
