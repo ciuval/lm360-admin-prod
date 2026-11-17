@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="color-scheme" content="dark">
+  <title>Ponte360 · Laboratorio famiglia — solo demo locale</title>
+  <style>
+    :root {
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color-scheme: dark;
+      --bg: #0b1021; --panel: #161e36; --panel2: #222b49;
+      --line: #465273; --text: #f2f4ff; --soft: #c3cbe0;
+      --accent: #c5b9ff; --positive: #b5ecd0; --warn: #ffdb9e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--text);
+      background: radial-gradient(ellipse at top left, #26315b, #0b1021 62%);
+      min-height: 100vh; line-height: 1.55;
+    }
+    .skip {
+      position: absolute; left: 1rem; top: -5rem; z-index: 20;
+      background: white; color: #111; padding: .5rem 1rem; border-radius: .5rem;
+    }
+    .skip:focus { top: 1rem; }
+    .wrap { width: min(1050px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 4rem; }
+    header { margin-bottom: 1.8rem; }
+    .brand { letter-spacing: .1em; font-size: .9rem; font-weight: 800; color: var(--accent); }
+    h1 { font-size: clamp(1.9rem, 5vw, 3.3rem); max-width: 23ch; line-height: 1.15; margin: .7rem 0 1rem; }
+    h2 { font-size: 1.22rem; margin: 0 0 .75rem; }
+    h3 { font-size: 1rem; margin: 0 0 .5rem; }
+    p { margin: .4rem 0 1rem; }
+    .lede { color: var(--soft); font-size: 1.1rem; max-width: 64ch; }
+    .tag {
+      display: inline-block; padding: .3rem .6rem; border: 1px solid var(--line);
+      border-radius: 99px; background: #141b36; color: var(--soft);
+      font-size: .81rem; font-weight: 650;
+    }
+    .columns { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(250px, .75fr); gap: 1.1rem; }
+    .panel {
+      border: 1px solid var(--line); border-radius: 1rem;
+      background: var(--panel); padding: clamp(1rem, 3vw, 1.65rem);
+      box-shadow: 0 15px 50px #05081445;
+    }
+    .muted { color: var(--soft); }
+    .small { font-size: .91rem; }
+    .hint { padding: .85rem 1rem; border-left: 3px solid var(--accent); background: #222b49; border-radius: .4rem; }
+    .roles { display: flex; gap: .6rem; flex-wrap: wrap; margin: .6rem 0 1.4rem; }
+    button {
+      font: inherit; min-height: 44px; border-radius: .6rem;
+      padding: .7rem 1rem; border: 1px solid var(--line);
+      color: var(--text); background: var(--panel2); cursor: pointer;
+      font-weight: 650; transition: background .14s, border-color .14s;
+    }
+    button:hover:not(:disabled) { background: #334068; border-color: #a9b0da; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #f6d48f; outline-offset: 3px; }
+    button[aria-pressed="true"] { background: #484279; border-color: #c5b9ff; }
+    button.primary { color: #16142b; background: #d6cdff; border-color: #d6cdff; }
+    button.primary:hover:not(:disabled) { background: #edeaff; }
+    button.warning { border-color: #dbb27c; background: #403023; color: #ffe6be; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.2rem; }
+    .status { padding: .8rem 1rem; border-radius: .6rem; color: var(--text); background: #293352; margin: 0 0 1rem; border: 1px solid var(--line); }
+    .step { padding: 1rem; border: 1px solid var(--line); border-radius: .7rem; background: #1c2642; margin-top: 1rem; }
+    .divider { height: 1px; background: var(--line); margin: 1.2rem 0; }
+    .number { color: var(--positive); font-size: .84rem; font-weight: 750; text-transform: uppercase; letter-spacing: .06em; }
+    ul { padding-left: 1.25rem; }
+    li { margin: .5rem 0; }
+    footer { margin-top: 1.5rem; font-size: .9rem; color: var(--soft); }
+    .label { display: block; margin-bottom: .5rem; font-weight: 650; }
+    @media (max-width: 760px) {
+      .wrap { padding-top: 1.4rem; }
+      .columns { grid-template-columns: 1fr; }
+      .roles button { flex: 1 1 120px; }
+    }
+    @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Vai al contenuto</a>
+  <div class="wrap">
+    <header>
+      <div class="brand">LOVEMATCH360 / PONTE360</div>
+      <p><span class="tag">Laboratorio locale · senza account reali</span></p>
+      <h1>Quando un figlio sogna di riunire mamma e papà.</h1>
+      <p class="lede">Una proposta può aprire una possibilità. La libertà di scegliere resta a ciascun genitore, senza promesse di riconciliazione.</p>
+    </header>
+
+    <main id="main" class="columns">
+      <section class="panel" aria-labelledby="lab-title">
+        <h2 id="lab-title">Prova la storia, un ruolo alla volta</h2>
+        <p class="muted small">Questi ruoli sono pulsanti di simulazione, <strong>non accessi autenticati</strong>. Usa soltanto informazioni inventate.</p>
+
+        <nav id="roles" class="roles" aria-label="Seleziona il ruolo simulato">
+          <button type="button" data-role="figlio-adulto" aria-pressed="true">Figlio maggiorenne</button>
+          <button type="button" data-role="mamma" aria-pressed="false">Mamma</button>
+          <button type="button" data-role="papa" aria-pressed="false">Papà</button>
+        </nav>
+
+        <div id="status" class="status" role="status" aria-live="polite" aria-atomic="true">La simulazione è pronta.</div>
+        <div id="stage" aria-live="off">
+          <p>Caricamento della versione locale…</p>
+        </div>
+        <div class="divider"></div>
+        <button type="button" id="reset">Azzera soltanto questa simulazione</button>
+      </section>
+
+      <aside class="panel" aria-labelledby="principles">
+        <h2 id="principles">Le regole del ponte</h2>
+        <div class="step">
+          <span class="number">01 · Il figlio</span>
+          <p>Può esprimere un desiderio <strong>una sola volta</strong>, se è maggiorenne. Non vede le scelte né le parole riservate dei genitori.</p>
+        </div>
+        <div class="step">
+          <span class="number">02 · I genitori</span>
+          <p>Devono aderire personalmente. Un sì non vale per due. Il silenzio e il rifiuto non autorizzano ulteriori richieste.</p>
+        </div>
+        <div class="step">
+          <span class="number">03 · La sicurezza</span>
+          <p>Basta una decisione per interrompere il percorso. Se c'è paura, violenza o controllo, non si propone una mediazione congiunta.</p>
+        </div>
+        <div class="step">
+          <span class="number">04 · Il risultato</span>
+          <p>Ritrovare rispetto o collaborazione è un esito possibile anche senza tornare insieme.</p>
+        </div>
+        <p class="hint small"><strong>Per i minorenni:</strong> non è loro compito fare da intermediari o convincere i genitori. È importante rivolgersi a un adulto affidabile quando il conflitto fa soffrire o crea paura.</p>
+      </aside>
+    </main>
+    <footer>
+      <p>Prototipo offline, servito solo su 127.0.0.1. Nessun dato inviato, salvato o collegato a Supabase. Non è un servizio di mediazione familiare né sostituisce un professionista qualificato.</p>
+    </footer>
+  </div>
+  <script type="module" src="/app.mjs"></script>
+</body>
+</html>
