@@ -152,6 +152,34 @@ async function run() {
   }
   check(await rpc(b.actor, "__FN_CONSENT__", 1, "B_RETRY") === false, "RECONSENT_AFTER_WITHDRAW");
   pass("JWT_WITHDRAW_REVOKES_VALID_SESSIONS");
+
+  // Caso indipendente: anche B puo' interrompere unilateralmente.
+  // In questa seconda istanza nessun precedente consenso e' riutilizzato.
+  check(await rpc(m.actor, "__FN_OPEN__", 4, "M_NEW_CASE") === false,
+    "NEW_CASE_INHERITS_OLD_CONSENT");
+  check(await rpc(a.actor, "__FN_CONSENT__", 4, "A_NEW_CASE_CONSENT") === true,
+    "NEW_CASE_A_CONSENT_FAILED");
+  check(await rpc(b.actor, "__FN_OPEN__", 4, "B_NEW_CASE_SINGLE") === false,
+    "NEW_CASE_SINGLE_CONSENT_OPENS");
+  check(await rpc(b.actor, "__FN_CONSENT__", 4, "B_NEW_CASE_CONSENT") === true,
+    "NEW_CASE_B_CONSENT_FAILED");
+  check(await rpc(m.actor, "__FN_OPEN__", 4, "M_NEW_CASE_OPEN") === true,
+    "NEW_CASE_TWO_CONSENTS_DENIED");
+  check(await rpc(m.actor, "__FN_WITHDRAW__", 4, "M_NEW_CASE_WITHDRAW") === false,
+    "MEDIATOR_CAN_WITHDRAW");
+  check(await rpc(x.actor, "__FN_WITHDRAW__", 4, "X_NEW_CASE_WITHDRAW") === false,
+    "OUTSIDER_CAN_WITHDRAW");
+  check(await rpc(b.actor, "__FN_WITHDRAW__", 4, "B_NEW_CASE_WITHDRAW") === true,
+    "B_CANNOT_WITHDRAW");
+  for (const [label, actor] of [["A", a.actor], ["B", b.actor], ["M", m.actor]]) {
+    check(await rpc(actor, "__FN_OPEN__", 4, label + "_NEW_CASE_AFTER") === false,
+      label + "_OPEN_AFTER_B_WITHDRAW");
+  }
+  check(await rpc(a.actor, "__FN_CONSENT__", 4, "A_NEW_CASE_RETRY") === false,
+    "A_CAN_REOPEN_AFTER_B_WITHDRAW");
+  check(await rpc(b.actor, "__FN_WITHDRAW__", 4, "B_NEW_CASE_REPEAT") === false,
+    "B_WITHDRAW_REPEAT_NOT_IDEMPOTENT");
+  pass("JWT_WITHDRAW_BY_EITHER_PARTICIPANT");
 }
 
 async function cleanup() {
