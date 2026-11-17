@@ -131,7 +131,7 @@ test("SON13: server serve solo file espliciti su loopback e ha CSP senza conness
   assert.equal(check.status, 0);
   assert.match(src, /const HOST = "127\.0\.0\.1"/);
   assert.match(src, /const assets = new Map\(\[/);
-  assert.match(src, /"connect-src 'none'"/);
+  assert.match(src, /connect-src 'none'/);
   assert.match(src, /"Cache-Control": "no-store"/);
   assert.match(src, /assets\.get\(pathname\)/);
   assert.doesNotMatch(src, /createClient|service_role|\.env|localhost\.supabase/);
