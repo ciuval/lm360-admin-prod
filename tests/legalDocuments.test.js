@@ -6,7 +6,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { LEGAL_DATE_LABEL, LEGAL_VERSION, legalDocuments } from "../src/content/legalDocuments.js";
 import LegalDocument from "../src/components/legal/LegalDocument.js";
-import { buildLegal } from "../scripts/build-legal.mjs";
+import { buildLegal, renderLegalHtml } from "../scripts/build-legal.mjs";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
@@ -106,4 +106,17 @@ test("public trust links use server-rendered legal documents, not SPA-only paths
   const contacts = await read("src/pages/Contatti.jsx");
   assert.match(footer, /\/legal\/richieste-autorita/);
   assert.match(contacts, /\/legal\/uso-accettabile/);
+});
+
+
+test("legal HTML generator normalizes Windows CSS line endings without changing text", () => {
+  const cssLF = ".legal-standalone {\n  margin: 0;\n  padding: 1rem;\n}";
+  const cssCRLF = cssLF.replace(/\n/g, "\r\n");
+  const cssMixed = cssLF.replace("margin: 0;\n", "margin: 0;\r\n");
+  const expected = renderLegalHtml(legalDocuments[0], cssLF);
+  for (const css of [cssCRLF, cssMixed]) {
+    const html = renderLegalHtml(legalDocuments[0], css);
+    assert.equal(html, expected);
+    assert.doesNotMatch(html, /\r/);
+  }
 });
