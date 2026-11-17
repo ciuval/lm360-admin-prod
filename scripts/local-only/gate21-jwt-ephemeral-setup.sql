@@ -41,7 +41,8 @@ insert into __SCHEMA__.consents
 values
 (1,'__A__','__B__','__M__',false,false,false,false),
 (2,'__A__','__B__','__M__',true,true,true,false),
-(3,'__A__','__B__','__M__',true,true,false,true);
+(3,'__A__','__B__','__M__',true,true,false,true),
+(4,'__A__','__B__','__M__',false,false,false,false);
 
 create function public.__FN_CONSENT__(p_case bigint)
 returns boolean language plpgsql security definer set search_path = ''
