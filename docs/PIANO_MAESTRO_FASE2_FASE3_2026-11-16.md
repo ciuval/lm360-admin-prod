@@ -170,3 +170,12 @@ L'utente ha verificato la preview nel browser LAB: **pulsazione PASS**, **messag
 **Correzione minima:** in `src/components/alive/AlivePreview.css` il cuore selezionato `.lm360-alive-card--heart.is-selected` ha fondo e bordo più evidenti; l'SVG ora passa da `fill:none` al riempimento `#ff81b9` e mantiene un bagliore rosa finché `aria-pressed=true`. Un secondo clic deseleziona. Nessun evento like o modifica backend. Il focus accessibile e la riduzione del movimento rimangono intatti.
 
 **CI successiva:** 194 test PASS, 0 FAIL e build Vite riuscita sul commit `c6f940a`. **La resa cromatica sul browser dell'utente deve ancora essere riverificata dopo il pull**, quindi non dichiarare PASS visivo definitivo prima di quel controllo.
+
+
+### Check visivo Cuore — PASS finale 17/11/2026
+
+**Evidenza screenshot reale di Chrome nel LAB locale**, dopo aggiornamento al commit `c014ca7`: il pulsante Cuore è selezionato, l'icona SVG è **riempita di rosa**, il pannello ha **bordo e sfondo luminosi** e il testo di feedback appare sotto le quattro icone. La pulsazione era già stata confermata dall'utente nella prova precedente. **Cuore: 3/3 PASS**, composito fra conferma del movimento e verifica screenshot della versione corretta.
+
+Prossimo controllo **ancora da eseguire**: pulsante Sorriso — salto/rotazione breve, feedback sotto le icone, selezione evidente. Non confondere il PASS del Cuore con il PASS dell'intera Fase 3.1; mobile, tastiera e movimento ridotto restano da provare.
+
+Non sono stati registrati dati del profilo visibili nello screenshot. Nessuna modifica a Supabase, produzione o Stripe.
