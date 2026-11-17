@@ -66,12 +66,18 @@ test("real JWT probe verifies one consent, two consents, outsider, anon, blocked
     "JWT_THIRD_PARTY_NO_CONSENT", "JWT_ONE_CONSENT_DENIED",
     "JWT_TWO_CONSENTS_ONLY_PARTICIPANTS", "JWT_CLOSED_BLOCKED_DENIED",
     "JWT_ANON_DENIED", "JWT_WITHDRAW_REVOKES_VALID_SESSIONS",
+    "JWT_WITHDRAW_BY_EITHER_PARTICIPANT",
     "GATE21_JWT_E2E=", "RPC_SCHEMA_CACHE_UNAVAILABLE",
   ]) assert.ok(src.includes(code), "Missing check " + code);
   assert.match(src, /dataOf\(await actor\.auth\.getUser/);
   assert.match(src, /await rpc\(m\.actor, "__FN_CONSENT__"/);
   assert.match(src, /await rpc\(b\.actor, "__FN_OPEN__"/);
   assert.match(src, /await rpc\(a\.actor, "__FN_WITHDRAW__"/);
+  assert.match(src, /await rpc\(b\.actor, "__FN_WITHDRAW__", 4/);
+  assert.match(src, /await rpc\(m\.actor, "__FN_WITHDRAW__", 4/);
+  assert.match(src, /await rpc\(x\.actor, "__FN_WITHDRAW__", 4/);
+  const sql = await read(setupFile);
+  assert.match(sql, /\(4,'__A__','__B__','__M__',false,false,false,false\)/);
 });
 
 test("Windows runner verifies Docker identity, checks for leftovers, protects local env", async () => {
