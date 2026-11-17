@@ -203,3 +203,12 @@ Dopo aggiornamento del clone LAB con la correzione a rotazione/feedback, l'utent
 **Prova manuale nel browser LAB**: l'utente ha confermato **3/3 PASS** per l'icona Messaggio: piccolo rimbalzo visibile, tre puntini animati e comparsa della frase «Questi puntini sono un gioco grafico. Non indicano che una persona stia scrivendo.». La preview è soltanto illustrativa e non usa stati di digitazione reali, non invia messaggi, non modifica dati.
 
 **Prossima verifica:** Scintilla — piccolo movimento/rotazione, effetto luce viola e frase sotto le icone. Dopo, QA mobile, tastiera e movimento ridotto. PR #27 resta draft; nessun deploy o intervento su Supabase cloud/Stripe.
+
+
+### Check Scintilla — bagliore viola da verificare 17/11/2026
+
+**Prova locale dell'utente:** (1) rotazione breve **PASS**; (2) bagliore **non osservato**; (3) frase «Una piccola scintilla. La magia, qui, non prende decisioni al posto tuo.» **PASS**. Il colore statico iniziale era già viola e l'animazione muoveva solo l'icona, senza un vero alone luminoso.
+
+**Correzione mirata, ancora da collaudare visivamente:** in `src/components/alive/AlivePreview.css` aggiunto un alone radiale viola dietro la scintilla e un doppio bagliore SVG `drop-shadow` durante hover/focus/selezione; sul pulsante selezionato restano un bordo viola e un fondo luminoso persistenti. Nessuna animazione infinita o lampeggiante; `prefers-reduced-motion` mantiene il segnale statico. Nuovo test di regressione in `tests/alivePreview.test.js`.
+
+**GitHub CI codice:** 196 test PASS, 0 falliti, build Vite riuscita sul commit `6a7164a`. **Scintilla ancora 2/3 PASS nel browser fino a riconferma** dopo aggiornamento. Nessuna modifica a DB, Vercel produzione o Stripe; PR #27 resta draft.
