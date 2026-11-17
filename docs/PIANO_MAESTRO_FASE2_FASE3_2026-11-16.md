@@ -239,3 +239,26 @@ Aggiornato `tests/alivePreview.test.js` per controllare durata, ampiezza, leggib
 **Stato Fase 3.1:** microinterazioni e bagliori presentabili, non ancora da pubblicare. Restano verifiche separate di **mobile 375/768px**, input **tastiera Tab/Enter/Space**, preferenza **reduced-motion**, contrasto/focus WCAG, e controllo dei comportamenti al secondo clic. Le verifiche di prodotto/backend della Fase 2 e l'audit cloud non sono implicati da questo PASS visivo; PR #27 resta **draft**. Nessun deploy, migrazione o modifica Stripe.
 
 **Rollback:** disattivare il flag di anteprima `VITE_LM360_ALIVE_PREVIEW` nel LAB; prima di qualsiasi revert o deploy eseguire un audit del branch.
+
+
+## Principio di prodotto — divertimento senza pornografia e senza sfruttamento
+
+**Decisione guida del 17 novembre 2026.** LoveMatch360 deve offrire tante esperienze divertenti e tante utilità reali, senza adottare meccaniche che trasformano le persone in oggetti sessuali, che promuovono pornografia o che sfruttano la vulnerabilità emotiva per aumentare visualizzazioni e ricavi. **«L'amore inizia dalla vera compatibilità»** resta la promessa centrale. Bellezza, ironia e tenerezza sì; pornografia, molestie e pressioni no. Non si tratta di giudicare orientamenti, corpi o intimità consensuale fra adulti, ma di stabilire un ambiente e una cultura di prodotto rispettosi.
+
+### Regole operative di UX, contenuti e monetizzazione
+
+1. **Nessuna pornografia in prodotto:** vietare la pubblicazione e la promozione di foto/video pornografici, nudi sessualmente espliciti, inviti a servizi sessuali a pagamento, immagini intime non consensuali o manipolate. È già coerente con i divieti della fonte legale `src/content/legalDocuments.js`, AUP sezione «Contenuti e comportamenti vietati». La definizione pubblica effettiva resta nella AUP, che non si modifica automaticamente con questa decisione UX.
+2. **Nessuna progettazione sessualizzante:** discovery, profili e anteprime privilegiano identità, interessi, rispetto e compatibilità. No CTA allusive, anteprime esplicite per stimolare clic, notifiche erotiche, annunci adult o sistemi che premiano l'esibizione sessuale.
+3. **Consenso prima dell'interazione:** un match non autorizza richieste sessuali insistenti o il superamento di un rifiuto. Rendere accessibili blocco, revoca match, segnalazione e uscita sicura; completare i gate Fase 2 e provarli con account sintetici prima di dichiararli funzionanti.
+4. **Protezione rigorosa e proporzionata:** priorità assoluta alla tutela dei minori, al contrasto a molestie, coercizione, diffusione non consensuale e truffe; procedure di segnalazione e riesame umano, senza pretendere che una moderazione automatica infallibile esista. Non leggere indiscriminatamente chat private, non pubblicare prove sensibili, minimizzare i dati e garantire procedure di ricorso quando dovute.
+5. **Divertimento senza inganno:** le icone LoveMatch360 Alive sono effetti illustrativi; non fingono che un utente stia scrivendo, non creano like e non inviano messaggi. Spunti relazionali facoltativi, zero interazioni manipolative, zero urgenza artificiale, nessun paywall che ricatti emotivamente.
+6. **Premium etico:** se e quando verranno riattivati acquisti, l'eventuale prezzo dovrà riferirsi a valore reale e trasparente, non all'accesso a materiale erotico o allo sfruttamento dell'attenzione. **Stripe resta sospeso** finché non autorizzato e verificato separatamente.
+
+### Gate prima di ogni rilascio
+
+- **Contenuti:** verificare flussi foto/profili/discovery e gestione concreta delle violazioni, senza asserire filtri o revisione preventiva non implementati.
+- **Sicurezza:** dimostrare con account sintetici che blocco, unmatch, segnalazione e sospensione applicano davvero le restrizioni necessarie a livello RLS/backend, incluse le sessioni aperte; preservare soltanto le evidenze lecite necessarie senza dati reali nei log.
+- **Accessibilità e fiducia:** rendere visibili regole, aiuto e canale di segnalazione; non dissuadere dal segnalare e prevedere rimedi proporzionati, trasparenza e riesame.
+- **Integrità:** nessuna nuova colonna, tabella, automazione di moderazione, servizio esterno o deploy come effetto automatico di questo principio. Prima audit, prove isolate e approvazione.
+
+**Stato:** visione di prodotto e criteri di accettazione approvati come indirizzo; non equivalgono a funzioni già implementate, né a un'affermazione che ogni contenuto vietato sia già tecnicamente bloccato. Riferimenti già esistenti: `src/content/legalDocuments.js` (AUP), `docs/legal-release-2026-10-31.md` (procedura e limiti reali), gate Fase 2 del presente piano.
