@@ -58,3 +58,24 @@ test("il cuore selezionato si riempie visibilmente di rosa, senza perdere il foc
   assert.match(jsx, /previous === id \? null : id/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });
+
+test("il sorriso fa una rotazione riconoscibile e mostra il testo anche al passaggio o al focus", async () => {
+  const [jsx, css] = await Promise.all([
+    read("src/components/alive/AlivePreview.jsx"),
+    read("src/components/alive/AlivePreview.css"),
+  ]);
+  assert.match(jsx, /\[preview, setPreview\] = useState\(null\)/);
+  assert.match(jsx, /preview \?\? selected/);
+  assert.match(jsx, /onMouseEnter=\{\(\) => setPreview\(id\)\}/);
+  assert.match(jsx, /onFocus=\{\(\) => setPreview\(id\)\}/);
+  assert.match(jsx, /onMouseLeave=\{\(\) => setPreview\(null\)\}/);
+  assert.match(jsx, /onBlur=\{\(\) => setPreview\(null\)\}/);
+  assert.match(jsx, /data-active=\{Boolean\(current\)\}/);
+  assert.match(jsx, /<strong>\{current.label\}:<\/strong>/);
+  assert.match(jsx, /Un occhiolino gentile/);
+  assert.match(css, /\.lm360-alive-card--smile\.is-selected/);
+  assert.match(css, /\.lm360-alive-feedback\[data-active="true"\]/);
+  assert.match(css, /rotate\(-23deg\)/);
+  assert.match(css, /rotate\(21deg\)/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+});
