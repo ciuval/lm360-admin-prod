@@ -14,14 +14,12 @@ export default function ChatBox() {
   const [chatAbilitata, setChatAbilitata] = useState(false);
   const [verificaAccesso, setVerificaAccesso] = useState(true);
   const [availabilityError, setAvailabilityError] = useState(false);
-  const [altraPersonaStaScrivendo, setAltraPersonaStaScrivendo] = useState(false);
   const [destinatarioNome, setDestinatarioNome] = useState("questa persona");
   const chatBoxRef = useRef(null);
   const [sending, setSending] = useState(false);
   const [messagesLoadError, setMessagesLoadError] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState("IN_ATTESA");
   const [realtimeFailure, setRealtimeFailure] = useState(null);
-  const typingTimeout = useRef(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -109,7 +107,6 @@ export default function ChatBox() {
     const myId = session.user.id;
     let active = true;
     let messaggiChannel = null;
-    let typingChannel = null;
     setRealtimeStatus("COLLEGAMENTO");
     setRealtimeFailure(null);
 
@@ -159,16 +156,6 @@ export default function ChatBox() {
           }
         });
 
-      typingChannel = supabase
-        .channel("typing-status")
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "typing_status" }, (payload) => {
-          if (!active) return;
-          const nuovo = payload.new;
-          if (nuovo.user_id === destinatarioId && nuovo.destinatario_id === myId) {
-            setAltraPersonaStaScrivendo(nuovo.typing);
-          }
-        })
-        .subscribe();
     };
 
     // Aggiorna la credenziale Realtime quando Supabase Auth rinnova la sessione.
@@ -186,9 +173,7 @@ export default function ChatBox() {
       }
       if (event === "SIGNED_OUT") {
         if (messaggiChannel) supabase.removeChannel(messaggiChannel);
-        if (typingChannel) supabase.removeChannel(typingChannel);
         messaggiChannel = null;
-        typingChannel = null;
         setRealtimeFailure("SESSIONE_TERMINATA");
         setRealtimeStatus("NON_DISPONIBILE");
       }
@@ -207,7 +192,6 @@ export default function ChatBox() {
       active = false;
       authListener.subscription.unsubscribe();
       if (messaggiChannel) supabase.removeChannel(messaggiChannel);
-      if (typingChannel) supabase.removeChannel(typingChannel);
     };
   }, [session?.user?.id, destinatarioId, chatAbilitata]);
 
@@ -228,7 +212,6 @@ export default function ChatBox() {
       // se una successiva lettura fallisce: si rischierebbe un duplicato.
       setInput("");
       track("room_message_sent").catch(() => {});
-      updateTypingStatus(false).catch(() => {});
 
       const loaded = await refreshMessages(session.user.id, destinatarioId);
       if (!loaded) {
@@ -243,15 +226,6 @@ export default function ChatBox() {
     }
   };
 
-  const updateTypingStatus = async (isTyping) => {
-    if (!session?.user?.id || !destinatarioId) return;
-    await supabase.from("typing_status").upsert({
-      user_id: session.user.id,
-      destinatario_id: destinatarioId,
-      typing: isTyping,
-      updated_at: new Date().toISOString(),
-    });
-  };
 
   const messaggiPerData = messaggi.reduce((acc, msg) => {
     const giorno = new Date(msg.inviato_il).toLocaleDateString("it-IT");
@@ -332,11 +306,6 @@ export default function ChatBox() {
             ))}
           </div>
         ))}
-        {altraPersonaStaScrivendo && (
-          <div style={{ fontSize: "0.85rem", color: "#aaa", fontStyle: "italic", paddingLeft: "0.6rem" }}>
-            💬 Sta scrivendo...
-          </div>
-        )}
 
       </div>
 
@@ -346,9 +315,6 @@ export default function ChatBox() {
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
-            updateTypingStatus(true);
-            clearTimeout(typingTimeout.current);
-            typingTimeout.current = setTimeout(() => updateTypingStatus(false), 2000);
           }}
           onKeyDown={(e) => e.key === "Enter" && inviaMessaggio()}
           placeholder="Scrivi un messaggio..."
