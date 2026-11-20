@@ -6,7 +6,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { LEGAL_DATE_LABEL, LEGAL_VERSION, legalDocuments } from "../src/content/legalDocuments.js";
 import LegalDocument from "../src/components/legal/LegalDocument.js";
-import { buildLegal } from "../scripts/build-legal.mjs";
+import { buildLegal, renderLegalHtml } from "../scripts/build-legal.mjs";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
@@ -88,5 +88,35 @@ test("canonical legal URLs resolve to existing static documents before the SPA f
     assert.deepEqual(config.redirects.find((entry) => entry.source === source), {
       source, destination: "/libro", permanent: true,
     });
+  }
+});
+
+test("public trust links use server-rendered legal documents, not SPA-only paths", async () => {
+  for (const path of [
+    "src/components/SiteFooter.jsx",
+    "src/pages/Sicurezza.jsx",
+    "src/pages/FAQ.jsx",
+  ]) {
+    const content = await read(path);
+    assert.match(content, /\/legal\/termini/);
+    assert.match(content, /\/legal\/uso-accettabile/);
+    assert.doesNotMatch(content, /href: ["']#\/(terms|termini|uso-accettabile)["']/);
+  }
+  const footer = await read("src/components/SiteFooter.jsx");
+  const contacts = await read("src/pages/Contatti.jsx");
+  assert.match(footer, /\/legal\/richieste-autorita/);
+  assert.match(contacts, /\/legal\/uso-accettabile/);
+});
+
+
+test("legal HTML generator normalizes Windows CSS line endings without changing text", () => {
+  const cssLF = ".legal-standalone {\n  margin: 0;\n  padding: 1rem;\n}";
+  const cssCRLF = cssLF.replace(/\n/g, "\r\n");
+  const cssMixed = cssLF.replace("margin: 0;\n", "margin: 0;\r\n");
+  const expected = renderLegalHtml(legalDocuments[0], cssLF);
+  for (const css of [cssCRLF, cssMixed]) {
+    const html = renderLegalHtml(legalDocuments[0], css);
+    assert.equal(html, expected);
+    assert.doesNotMatch(html, /\r/);
   }
 });

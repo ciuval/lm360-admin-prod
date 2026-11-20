@@ -310,6 +310,7 @@ export default function AppShell({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [logoutError, setLogoutError] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -361,11 +362,13 @@ export default function AppShell({ children }) {
 
   async function handleLogout() {
     try {
+      setLogoutError(false);
       setIsSigningOut(true);
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw new Error("LOGOUT_FAILED");
       navigate("/login", { replace: true });
-    } catch (error) {
-      console.error("AppShell logout error:", error);
+    } catch {
+      setLogoutError(true);
     } finally {
       setIsSigningOut(false);
     }
@@ -373,6 +376,36 @@ export default function AppShell({ children }) {
 
   return (
     <div className="lm360-shell" style={shellStyle}>
+      <style>{`
+        .lm360-skip {
+          position: fixed; left: 12px; top: -100px; z-index: 100;
+          background: #ffd6ea; color: #180d14; border: 2px solid #080c13;
+          padding: 12px 16px; border-radius: 12px; font-weight: 900;
+        }
+        .lm360-skip:focus-visible { top: 12px; }
+        .lm360-shell a:focus-visible,
+        .lm360-shell button:focus-visible {
+          outline: 3px solid #8ddcff; outline-offset: 3px;
+        }
+        @media (max-width: 680px) {
+          .lm360-shell-location-card, .lm360-shell-account-card { display: none; }
+          .lm360-shell-nav {
+            width: 100%; max-width: 100%; overflow-x: auto;
+            flex-wrap: nowrap !important; padding: 4px 2px 12px;
+            scroll-snap-type: x proximity; scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+          }
+          .lm360-shell-nav a { flex: 0 0 auto; scroll-snap-align: start; }
+          .lm360-shell-bottom-row { align-items: stretch !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .lm360-shell a { transition: none !important; }
+        }
+      `}</style>
+      <button type="button" className="lm360-skip"
+        onClick={() => document.getElementById("contenuto-principale")?.focus()}>
+        Vai al contenuto
+      </button>
       <header style={headerStyle}>
         <div style={headerInnerStyle}>
           <div style={topRowStyle}>
@@ -394,14 +427,14 @@ export default function AppShell({ children }) {
               )}
             </div>
 
-            <div style={identityCardStyle}>
+            <div className="lm360-shell-location-card" style={identityCardStyle}>
               <div style={identityCardLabelStyle}>Dove sei</div>
               <div style={identityNameStyle}>{currentSection.label}</div>
               <div style={identityEmailStyle}>{currentSection.helper}</div>
             </div>
 
             {!loading && isAuthed ? (
-              <div style={identityCardStyle}>
+              <div className="lm360-shell-account-card" style={identityCardStyle}>
                 <div style={identityCardLabelStyle}>Account attuale</div>
                 <div style={identityNameStyle}>{displayName}</div>
                 <div style={identityEmailStyle}>{visibleEmail}</div>
@@ -409,22 +442,19 @@ export default function AppShell({ children }) {
             ) : null}
           </div>
 
-          <div style={bottomRowStyle}>
-            <nav aria-label="Navigazione principale" style={navStyle}>
+          <div className="lm360-shell-bottom-row" style={bottomRowStyle}>
+            <nav className="lm360-shell-nav" aria-label="Navigazione principale" style={navStyle}>
               <ShellLink to="/">Home</ShellLink>
-              {!isAuthed ? <ShellLink to="/welcome">Inizia</ShellLink> : null}
+              <ShellLink to="/come-funziona">Come funziona</ShellLink>
               <ShellLink to="/scopri-profili">Scopri persone</ShellLink>
               {isAuthed ? <ShellLink to="/match">Match</ShellLink> : null}
-              <ShellLink to="/messaggi">Messaggi</ShellLink>
-              <ShellLink to="/scopri">Risorse</ShellLink>
-              <ShellLink to="/premium">Premium</ShellLink>
-
-              {isAuthed ? (
-                <>
-                  <ShellLink to="/profilo">La mia stanza</ShellLink>
-                  {showAdminLink ? <ShellLink to="/admin">Regia</ShellLink> : null}
-                </>
-              ) : null}
+              <ShellLink to="/scopri">Idee e articoli</ShellLink>
+              <ShellLink to="/libro">Libro</ShellLink>
+              <ShellLink to="/soluzioni">Servizi web</ShellLink>
+              <ShellLink to="/faq">FAQ</ShellLink>
+              <ShellLink to="/sicurezza">Sicurezza</ShellLink>
+              {isAuthed ? <ShellLink to="/profilo">Profilo</ShellLink> : null}
+              {showAdminLink ? <ShellLink to="/admin">Regia</ShellLink> : null}
             </nav>
 
             <div style={actionsStyle}>
@@ -438,13 +468,22 @@ export default function AppShell({ children }) {
                   {isSigningOut ? "Uscita..." : "Esci"}
                 </button>
               ) : (
-                <button
-                  type="button"
-                  style={logoutButtonStyle}
-                  onClick={() => navigate("/login")}
-                >
-                  Accedi
-                </button>
+                <>
+                  <button
+                    type="button"
+                    style={registerButtonStyle}
+                    onClick={() => navigate("/register")}
+                  >
+                    Registrati
+                  </button>
+                  <button
+                    type="button"
+                    style={logoutButtonStyle}
+                    onClick={() => navigate("/login")}
+                  >
+                    Accedi
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -452,8 +491,9 @@ export default function AppShell({ children }) {
       </header>
 
       <>
-      <main style={mainStyle}>{content}</main>
-      <SiteFooter />
+      {logoutError ? <p role="alert" style={{ padding: "0 16px", color: "#ffd6ea" }}>Uscita non completata. Riprova.</p> : null}
+      <main id="contenuto-principale" tabIndex={-1} style={mainStyle}>{content}</main>
+      <SiteFooter isAuthed={isAuthed} isAdmin={showAdminLink} />
 
       </>
     </div>
@@ -565,7 +605,7 @@ const navLinkStyle = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  minHeight: 42,
+  minHeight: 44,
   padding: "0 16px",
   borderRadius: 999,
   textDecoration: "none",
@@ -591,8 +631,19 @@ const actionsStyle = {
   alignItems: "center",
 };
 
+const registerButtonStyle = {
+  minHeight: 44,
+  padding: "0 16px",
+  borderRadius: 12,
+  border: "1px solid #f08fc0",
+  color: "#170d13",
+  background: "#f08fc0",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
 const logoutButtonStyle = {
-  minHeight: 42,
+  minHeight: 44,
   padding: "0 14px",
   borderRadius: 12,
   border: "1px solid rgba(255,255,255,0.12)",

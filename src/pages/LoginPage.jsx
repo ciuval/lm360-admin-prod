@@ -133,6 +133,11 @@ export default function LoginPage() {
   return (
     <main className="lm-login" style={pageStyle}>
       <section style={cardStyle} aria-labelledby="login-title">
+        <nav aria-label="Torna al sito" style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 20 }}>
+          <Link to="/" style={{ color: "#ffd6ea" }}>Home</Link>
+          <Link to="/come-funziona" style={{ color: "#ffd6ea" }}>Come funziona</Link>
+          <Link to="/sicurezza" style={{ color: "#ffd6ea" }}>Sicurezza</Link>
+        </nav>
         <header style={headerStyle}>
           <div aria-hidden="true" style={iconStyle}>
             🔐

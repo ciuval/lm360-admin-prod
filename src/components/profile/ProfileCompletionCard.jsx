@@ -11,12 +11,15 @@ export default function ProfileCompletionCard({ completion, disabled = false, on
   };
 
   const title = safeCompletion.isComplete
-    ? "Profilo completo. Ora puoi farti trovare meglio."
-    : "Completa il profilo per sbloccare più valore.";
+    ? "Profilo completo. La visibilità è una scelta separata."
+    : "Profilo ancora da completare.";
 
+  const missingLabels = (safeCompletion.missingItems || [])
+    .map((item) => item.label.toLowerCase())
+    .join(", ");
   const subtitle = safeCompletion.isComplete
-    ? "Hai le basi giuste per entrare in Scopri persone con più contesto."
-    : "Nome, bio, interessi e foto aiutano le altre persone a capire chi sei davvero.";
+    ? "Puoi entrare in Scopri. Per rendere pubblico il profilo devi autorizzarlo nella sezione Visibilità."
+    : `Hai completato ${safeCompletion.completedCount} requisiti su ${safeCompletion.totalCount}. Mancano: ${missingLabels}.`;
 
   const actionLabel = safeCompletion.isComplete ? "Vai a Scopri persone" : "Completa il prossimo passo del profilo";
 
@@ -33,7 +36,7 @@ export default function ProfileCompletionCard({ completion, disabled = false, on
 
         <div style={scoreBoxStyle} aria-label={`Profilo completato al ${safeCompletion.score}%`}>
           <strong style={scoreStyle}>{safeCompletion.score}%</strong>
-          <span style={scoreLabelStyle}>completo</span>
+          <span style={scoreLabelStyle}>{safeCompletion.isComplete ? "completo" : "del percorso"}</span>
         </div>
       </div>
 

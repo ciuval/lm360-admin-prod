@@ -46,10 +46,10 @@ export default function PremiumPage() {
         badge: "Accesso ospite",
         title: "Premium quando serve davvero.",
         description:
-          "Più visibilità, strumenti più chiari e un percorso più fluido per farti notare meglio dentro LoveMatch360.",
+          "I nuovi acquisti Premium sono sospesi. Puoi conoscere il percorso gratuito e leggere le regole prima di decidere se iscriverti.",
         primaryLabel: "Accedi per continuare",
         secondaryLabel: "Torna Home",
-        note: "Per valutare o gestire Premium devi accedere con un account valido. Nessun acquisto parte da questa schermata.",
+        note: "Non è possibile acquistare un nuovo abbonamento in questa fase. Puoi comunque consultare il percorso gratuito.",
       };
     }
 
@@ -90,13 +90,13 @@ export default function PremiumPage() {
     }
 
     return {
-      badge: "Free",
-      title: "Sblocca il lato più vivo di LoveMatch360.",
+      badge: "Free · Premium sospeso",
+      title: "Prima le persone, poi gli abbonamenti.",
       description:
-        "Filtri pro, più qualità nella scoperta dei profili e un percorso più diretto verso connessioni che meritano davvero attenzione.",
-      primaryLabel: "Attiva Premium",
-      secondaryLabel: "Scopri i profili",
-      note: "Puoi valutare Premium con calma e procedere solo quando il percorso è davvero adatto a te.",
+        "I nuovi acquisti Premium sono sospesi. Puoi completare il profilo e consultare il percorso gratuito senza pagare.",
+      primaryLabel: "Vai al profilo",
+      secondaryLabel: "Come funziona",
+      note: "Nessun nuovo pagamento o abbonamento viene avviato da questa pagina.",
     };
   }, [isAuthed, tier]);
 
@@ -111,7 +111,7 @@ export default function PremiumPage() {
       return;
     }
 
-    navigate("/attiva-premium");
+    navigate("/profilo");
   };
 
   const handleSecondaryAction = () => {
@@ -135,7 +135,7 @@ export default function PremiumPage() {
       return;
     }
 
-    navigate("/scopri");
+    navigate("/come-funziona");
   };
 
   if (loading) {

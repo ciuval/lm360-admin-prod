@@ -78,7 +78,7 @@ export function renderLegalHtml(policy, css) {
   <title>${escapeHtml(policy.title)} | LoveMatch360</title>
   <link rel="canonical" href="${SITE_ORIGIN}/legal/${escapeHtml(policy.slug)}">
   <style>
-${css.trim()}
+${css.replace(/\r\n?/g, "\n").trim()}
   </style>
 </head>
 <body class="legal-standalone">

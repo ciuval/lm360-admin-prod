@@ -21,7 +21,6 @@ const linkGroups = [
       { label: "Scopri persone", href: "#/scopri-profili" },
       { label: "Profilo", href: "#/profilo" },
       { label: "Match", href: "#/match" },
-      { label: "Messaggi", href: "#/messaggi" },
       { label: "Premium", href: "#/premium" },
     ],
   },
@@ -30,6 +29,7 @@ const linkGroups = [
     note: "Contenuti che sostengono il percorso.",
     links: [
       { label: "Articoli e idee", href: "#/scopri" },
+      { label: "Messaggi da leggere", href: "#/messaggi" },
       { label: "YouTube News", href: "#/youtube-news" },
       { label: "Libro", href: "#/libro" },
       { label: "Metodo", href: "#/playbook" },
@@ -56,25 +56,43 @@ const linkGroups = [
       { label: "Manifesto per la sicurezza digitale", href: "/manifesto-sicurezza" },
       { label: "Privacy", href: "#/privacy" },
       { label: "Cookie", href: "#/cookies" },
-      { label: "Termini", href: "#/terms" },
-      { label: "Uso accettabile (AUP)", href: "#/uso-accettabile" },
-      { label: "Richieste delle autorità", href: "#/richieste-autorita" },
+      { label: "Termini", href: "/legal/termini" },
+      { label: "Uso accettabile (AUP)", href: "/legal/uso-accettabile" },
+      { label: "Richieste delle autorità", href: "/legal/richieste-autorita" },
       { label: "Rimborsi", href: "#/refunds" },
-      { label: "Termini IT", href: "#/termini" },
       { label: "Rimborsi IT", href: "#/rimborsi" },
     ],
   },
 ];
 
 const statusItems = [
-  "Sito vivo",
-  "Crescita con calma",
-  "Privacy rispettata",
-  "Contatti puliti",
-  "Nessun invio email dal browser",
+  "18+ con autodichiarazione",
+  "Segnalazioni via email",
+  "Regole e contatti pubblici",
+  "Nuovi acquisti Premium sospesi",
+  "Nessun credito chat per messaggio",
 ];
 
-export default function SiteFooter() {
+export default function SiteFooter({ isAuthed = false, isAdmin = false }) {
+  const visibleGroups = linkGroups
+    .filter((group) => group.title !== "Dietro le quinte" || isAdmin)
+    .map((group) => {
+      if (group.title === "Dietro le quinte") {
+        return { ...group, links: group.links.filter((link) => link.href !== "#/quantum") };
+      }
+      if (group.title !== "Per entrare" || isAuthed) return group;
+      return {
+        ...group,
+        links: [
+          { label: "Registrati", href: "#/register" },
+          { label: "Accedi", href: "#/login" },
+          { label: "Come funziona", href: "#/come-funziona" },
+          { label: "Scopri persone (accesso richiesto)", href: "#/scopri-profili" },
+          { label: "Premium (acquisti sospesi)", href: "#/premium" },
+        ],
+      };
+    });
+
   return (
     <footer style={footerStyle} aria-label="Mappa finale del sito">
       <div style={innerStyle}>
@@ -96,7 +114,7 @@ export default function SiteFooter() {
         </section>
 
         <nav style={groupsStyle} aria-label="Collegamenti footer">
-          {linkGroups.map((group) => (
+          {visibleGroups.map((group) => (
             <section key={group.title} style={groupStyle} aria-labelledby={`footer-${slug(group.title)}`}>
               <h3 id={`footer-${slug(group.title)}`} style={groupTitleStyle}>
                 {group.title}
@@ -238,6 +256,8 @@ const linksStyle = {
 
 const linkStyle = {
   display: "inline-flex",
+  minHeight: 44,
+  alignItems: "center",
   padding: "0.48rem 0.62rem",
   borderRadius: "999px",
   border: "1px solid rgba(255, 255, 255, 0.1)",

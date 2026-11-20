@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { ROOM_MIN_SCORE } from "../lib/stanza360.js";
+import { loadConsentedPartnerName } from "../lib/partnerDisplayName.js";
 import { track } from "../lib/analytics.js";
 
 export default function Stanza360Page() {
@@ -14,10 +15,9 @@ export default function Stanza360Page() {
       const { data:{ user } } = await supabase.auth.getUser();
       if (!user?.id || !id || user.id === id) { if (alive) setState({ loading:false, allowed:false, compatibility:null, name:"" }); return; }
       const pair = [user.id, id].sort();
-      const [roomResult, match, profile] = await Promise.all([
+      const [roomResult, match] = await Promise.all([
         supabase.rpc("get_stanza_compatibility", { target_user_id: id }).maybeSingle(),
         supabase.from("match_scores").select("user_a,user_b,score").eq("user_a",pair[0]).eq("user_b",pair[1]).eq("score",100).maybeSingle(),
-        supabase.from("profili").select("nome").eq("id",id).maybeSingle(),
       ]);
       const compatibility = roomResult.data ? {
         ready: Boolean(roomResult.data.both_ready),
@@ -30,7 +30,11 @@ export default function Stanza360Page() {
         opens: Boolean(compatibility?.opens),
         reciprocal: Boolean(match.data),
       }).catch(() => {});
-      if (alive) setState({ loading:false, allowed:Boolean(match.data)&&Boolean(compatibility?.opens), compatibility, name:profile.data?.nome||"questa persona" });
+      const allowed = !roomResult.error && !match.error && Boolean(match.data) && Boolean(compatibility?.opens);
+      const name = allowed
+        ? await loadConsentedPartnerName(supabase, user.id, id)
+        : "questa persona";
+      if (alive) setState({ loading:false, allowed, compatibility, name });
     }
     load().catch(()=>alive&&setState({ loading:false, allowed:false, compatibility:null, name:"" }));
     return()=>{alive=false;};

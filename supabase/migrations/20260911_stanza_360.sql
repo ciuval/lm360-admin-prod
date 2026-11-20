@@ -166,7 +166,7 @@ begin
     return false;
   end if;
 
-  insert into public.messaggi (mittente_id, destinatario_id, contenuto, letto)
+  insert into public.messaggi (mittente_id, destinatario_id, testo, letto)
   values (auth.uid(), target_user_id, btrim(message_content), false);
   return true;
 end;

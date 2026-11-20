@@ -14,7 +14,8 @@
     "build": "vite build",
     "test": "node --test tests/*.test.js",
     "preview": "vite preview",
-    "check-premium": "node cron/checkPremiumExpiry.js"
+    "check-premium": "node cron/checkPremiumExpiry.js",
+    "test:e2e:local": "node scripts/e2e-two-accounts-local.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
