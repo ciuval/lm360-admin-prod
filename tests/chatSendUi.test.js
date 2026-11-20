@@ -29,7 +29,7 @@ test("l'invio non viene ripetuto mentre la richiesta e in corso", async () => {
   const chat = await readChat();
   assert.match(chat, /\|\| sending\) return/);
   assert.match(chat, /setSending\(true\)/);
-  assert.match(chat, /finally \{\s*setSending\(false\)/);
+  assert.match(chat, /finally \{\s*if \(readGenerationRef\.current === sendGeneration\) \{\s*setSending\(false\)/);
   assert.match(chat, /disabled=\{!chatAbilitata \|\| sending \|\| !input\.trim\(\)\}/);
   assert.match(chat, /disabled=\{!chatAbilitata \|\| sending\}/);
 });

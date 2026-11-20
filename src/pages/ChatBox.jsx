@@ -12,23 +12,82 @@ export default function ChatBox() {
   const [input, setInput] = useState("");
   const [messaggi, setMessaggi] = useState([]);
   const [chatAbilitata, setChatAbilitata] = useState(false);
+  const [authorizedPair, setAuthorizedPair] = useState(null);
   const [verificaAccesso, setVerificaAccesso] = useState(true);
   const [availabilityError, setAvailabilityError] = useState(false);
   const [destinatarioNome, setDestinatarioNome] = useState("questa persona");
   const chatBoxRef = useRef(null);
+  const readGenerationRef = useRef(0);
   const [sending, setSending] = useState(false);
   const [messagesLoadError, setMessagesLoadError] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState("IN_ATTESA");
   const [realtimeFailure, setRealtimeFailure] = useState(null);
 
+  const closeSignedOut = () => {
+    readGenerationRef.current += 1;
+    setSession(null);
+    setChatAbilitata(false);
+    setMessaggi([]);
+    setInput("");
+    setSending(false);
+    setDestinatarioNome("questa persona");
+    setMessagesLoadError(false);
+    setAvailabilityError(false);
+    setVerificaAccesso(false);
+    setRealtimeFailure("SESSIONE_TERMINATA");
+    setRealtimeStatus("NON_DISPONIBILE");
+  };
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data?.session) setSession(data.session);
+    let active = true;
+    let authEventGeneration = 0;
+
+    // Auth rimane attivo anche quando la chat o Realtime sono chiusi.
+    const { data: authState } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (!active) return;
+      authEventGeneration += 1;
+
+      if (event === "SIGNED_OUT") {
+        closeSignedOut();
+      } else {
+        setSession(nextSession ?? null);
+      }
     });
+
+    const initialGeneration = authEventGeneration;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!active || authEventGeneration !== initialGeneration) return;
+      if (data?.session) setSession(data.session);
+    }).catch(() => {
+      if (active && authEventGeneration === initialGeneration) setSession(null);
+    });
+
+    return () => {
+      active = false;
+      authState.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    if (!session?.user?.id || !destinatarioId) return;
+    readGenerationRef.current += 1;
+    setChatAbilitata(false);
+    setMessaggi([]);
+    setInput("");
+    setSending(false);
+    setDestinatarioNome("questa persona");
+    setMessagesLoadError(false);
+    setAvailabilityError(false);
+    setVerificaAccesso(true);
+
+    if (!session?.user?.id || !destinatarioId) {
+      setVerificaAccesso(false);
+      return;
+    }
+
+    let active = true;
+    const checkGeneration = readGenerationRef.current;
+
     const checkMatchAndRead = async () => {
       const myId = session.user.id;
       const pair = [myId, destinatarioId].sort();
@@ -44,6 +103,9 @@ export default function ChatBox() {
       const { data: roomCompatibility, error: roomError } = await supabase
         .rpc("get_stanza_compatibility", { target_user_id: destinatarioId })
         .maybeSingle();
+      if (!active) return;
+      if (readGenerationRef.current !== checkGeneration) return;
+
       if (matchError || roomError) {
         setChatAbilitata(false);
         setAvailabilityError(true);
@@ -52,6 +114,7 @@ export default function ChatBox() {
       }
       const roomCanOpen = Boolean(roomCompatibility?.opens);
       const allowed = Boolean(match) && roomCanOpen;
+      setAuthorizedPair(allowed ? `${myId}:${destinatarioId}` : null);
       setChatAbilitata(allowed);
       if (allowed) {
         await supabase
@@ -64,24 +127,114 @@ export default function ChatBox() {
       const name = allowed
         ? await loadConsentedPartnerName(supabase, myId, destinatarioId)
         : "questa persona";
+      if (!active) return;
+      if (readGenerationRef.current !== checkGeneration) return;
+
       setDestinatarioNome(name);
       setVerificaAccesso(false);
     };
-    checkMatchAndRead().catch(() => {
+    void checkMatchAndRead().catch(() => {
+      if (!active) return;
+      if (readGenerationRef.current !== checkGeneration) return;
+
       setChatAbilitata(false);
       setAvailabilityError(true);
       setVerificaAccesso(false);
     });
-  }, [session, destinatarioId]);
 
+    return () => {
+      active = false;
+      readGenerationRef.current += 1;
+    };
+  }, [session?.user?.id, destinatarioId]);
+
+  // Gate 2.1B: rivalidazione della chat aperta.
+  useEffect(() => {
+    if (!chatAbilitata || !session?.user?.id || !destinatarioId) return;
+
+    const myId = session.user.id;
+    const pair = [myId, destinatarioId].sort();
+    let active = true;
+    let checking = false;
+
+    const closeRevoked = (unavailable = false) => {
+      if (!active) return;
+      readGenerationRef.current += 1;
+      setChatAbilitata(false);
+      setMessaggi([]);
+      setInput("");
+      setSending(false);
+      setDestinatarioNome("questa persona");
+      setAvailabilityError(unavailable);
+    };
+
+    const checkRevocationAccess = async () => {
+      if (!active || checking) return;
+      checking = true;
+
+      try {
+        const { data: match, error: matchError } = await supabase
+          .from("match_scores")
+          .select("score")
+          .eq("user_a", pair[0])
+          .eq("user_b", pair[1])
+          .eq("score", 100)
+          .maybeSingle();
+
+        if (!active) return;
+
+        if (matchError || !match) {
+          closeRevoked(Boolean(matchError));
+          return;
+        }
+
+        const { data: room, error: roomError } = await supabase
+          .rpc("get_stanza_compatibility", {
+            target_user_id: destinatarioId,
+          })
+          .maybeSingle();
+
+        if (!active) return;
+
+        if (roomError || !room?.opens) {
+          closeRevoked(Boolean(roomError));
+        }
+      } catch {
+        closeRevoked(true);
+      } finally {
+        checking = false;
+      }
+    };
+
+    const timer = window.setInterval(() => {
+      if (document.visibilityState !== "hidden") {
+        void checkRevocationAccess();
+      }
+    }, 5000);
+
+    const onFocus = () => {
+      void checkRevocationAccess();
+    };
+
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      active = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [session?.user?.id, destinatarioId, chatAbilitata]);
   // Legge soltanto la coppia autorizzata: la RLS di messaggi resta attiva.
   // Riutilizzato anche dopo un invio riuscito, senza dipendere da Realtime.
   const refreshMessages = async (myId, partnerId) => {
+    const requestGeneration = readGenerationRef.current;
     const { data, error } = await supabase
       .from("messaggi")
       .select("id, mittente_id, destinatario_id, testo, letto, inviato_il")
       .or(`and(mittente_id.eq.${myId},destinatario_id.eq.${partnerId}),and(mittente_id.eq.${partnerId},destinatario_id.eq.${myId})`)
       .order("inviato_il", { ascending: true });
+
+    if (readGenerationRef.current !== requestGeneration) return false;
 
     if (error) {
       setMessagesLoadError(true);
@@ -105,6 +258,7 @@ export default function ChatBox() {
   useEffect(() => {
     if (!session?.user?.id || !destinatarioId || !chatAbilitata) return;
     const myId = session.user.id;
+    const channelGeneration = readGenerationRef.current;
     let active = true;
     let messaggiChannel = null;
     setRealtimeStatus("COLLEGAMENTO");
@@ -128,7 +282,7 @@ export default function ChatBox() {
       messaggiChannel = supabase
         .channel("chat-messaggi")
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messaggi" }, async (payload) => {
-          if (!active) return;
+          if (!active || readGenerationRef.current !== channelGeneration) return;
           const nuovo = payload.new;
           const coinvolto =
             (nuovo.mittente_id === myId && nuovo.destinatario_id === destinatarioId) ||
@@ -145,7 +299,7 @@ export default function ChatBox() {
         })
         .subscribe((status) => {
           // Nessun token, UUID, URL o payload nei messaggi diagnostici.
-          if (!active) return;
+          if (!active || readGenerationRef.current !== channelGeneration) return;
           if (status === "SUBSCRIBED") {
             setRealtimeFailure(null);
             setRealtimeStatus("COLLEGATO");
@@ -197,12 +351,14 @@ export default function ChatBox() {
 
   const inviaMessaggio = async () => {
     if (!session?.user?.id || !destinatarioId || !chatAbilitata || !input.trim() || sending) return;
+    const sendGeneration = readGenerationRef.current;
     setSending(true);
     try {
       const { data: sent, error } = await supabase.rpc("send_stanza_message", {
         target_user_id: destinatarioId,
         message_content: input.trim(),
       });
+      if (readGenerationRef.current !== sendGeneration) return;
       if (error || !sent) {
         toast.error("Il messaggio non è stato inviato. Riprova.");
         return;
@@ -214,15 +370,20 @@ export default function ChatBox() {
       track("room_message_sent").catch(() => {});
 
       const loaded = await refreshMessages(session.user.id, destinatarioId);
+      if (readGenerationRef.current !== sendGeneration) return;
       if (!loaded) {
         toast.error("Messaggio inviato, ma la cronologia non si aggiorna. Ricarica la pagina.");
       } else {
         requestAnimationFrame(scrollConversationToEnd);
       }
     } catch {
-      toast.error("Invio non confermato. Verifica la chat prima di riprovare.");
+      if (readGenerationRef.current === sendGeneration) {
+        toast.error("Invio non confermato. Verifica la chat prima di riprovare.");
+      }
     } finally {
-      setSending(false);
+      if (readGenerationRef.current === sendGeneration) {
+        setSending(false);
+      }
     }
   };
 
@@ -233,6 +394,20 @@ export default function ChatBox() {
     acc[giorno].push(msg);
     return acc;
   }, {});
+
+  // Blocca il rendering di dati autorizzati per un'altra coppia.
+  // Non aspetta il cleanup asincrono di useEffect.
+  const currentPair = `${session?.user?.id ?? ""}:${destinatarioId ?? ""}`;
+
+  if (chatAbilitata && authorizedPair !== currentPair) {
+    return (
+      <div style={{ ...chatContainer, padding: "1rem" }}>
+        <div role="status" style={closedStyle}>
+          Verifica della Stanza 360 in corso…
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ ...chatContainer, padding: "1rem" }}>
@@ -278,6 +453,7 @@ export default function ChatBox() {
           La cronologia non è disponibile in questo momento. Non inviare nuovamente lo stesso messaggio.
         </p>
       )}
+      {chatAbilitata && (
       <div ref={chatBoxRef} style={chatBox} className="chat-box" aria-label={`Conversazione con ${destinatarioNome}`}>
         {Object.entries(messaggiPerData).map(([giorno, messaggiDelGiorno]) => (
           <div key={giorno}>
@@ -308,6 +484,7 @@ export default function ChatBox() {
         ))}
 
       </div>
+      )}
 
       <div style={inputRow}>
         <input
